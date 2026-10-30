@@ -1,11 +1,11 @@
 STUDIO
 ------
-Este site-ul SPACEJUNK (SpaceJunk/index.html, style.css, script.js).
+Este site-ul SPACEJUNK (index.html, style.css, script.js in radacina FlorinStudio/).
 
-Jocuri pe acelasi nivel cu SpaceJunk/:
+Jocuri ca subfoldere ale FlorinStudio/:
   NebulaVoid/
   CosmicQuiz/
   Cell War/
   JunkRunner/
 
-Lista si linkurile: SpaceJunk/script.js → array GAMES.
+Lista si linkurile: script.js → array GAMES (href relativ, ex. NebulaVoid/index.html).

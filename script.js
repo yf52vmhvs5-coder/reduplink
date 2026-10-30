@@ -7,7 +7,7 @@
  *   kind: "ARENA",
  *   status: "live",          // "live" or "hold"
  *   line: "One sentence.",
- *   href: "../NebulaVoid/index.html",   // omit or leave "" while the build is sealed
+ *   href: "NebulaVoid/index.html",   // omit or leave "" while the build is sealed
  *   web: true                           // browser badge (optional; defaults from href)
  * }
  */
@@ -20,7 +20,7 @@
             kind: "ARENA",
             status: "live",
             line: "The studio signature: a hungry singularity. Grow, or be pulled in.",
-            href: "../NebulaVoid/index.html",
+            href: "NebulaVoid/index.html",
             web: true
         },
         {
@@ -28,7 +28,7 @@
             kind: "TRIVIA",
             status: "live",
             line: "Fifty questions on space, tech, and odd facts. Solo or pass a room code.",
-            href: "../CosmicQuiz/index.html",
+            href: "CosmicQuiz/index.html",
             web: true
         },
         {
@@ -36,7 +36,7 @@
             kind: "ARENA",
             status: "live",
             line: "Grow, split, dominate — retro phosphor and scanlines.",
-            href: "../Cell%20War/index.html",
+            href: "Cell%20War/index.html",
             web: true
         }
     ];
