@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEBULA VOID</title>
+    <!-- Anti-flicker: ascunde hub/meniu înainte de style.css (evită flash la refresh) -->
+    <style>
+        #introScreen, #startMenu { opacity: 0; visibility: hidden; }
+        #introScreen #introTitle,
+        #introScreen #hubActions { opacity: 0; }
+    </style>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="ui">
+        <div class="label">ENTITY_SCORE</div> 
+        <div id="score">0</div>
+        <div id="mpMatchUpgrades" hidden>
+            <div id="mpMatchBars"></div>
+            <div id="mpMatchMods"></div>
+            <p id="mpMatchFlash" hidden></p>
+        </div>
+    </div>
+
+    <button id="mpTauntBtn" type="button" class="mp-taunt-btn" hidden tabindex="-1" aria-hidden="true" aria-label="Proximity taunt" title="M">
+        <svg class="mp-taunt-icon" width="34" height="34" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path class="mp-lobby-chat-icon-frame" d="M4 5h15v8H9.5L6 18v-5H4V5z"/>
+            <circle class="mp-lobby-chat-icon-dot" cx="8.5" cy="9" r="1"/>
+            <circle class="mp-lobby-chat-icon-dot" cx="12" cy="9" r="1"/>
+            <circle class="mp-lobby-chat-icon-dot" cx="15.5" cy="9" r="1"/>
+        </svg>
+    </button>
+
+    <div id="introScreen" class="main-hub" aria-label="Main menu">
+        <h1 id="introTitle" data-original-text="NEBULA VOID">NEBULA VOID</h1>
+        <nav id="hubActions" aria-hidden="true">
+            <button id="hubPlayBtn" type="button" class="hub-menu-btn">[ PLAY ]</button>
+            <button id="hubMultiplayerBtn" type="button" class="hub-menu-btn">[ MULTIPLAYER ]</button>
+            <button id="hubOptionsBtn" type="button" class="hub-menu-btn">[ OPTIONS ]</button>
+            <button id="hubAboutBtn" type="button" class="hub-menu-btn">[ ABOUT ]</button>
+        </nav>
+        <div id="hubColorRow" class="hub-color-row hub-color-row--spectrum-collapsed" aria-hidden="true" role="group" aria-label="Signal tint">
+            <span class="hub-color-tag">SIGNAL TINT</span>
+            <button type="button" id="hubColorPreviewBtn" class="hub-color-preview" aria-expanded="false" aria-controls="hubColorSpectrum" aria-label="Open signal spectrum"></button>
+            <div id="hubColorSpectrum" class="hub-color-spectrum" aria-hidden="true">
+                <div id="hubColorSwatches" class="hub-color-swatches"></div>
+            </div>
+            <footer id="hubBrand" class="hub-brand" aria-label="Spacejunk Games">
+                <button type="button" id="hubAlienTintBtn" class="hub-brand-alien-btn" aria-expanded="false" aria-controls="hubColorSpectrum" aria-label="Calibrate signal tint">
+                    <svg class="hub-brand-alien" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                        <g class="hub-brand-alien-body">
+                            <g class="hub-brand-alien-antenna-wrap">
+                                <path class="hub-brand-alien-antenna" fill="var(--hub-signal-tint, #ff2d2d)" d="M11.2 3.1 12 1.2 12.8 3.1 12 3.6Z"/>
+                            </g>
+                            <path class="hub-brand-alien-head" fill="var(--hub-signal-tint, #ff2d2d)" d="M12 4.2c-4.8 0-7.2 4.6-7.2 8.4 0 4.2 3.1 6.8 7.2 6.8s7.2-2.6 7.2-6.8c0-3.8-2.4-8.4-7.2-8.4Z"/>
+                            <ellipse class="hub-brand-alien-eye hub-brand-alien-eye--l" cx="9.15" cy="12.1" rx="1.55" ry="2.35" fill="#060606"/>
+                            <ellipse class="hub-brand-alien-eye hub-brand-alien-eye--r" cx="14.85" cy="12.1" rx="1.55" ry="2.35" fill="#060606"/>
+                        </g>
+                    </svg>
+                </button>
+                <p class="hub-brand-signature">SPACEJUNK GAMES</p>
+                <span id="hubBrandCalibrateHint" class="hub-brand-calibrate-hint">CALIBRATE</span>
+            </footer>
+        </div>
+    </div>
+
+    <div id="optionsScreen" class="menu-overlay" hidden>
+        <p class="menu-overlay-tag">[ CONFIG ]</p>
+        <h2 class="menu-overlay-title">OPTIONS</h2>
+        <div class="options-panel">
+            <section class="options-block" aria-labelledby="optionsMovementLabel">
+                <p id="optionsMovementLabel" class="options-block-tag">MOVEMENT</p>
+                <div class="control-picker" role="radiogroup" aria-label="Movement control">
+                    <button type="button" class="control-choice" data-scheme="wasd" aria-pressed="false" aria-label="WASD keys">
+                        <span class="wasd-visual" aria-hidden="true">
+                            <span class="key-cap key-cap--w">W</span>
+                            <span class="key-cap key-cap--a">A</span>
+                            <span class="key-cap key-cap--s">S</span>
+                            <span class="key-cap key-cap--d">D</span>
+                        </span>
+                    </button>
+                    <button type="button" class="control-choice control-choice--active" data-scheme="mouse" aria-pressed="true" aria-label="Mouse">
+                        <span class="mouse-visual" aria-hidden="true">
+                            <span class="mouse-body"></span>
+                            <span class="mouse-wheel"></span>
+                            <span class="mouse-glow"></span>
+                        </span>
+                    </button>
+                </div>
+                <p class="options-control-hint" data-for="wasd" hidden>WASD sets your heading — the entity moves that way. Cursor stays hidden in the arena; the camera follows your direction.</p>
+                <p class="options-control-hint" data-for="mouse">The entity moves toward your cursor. The camera shifts slightly ahead of where you point.</p>
+            </section>
+            <section class="options-block options-block--system" aria-labelledby="optionsSystemLabel">
+                <p id="optionsSystemLabel" class="options-block-tag">SYSTEM</p>
+                <div id="optionsMenuControls">
+                    <div id="soundBtn">SOUND: <span class="state-on">ON</span></div>
+                    <div id="fullscreenBtn">SCREEN: <span class="state-off">OFF</span></div>
+                </div>
+            </section>
+        </div>
+        <button id="optionsBackBtn" type="button" class="menu-overlay-back">[ BACK ]</button>
+    </div>
+
+    <div id="aboutScreen" class="menu-overlay" hidden>
+        <p class="menu-overlay-tag">[ ARCHIVE ]</p>
+        <h2 class="menu-overlay-title">ABOUT</h2>
+        <div class="about-frame">
+            <nav class="about-pager" aria-label="Archive sections">
+                <button id="aboutPagePrev" type="button" class="about-pager-arrow" aria-label="Previous section" disabled>&lsaquo;</button>
+                <div class="about-pager-meta">
+                    <p id="aboutPageTag" class="about-pager-tag">[ OVERVIEW ]</p>
+                    <span id="aboutPageCounter" class="about-pager-counter">1 / 5</span>
+                </div>
+                <button id="aboutPageNext" type="button" class="about-pager-arrow" aria-label="Next section">&rsaquo;</button>
+            </nav>
+            <div class="about-viewport" id="aboutViewport">
+                <div class="about-page is-active" data-about-page="0" id="aboutPage0" role="region" aria-labelledby="aboutPageTag">
+                    <div class="about-body">
+                        <p><strong>NEBULA VOID</strong> is a top-down survival arena set in a drifting starfield around a hungry singularity. You are not a hero — you are an intruder: a living cell fighting to grow before the void pulls you in.</p>
+                        <p>Consume stardust and nutrients, hunt smaller entities, and dodge anything bigger than you. Chain kills to raise your bounty multiplier. Each run earns <strong>Void Matter</strong> for unlocking new skins and tuning them in the <strong>Evolution Lab</strong>.</p>
+                        <p>Three playable entities ship with distinct powers: blood rifts, warp freezes, and corrosive dashes. The map is alive with rival bots — titans, glitches, nebulae — each with its own temperament.</p>
+                    </div>
+                </div>
+                <div class="about-page" data-about-page="1" id="aboutPageIntruders" hidden role="region"></div>
+                <div class="about-page" data-about-page="2" id="aboutPageVoid" hidden role="region"></div>
+                <div class="about-page" data-about-page="3" id="aboutPageSystems" hidden role="region"></div>
+                <div class="about-page" data-about-page="4" id="aboutPageRivals" hidden role="region"></div>
+            </div>
+        </div>
+        <footer class="about-footer">
+            <p class="about-body-signoff">// STAY LARGE. STAY MOVING. DO NOT FEED THE CENTER.</p>
+            <button id="aboutBackBtn" type="button" class="menu-overlay-back">[ BACK ]</button>
+        </footer>
+    </div>
+
+    <div id="multiplayerLobbyScreen" class="menu-overlay" hidden>
+        <p class="menu-overlay-tag">[ LINK ]</p>
+        <h2 class="menu-overlay-title">MULTIPLAYER</h2>
+        <div class="mp-lobby-body">
+            <aside id="mpLobbyChatColPeer" class="mp-lobby-chat-col mp-lobby-chat-col--peer" aria-label="Opponent chat">
+                <p class="mp-lobby-chat-label">OPPONENT</p>
+                <div id="mpChatLogPeer" class="mp-lobby-chat-log" role="log" aria-live="polite"></div>
+            </aside>
+            <div class="mp-lobby-center">
+                <p id="mpLobbyEntityLabel" class="mp-lobby-entity"></p>
+                <p id="mpLobbyPlayerCount" class="mp-lobby-hint mp-lobby-player-count" hidden aria-live="polite"></p>
+                <div id="mpLobbyPanelIdle" class="mp-lobby-panel">
+                    <button id="mpCreateRoomBtn" type="button" class="mp-lobby-btn">[ CREATE ROOM ]</button>
+                    <button id="mpRoomLockBtn" type="button" class="mp-lobby-lock" aria-pressed="false" title="PUBLIC" aria-label="Room visibility: public">
+                        <svg class="mp-lobby-lock-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <g class="mp-lobby-lock-shackle mp-lobby-lock-shackle--open">
+                                <path d="M8 11V8a4 4 0 0 1 7.8-1.2" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                            </g>
+                            <g class="mp-lobby-lock-shackle mp-lobby-lock-shackle--shut">
+                                <path d="M8 11V8a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                            </g>
+                            <rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.75"/>
+                            <circle cx="12" cy="16.1" r="1.25" fill="currentColor"/>
+                        </svg>
+                    </button>
+                </div>
+                <div id="mpPublicRooms" class="mp-public-rooms" hidden>
+                    <div id="mpPublicRoomList" class="mp-public-room-list"></div>
+                    <button id="mpFindSignalBtn" type="button" class="mp-lobby-btn" hidden>[ FIND SIGNAL ]</button>
+                </div>
+                <div id="mpLobbyPanelWaiting" class="mp-lobby-panel" hidden>
+                    <div id="mpRoomCodeBlock" class="mp-room-code-block">
+                        <p id="mpRoomCodeDisplay" class="mp-room-code-display" aria-live="polite"></p>
+                    </div>
+                    <p id="mpLobbyStatusText" class="mp-lobby-hint mp-lobby-status"></p>
+                    <button id="mpStartMatchBtn" type="button" class="mp-lobby-btn mp-lobby-btn--start" hidden>[ START MATCH ]</button>
+                </div>
+                <p id="mpLobbyError" class="mp-lobby-error" hidden></p>
+                <div id="mpLobbyJoinStack" class="mp-lobby-join-stack">
+                    <input id="mpRoomCodeInput" class="mp-lobby-code-input" type="text" inputmode="text" autocomplete="off" spellcheck="false" maxlength="6" placeholder="CODE" aria-label="Room code" />
+                    <button id="mpJoinRoomBtn" type="button" class="mp-lobby-btn">[ JOIN ]</button>
+                </div>
+                <nav class="mp-lobby-footer" aria-label="Lobby navigation">
+                    <button id="mpLobbyCancelHubBtn" type="button" class="menu-overlay-back">[ MAIN MENU ]</button>
+                    <button id="multiplayerLobbyBackBtn" type="button" class="menu-overlay-back">[ BACK ]</button>
+                    <div class="mp-lobby-chat-stack">
+                        <button id="mpLobbyChatToggleBtn" type="button" class="mp-lobby-chat-toggle" aria-expanded="false" aria-controls="mpLobbyChatColPeer mpLobbyChatColSelf mpLobbyChatCompose" aria-label="Open room chat" title="Comms" hidden>
+                            <svg class="mp-lobby-chat-icon" width="31" height="31" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path class="mp-lobby-chat-icon-frame" d="M4 5h15v8H9.5L6 18v-5H4V5z"/>
+                                <circle class="mp-lobby-chat-icon-dot" cx="8.5" cy="9" r="1"/>
+                                <circle class="mp-lobby-chat-icon-dot" cx="12" cy="9" r="1"/>
+                                <circle class="mp-lobby-chat-icon-dot" cx="15.5" cy="9" r="1"/>
+                            </svg>
+                        </button>
+                        <div id="mpLobbyChatCompose" class="mp-lobby-chat-compose" role="region" aria-label="Compose chat message" hidden>
+                            <input id="mpChatInput" class="mp-lobby-chat-input" type="text" autocomplete="off" spellcheck="true" maxlength="120" placeholder="Signal…" aria-label="Chat message" disabled />
+                            <button id="mpChatSendBtn" type="button" class="mp-lobby-chat-send" aria-label="Send message" disabled>↵</button>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+            <aside id="mpLobbyChatColSelf" class="mp-lobby-chat-col mp-lobby-chat-col--self" aria-label="Your chat">
+                <p class="mp-lobby-chat-label">YOU</p>
+                <div id="mpChatLogSelf" class="mp-lobby-chat-log" role="log" aria-live="polite"></div>
+            </aside>
+        </div>
+    </div>
+
+    <div id="startMenu">
+        <p id="menuSubtitle">SELECT ENTITY TO INTRUDE</p>
+
+        <div id="abilityDesc"></div>
+
+        <button id="evolutionLabBtn" type="button">[ EVOLUTION LAB ]</button>
+        <p id="mpUpgradeLine" hidden>UPGRADES AWAKEN IN MATCH</p>
+
+        <div id="skinSelector">
+            <div id="skinPriceBadge" hidden></div>
+        </div>
+
+        <button id="entitySelectBackBtn" type="button" class="menu-overlay-back entity-select-back">[ BACK ]</button>
+
+        <div id="matterDisplay" hidden></div>
+        <button id="skinActionBtn" type="button"></button>
+    </div>
+    
+    <div id="gameOver">
+        <h2>VOID CONSUMED YOU</h2>
+        <div class="go-stat-label">VOID MATTER EARNED</div>
+        <div id="finalScore">0</div>
+        <div class="go-stat-label">TOTAL VOID MATTER</div>
+        <div id="bestScore">0</div>
+        <div class="go-stat-label">TIME INTRUDED</div>
+        <div id="timeIntruded">00:00</div>
+        <button id="retryBtn" type="button">RETRY</button>
+        <button id="backToMenuBtn" type="button">CHANGE ENTITY</button>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script src="js/game-data.js"></script>
+    <script src="js/config-loader.js"></script>
+    <script src="js/boot-chain.js"></script>
+    <script>
+        loadNebulaModules().catch(function (err) {
+            if (typeof showNebulaBootFailure === "function") {
+                showNebulaBootFailure(err);
+            } else {
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+</html>

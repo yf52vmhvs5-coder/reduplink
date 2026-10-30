@@ -1,0 +1,461 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+ *
+ *   AGAR · RETRO EDITION
+ *   ─────────────────────
+ *   Stylesheet — CRT Aesthetic & UI Layer
+ *
+ *   Design tokens, screen layouts, HUD, overlays & retro typography.
+ *
+ *   @layer  Presentation
+ *   @version 1.1.0
+ *
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+
+/* ───────────────────────────────────────────────────────────────────────────
+ *  DESIGN TOKENS
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+:root {
+    --bg: #0a0a12;
+    --phosphor: #39ff14;
+    --phosphor-dim: #2bc410;
+    --amber: #ffb000;
+    --cyan: #00e5ff;
+    --text: #39ff14;
+    --text-dim: #1a8010;
+    --panel: rgba(0, 8, 0, 0.85);
+    --font-pixel: 'Press Start 2P', monospace;
+    --font-retro: 'VT323', monospace;
+}
+
+
+/* ───────────────────────────────────────────────────────────────────────────
+ *  RESET & BASE
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background: #000;
+    color: var(--text);
+    font-family: var(--font-retro);
+    overflow: hidden;
+    image-rendering: pixelated;
+}
+
+
+/* ───────────────────────────────────────────────────────────────────────────
+ *  SCREEN SYSTEM — Visibility & transitions
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+.screen {
+    position: fixed;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+}
+
+.screen.active { opacity: 1; pointer-events: auto; }
+.hidden { display: none !important; }
+
+
+/* ───────────────────────────────────────────────────────────────────────────
+ *  SCREEN: Intro — Boot sequence
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+#screen-intro {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    cursor: pointer;
+}
+
+.intro-box { text-align: center; }
+
+.intro-logo {
+    font-family: var(--font-pixel);
+    font-size: clamp(2rem, 8vw, 3.5rem);
+    color: var(--phosphor);
+    text-shadow: 0 0 20px var(--phosphor), 0 0 40px rgba(57,255,20,0.4);
+    animation: introPulse 1.5s ease-in-out infinite;
+    line-height: 1.6;
+}
+
+.intro-sub {
+    font-family: var(--font-retro);
+    font-size: 1.6rem;
+    color: var(--cyan);
+    letter-spacing: 0.3em;
+    margin: 16px 0 28px;
+    animation: fadeUp 0.8s ease 0.3s both;
+}
+
+.intro-bar {
+    width: 200px;
+    height: 6px;
+    border: 2px solid var(--phosphor-dim);
+    margin: 0 auto 16px;
+    overflow: hidden;
+}
+
+.intro-bar-fill {
+    height: 100%;
+    background: var(--phosphor);
+    width: 0%;
+    animation: introLoad 2.5s ease forwards;
+    box-shadow: 0 0 10px var(--phosphor);
+}
+
+.intro-tap {
+    font-family: var(--font-retro);
+    font-size: 1rem;
+    color: var(--text-dim);
+    animation: blink 1.2s step-end infinite;
+}
+
+.title.small { font-size: clamp(0.9rem, 3vw, 1.2rem); margin-bottom: 8px; }
+
+
+/* ───────────────────────────────────────────────────────────────────────────
+ *  SCREEN: Menu & Options — Shared panel chrome
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+#screen-menu,
+#screen-options {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    background-image:
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px);
+}
+
+.menu-box {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    border: 3px solid var(--phosphor);
+    padding: 40px 48px;
+    box-shadow: 0 0 20px rgba(57, 255, 20, 0.2), inset 0 0 30px rgba(57, 255, 20, 0.05);
+}
+
+.title {
+    font-family: var(--font-pixel);
+    font-size: clamp(1.2rem, 5vw, 2rem);
+    color: var(--phosphor);
+    text-shadow: 0 0 10px var(--phosphor), 2px 2px 0 #004400;
+    line-height: 1.6;
+}
+
+.subtitle {
+    font-family: var(--font-retro);
+    font-size: 1.4rem;
+    color: var(--cyan);
+    letter-spacing: 0.2em;
+}
+
+
+/* ───────────────────────────────────────────────────────────────────────────
+ *  FORM CONTROLS — Input & buttons
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+#nick-input {
+    width: 240px;
+    padding: 12px;
+    border: 2px solid var(--phosphor-dim);
+    background: #000;
+    color: var(--phosphor);
+    font-family: var(--font-retro);
+    font-size: 1.5rem;
+    text-align: center;
+    text-transform: uppercase;
+    outline: none;
+    letter-spacing: 0.15em;
+}
+
+#nick-input:focus {
+    border-color: var(--phosphor);
+    box-shadow: 0 0 12px rgba(57, 255, 20, 0.4);
+}
+
+#nick-input::placeholder { color: var(--text-dim); }
+
+.btn-play {
+    padding: 14px 32px;
+    border: 2px solid var(--phosphor);
+    background: #001800;
+    color: var(--phosphor);
+    font-family: var(--font-pixel);
+    font-size: 0.65rem;
+    cursor: pointer;
+    text-shadow: 0 0 8px var(--phosphor);
+    transition: background 0.15s, box-shadow 0.15s;
+}
+
+.btn-play:hover {
+    background: #003000;
+    box-shadow: 0 0 16px rgba(57, 255, 20, 0.5);
+}
+
+.btn-play:active { background: #004400; transform: scale(0.97); }
+
+.btn-secondary {
+    padding: 10px 28px;
+    border: 2px solid var(--cyan);
+    background: transparent;
+    color: var(--cyan);
+    font-family: var(--font-pixel);
+    font-size: 0.55rem;
+    cursor: pointer;
+    transition: background 0.15s, box-shadow 0.15s;
+}
+
+.btn-secondary:hover {
+    background: rgba(0, 229, 255, 0.1);
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.3);
+}
+
+
+/* ───────────────────────────────────────────────────────────────────────────
+ *  OPTIONS PANEL — Sliders, toggles & selects
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+.options-box { min-width: 320px; gap: 14px; }
+
+.opt-row {
+    display: grid;
+    grid-template-columns: 1fr auto 40px;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    font-family: var(--font-retro);
+    font-size: 1.2rem;
+    color: var(--phosphor-dim);
+}
+
+.opt-row span:first-child { text-align: left; }
+
+.opt-val {
+    font-family: var(--font-pixel);
+    font-size: 0.45rem;
+    color: var(--amber);
+    text-align: right;
+}
+
+.opt-row input[type="range"] {
+    width: 100px;
+    accent-color: var(--phosphor);
+}
+
+.opt-row select {
+    grid-column: 2 / 4;
+    background: #000;
+    border: 2px solid var(--phosphor-dim);
+    color: var(--phosphor);
+    font-family: var(--font-retro);
+    font-size: 1.1rem;
+    padding: 4px 8px;
+    outline: none;
+}
+
+.toggle-row { grid-template-columns: 1fr auto; }
+
+.toggle-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--phosphor);
+}
+
+.opt-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+    width: 100%;
+}
+
+.opt-buttons .btn-play,
+.opt-buttons .btn-secondary { flex: 1; }
+
+.hint {
+    font-family: var(--font-retro);
+    font-size: 1.1rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+}
+
+
+/* ───────────────────────────────────────────────────────────────────────────
+ *  SCREEN: Game — Canvas & CRT post-process
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+#screen-game { display: block; }
+
+#gameCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+    image-rendering: pixelated;
+}
+
+#crt-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 4;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.12) 0px,
+        rgba(0, 0, 0, 0.12) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.5);
+}
+
+
+/* ───────────────────────────────────────────────────────────────────────────
+ *  HUD — Score · Merge hint · Leaderboard
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+#hud {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+#score-box {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--panel);
+    border: 2px solid var(--phosphor-dim);
+    padding: 8px 20px;
+    font-family: var(--font-pixel);
+    font-size: 0.55rem;
+    letter-spacing: 0.05em;
+    color: var(--phosphor-dim);
+}
+
+#score-box span { color: var(--phosphor); }
+
+#merge-hint {
+    position: absolute;
+    top: 48px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--panel);
+    border: 2px solid var(--cyan);
+    padding: 6px 14px;
+    font-family: var(--font-pixel);
+    font-size: 0.42rem;
+    color: var(--cyan);
+    letter-spacing: 0.05em;
+    animation: blink 1.4s step-end infinite;
+}
+
+#merge-hint.hidden { display: none !important; }
+
+#leaderboard {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--panel);
+    border: 2px solid var(--phosphor-dim);
+    padding: 10px 14px;
+    min-width: 150px;
+}
+
+#leaderboard h3 {
+    font-family: var(--font-pixel);
+    font-size: 0.45rem;
+    color: var(--cyan);
+    margin-bottom: 10px;
+    letter-spacing: 0.05em;
+}
+
+#leader-list {
+    list-style: none;
+    font-family: var(--font-retro);
+    font-size: 1.15rem;
+}
+
+#leader-list li {
+    padding: 2px 0;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    color: #aaa;
+}
+
+#leader-list li.me { color: var(--phosphor); text-shadow: 0 0 6px var(--phosphor); }
+#leader-list li span:last-child { color: var(--amber); }
+
+
+/* ───────────────────────────────────────────────────────────────────────────
+ *  DEATH OVERLAY — Game over panel
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    pointer-events: auto;
+}
+
+.death-box {
+    text-align: center;
+    background: #000;
+    border: 3px solid var(--phosphor);
+    padding: 32px 40px;
+    box-shadow: 0 0 30px rgba(57, 255, 20, 0.3);
+}
+
+.death-box h2 {
+    font-family: var(--font-pixel);
+    font-size: 0.9rem;
+    color: #ff3333;
+    text-shadow: 0 0 10px #ff0000;
+    margin-bottom: 16px;
+    line-height: 1.8;
+}
+
+.death-box p {
+    font-family: var(--font-retro);
+    font-size: 1.4rem;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+}
+
+.death-box span { color: var(--amber); font-size: 1.6rem; }
+.death-box .btn-secondary { margin-top: 10px; }
+
+
+/* ───────────────────────────────────────────────────────────────────────────
+ *  KEYFRAME ANIMATIONS
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+@keyframes introPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.85; transform: scale(1.02); }
+}
+
+@keyframes introLoad { to { width: 100%; } }
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes blink { 50% { opacity: 0; } }

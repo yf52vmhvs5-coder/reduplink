@@ -1,0 +1,14 @@
+{
+  "name": "nebula-void-relay",
+  "private": true,
+  "version": "1.0.0",
+  "description": "NEBULA VOID — blind mirror WebSocket relay (no game logic)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node --test ../test/relay-packets.test.js ../test/relay-server.test.js ../test/mp-client.test.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

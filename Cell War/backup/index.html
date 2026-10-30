@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<!--
+  ═══════════════════════════════════════════════════════════════════════════
+   AGAR · RETRO EDITION
+   Entry Point — Document Structure & Screen Flow
+
+   Screens:  Intro → Menu → Options / Game → Death Overlay
+  ═══════════════════════════════════════════════════════════════════════════
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agar · Retro</title>
+
+    <!-- Styles & Typography -->
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- ────────────────────────────────────────────────────────────────────
+         SCREEN: Intro — Boot sequence & branding
+         ──────────────────────────────────────────────────────────────────── -->
+    <section id="screen-intro" class="screen active">
+        <div class="intro-box">
+            <h1 class="intro-logo">AGAR</h1>
+            <p class="intro-sub">RETRO EDITION</p>
+            <div class="intro-bar"><div class="intro-bar-fill"></div></div>
+            <p class="intro-tap">CLICK OR WAIT...</p>
+        </div>
+    </section>
+
+    <!-- ────────────────────────────────────────────────────────────────────
+         SCREEN: Main Menu — Nickname & navigation
+         ──────────────────────────────────────────────────────────────────── -->
+    <section id="screen-menu" class="screen">
+        <div class="menu-box">
+            <h1 class="title">AGAR</h1>
+            <p class="subtitle">/// RETRO EDITION ///</p>
+            <input id="nick-input" type="text" maxlength="12" placeholder="NAME" autocomplete="off">
+            <button id="btn-play" class="btn-play">START</button>
+            <button id="btn-options" class="btn-secondary">OPTIONS</button>
+            <p class="hint">MOUSE · SPACE SPLIT · SHIFT MERGE · W EJECT</p>
+        </div>
+    </section>
+
+    <!-- ────────────────────────────────────────────────────────────────────
+         SCREEN: Options — Gameplay, audio & display settings
+         ──────────────────────────────────────────────────────────────────── -->
+    <section id="screen-options" class="screen">
+        <div class="menu-box options-box">
+            <h1 class="title small">OPTIONS</h1>
+
+            <!-- Gameplay -->
+            <label class="opt-row">
+                <span>ZOOM OUT</span>
+                <input type="range" id="opt-zoom" min="50" max="100" value="72">
+                <span id="val-zoom" class="opt-val">72%</span>
+            </label>
+            <label class="opt-row">
+                <span>SMOOTH CAMERA</span>
+                <input type="range" id="opt-camera" min="3" max="20" value="9">
+                <span id="val-camera" class="opt-val">9</span>
+            </label>
+            <label class="opt-row">
+                <span>BOTS</span>
+                <input type="range" id="opt-bots" min="10" max="40" value="25">
+                <span id="val-bots" class="opt-val">25</span>
+            </label>
+            <label class="opt-row">
+                <span>FOOD</span>
+                <input type="range" id="opt-food" min="400" max="1200" step="100" value="800">
+                <span id="val-food" class="opt-val">800</span>
+            </label>
+
+            <!-- Audio -->
+            <label class="opt-row toggle-row">
+                <span>SOUND</span>
+                <input type="checkbox" id="opt-sounds" checked>
+            </label>
+            <label class="opt-row">
+                <span>VOLUME</span>
+                <input type="range" id="opt-sound-vol" min="0" max="100" value="65">
+                <span id="val-sound-vol" class="opt-val">65%</span>
+            </label>
+
+            <!-- Display -->
+            <label class="opt-row toggle-row">
+                <span>SCANLINES CRT</span>
+                <input type="checkbox" id="opt-scanlines" checked>
+            </label>
+            <label class="opt-row toggle-row">
+                <span>FULL SCREEN</span>
+                <input type="checkbox" id="opt-fullscreen">
+            </label>
+            <label class="opt-row">
+                <span>COLOR</span>
+                <select id="opt-color">
+                    <option value="#39ff14">GREEN</option>
+                    <option value="#00e5ff">CYAN</option>
+                    <option value="#ff0055">RED</option>
+                    <option value="#ffb000">YELLOW</option>
+                    <option value="#ff44ff">MAGENTA</option>
+                </select>
+            </label>
+
+            <div class="opt-buttons">
+                <button id="btn-save-options" class="btn-play">SAVE</button>
+                <button id="btn-back-menu" class="btn-secondary">BACK</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ────────────────────────────────────────────────────────────────────
+         SCREEN: Game — Canvas, HUD & death overlay
+         ──────────────────────────────────────────────────────────────────── -->
+    <section id="screen-game" class="screen">
+        <canvas id="gameCanvas"></canvas>
+        <div id="crt-overlay"></div>
+
+        <!-- HUD -->
+        <div id="hud">
+            <div id="score-box">MASS <span id="score">0</span></div>
+            <div id="merge-hint" class="hidden">SHIFT · MERGE</div>
+            <div id="leaderboard">
+                <h3>TOP 10</h3>
+                <ol id="leader-list"></ol>
+            </div>
+        </div>
+
+        <!-- Death overlay -->
+        <div id="death-screen" class="overlay hidden">
+            <div class="death-box">
+                <h2>GAME OVER</h2>
+                <p>SCORE <span id="final-score">0</span></p>
+                <button id="btn-respawn" class="btn-play">RETRY</button>
+                <button id="btn-menu-death" class="btn-secondary">MENU</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts: Audio subsystem → Core game logic -->
+    <script src="sounds.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

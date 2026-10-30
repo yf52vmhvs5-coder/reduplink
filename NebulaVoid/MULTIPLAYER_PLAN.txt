@@ -1,0 +1,276 @@
+================================================================================
+NEBULA VOID — MULTIPLAYER
+================================================================================
+Ultima actualizare: 25 octombrie 2026
+Stare: duelul se poate juca. Esc din meci e în lobby. Singleplayer nu folosește Esc.
+       Relay-ul e filtrat (allowlist, ping, rate-limit). Simularea rămâne pe client.
+
+Model (nu e server autoritativ):
+  • Fiecare client rulează aceeași simulare ca PLAY.
+  • server/index.js e un relay WebSocket. Nu simulează jocul.
+    Nu mai copiază tot JSON-ul: trece doar tipurile de meci/lobby, cu câmpuri cunoscute.
+  • Cameră: 2–6 jucători (game-data.js → multiplayer.minPlayersToStart / maxRoomPlayers).
+  • Sincronizat: poziția, raza, skin-ul, cooldown-ul și evenimentele de duel.
+  • Nutrienții verzi sunt locali. Praful stelar (cele 200) și dreptunghiurile din duel sunt aceleași.
+  • Jeleul moale rămâne doar în singleplayer. În duel, în locul lui sunt 8 dreptunghiuri.
+
+PLAY rămâne separat.
+  runMode "single". La moarte: #gameOver clasic, VOID MATTER EARNED, materia se salvează.
+  Butoanele RETRY / CHANGE ENTITY intră pe calea singleplayer doar când nu e card de duel.
+  Esc nu închide un meci singleplayer.
+
+================================================================================
+CE FUNCȚIONEAZĂ
+================================================================================
+
+Intrare
+  [x] Hub [ MULTIPLAYER ] → același entity select ca PLAY → lobby
+  [x] CREATE deschide o cameră nouă. JOIN intră doar dacă codul există.
+      Un cod greșit rămâne în lobby cu „ROOM NOT FOUND”. Nu creează o cameră goală.
+  [x] Lacăt lângă CREATE: deschis = public, închis = privat (implicit public).
+      Public: max 3 semnale (callsign host + n/6), sortate după cât de pline sunt.
+      Peste 3: [ FIND SIGNAL ] bagă în următoarea. Cap relay: 8 camere publice waiting.
+      Private nu apare în listă. În meci, camera iese din listă. Listă goală = ascunsă.
+  [x] [ START MATCH ] îl vede doar hostul, și doar când sunt destui jucători.
+  [x] [ MAIN MENU ] și [ BACK ] din lobby
+  [x] Chat de cameră (T deschide, Enter / Space pe butonul de chat, Esc închide chat-ul)
+
+Cameră
+  [x] Primul din cameră e host. Dacă iese, hostul trece la următorul rămas.
+      [ START MATCH ] apare la noul host. Camera nu rămâne fără cine să pornească.
+  [x] În lobby, un disconnect te pune pe „waiting” doar dacă rămâneți sub minim.
+      Dacă mai sunteți destui, startul rămâne disponibil.
+  [x] Relay: server/index.js, server/start-relay.bat, ws://127.0.0.1:8080
+  [x] Tab mort / Wi-Fi tăiat: ping la 15s. Fără pong, clientul e scos din cameră
+      (nu ține un loc din cele 6 până expiră TCP-ul).
+  [x] Frame peste 4096 octeți: conexiunea se închide. Error pe socket nu omoară relay-ul.
+
+Relay / pachete (25 oct 2026 — nu schimbă look-ul sau interpolarea)
+  [x] Allowlist. Tip necunoscut sau câmp extra (hack, matchEnd fals) nu se retransmite.
+  [x] matchStart doar de la host. Guest-ul care îl trimite e ignorat.
+  [x] state: maxim ~70/s per jucător, burst 12. Un client care spam-uiește e plafonat.
+      claimHit, hitAck, dust, egg, matchEnd, forfeit nu sunt tăiate de acest cap.
+  [x] Un JSON.stringify pe broadcast, nu o serializare per destinatar.
+  [x] Teste: cd server && npm test  (42 teste: sanitize, flood, host-only, ping, delta/glow, abilități).
+
+Arenă
+  [x] Fără boți. Gaură neagră, nutrienți locali, praf sincronizat.
+  [x] În loc de jeleu: 18 dreptunghiuri, mai mari, fără mărimea mică.
+      Interior gri mat, același la toate. Conturul are intensitatea barierei hărții.
+      Dreptunghiurile nu se suprapun (test pe forma rotită, nu pe cerc).
+      Culori: cyan, albastru, violet, gheață, roșu, verde.
+      Interiorul nu întinde degradeul pe colțuri. Ouăle apar unul câte unul, până la 4.
+      Sunet și shake la intrare și la ieșire, doar la clientul care trece.
+  [x] Spawn pe un cerc la 500px de centru, un loc per jucător, aceeași ordine de peer id.
+  [x] matchStart pornește guest-ul. Al doilea start, cât e deja în meci, e ignorat.
+      Relay-ul nici nu mai forward-ează matchStart de la non-host.
+  [x] Re-enter după moarte: rază și scor de start, aceeași arenă.
+      Dash-ul, rift-ul, cușca, fantomele și bounty-ul nu se păstrează din clipa morții.
+
+Celălalt jucător
+  [x] State la 16ms (neschimbat). Se trimite când se mișcă, se schimbă raza/cooldown-ul,
+      sau skin-ul. Dacă stai pe loc: un keepalive full la 300ms (glow/nume nu dispar).
+  [x] Primul pachet e full (color, glow, entity). Apoi delta: doar t, x, y, radius,
+      ability, cd, cdMax. Glow-ul vechi rămâne pe client până vine un full nou.
+  [x] x/y rotunjite la 0,1 px, raza și cd la 0,01 — sub pragul de skip (0,2 px).
+  [x] Dacă OS-ul are deja >8 KB în coada WebSocket, un state se sare. claimHit / dust / egg
+      tot pleacă. Interpolarea acoperă gaura; evită saltul când lag-ul umflă coada.
+  [x] Desen din poziția netezită (displayX / displayY / displayRadius).
+  [x] Predicția folosește ceasul local la primirea pachetului, nu ceasul celuilalt.
+      remoteInterpSpeed 32, snap 320px, extrap 55ms — aceleași valori ca înainte.
+  [x] Core întunecat + glow-ul skin-ului. X-ul de cooldown din ability / cd / cdMax.
+      Abilitățile de bază se văd la celălalt: rift, shriek, dash.
+      Un pachet `cast` la Space. Damage-ul de rift îl aplică victima și îl confirmă
+      cu `riftAck` (~10/s). Casterul primește jumătate, doar dacă celula e lângă rift.
+      x1 / x2 / x3 nu intră în duel.
+
+PvP
+  [x] Damage-ul folosește cercul desenat. Nu mai există marginea de 96px
+      și nu se lovește poziția brută din rețea, dacă sprite-ul e în urmă.
+  [x] Contactul e același test ca la boți: distanța < suma razelor.
+      Cel mai mare trebuie să fie peste BOT_EAT_THRESHOLD (1.1×).
+  [x] Cel mic pierde BOT_CONTACT_DRAIN (24 px/s) cât timp cercurile se ating.
+      Aceeași cantitate, nu o estimare, pleacă în hitAck drain și se adaugă la cel mare.
+  [x] Înghițirea e la PLAYER_DEATH_DIST_FACTOR (0.25 × raza atacatorului).
+      Atacatorul primește și restul de contact neconfirmat, apoi raza victimei × GROW_FROM_BOT.
+
+Sfârșit de meci
+  [x] Același #gameOver, fără Void Matter. showGameOverOverlay() nu e apelat în duel.
+  [x] Următorul game over din PLAY își revine la etichetele singleplayer.
+  [x] Moarte: după explozia de 2,5s, „[ADVERSAR] CONSUMED YOU”.
+      Butoane: RE-ENTER ARENA / RETURN TO LOBBY.
+  [x] Ultimul rămas prin luptă: „YOU DOMINATED THE VOID”, imediat.
+      Butoane: RETURN TO LOBBY / CHANGE ENTITY.
+  [x] Toți mor: ambele părți văd „VOID DOMINATED THE VOID”.
+  [x] Esc, cât ești viu în arenă: închide meciul, revii în aceeași cameră, fără card și fără materie.
+      Singleplayer ignoră Esc. Dacă jocul e fullscreen, primul Esc iese din fullscreen.
+  [x] Cel care rămâne singur pentru că celălalt a dat Esc, a închis tab-ul sau a pierdut legătura
+      vede „OPPONENT DISCONNECTED”, nu o victorie.
+      Butoane: RETURN TO LOBBY / CHANGE ENTITY. RETRY nu te bagă înapoi în arenă.
+  [x] Dacă mai sunt jucători în arenă, plecarea unuia nu închide meciul pentru restul.
+  [x] RETURN TO LOBBY de pe cardul de moarte e abandon: cel rămas viu poate lua victoria.
+  [x] CHANGE ENTITY închide camera și revine la entity select.
+
+================================================================================
+CE NU E SINCRONIZAT (INTENȚIONAT)
+================================================================================
+
+  • Nutrienții și reumplerea lor. Fiecare client are propriile puncte verzi.
+  • Praful stelar e comun: un dustSeed în matchStart, id stabil, poziție din hash(seed, id).
+    Mâncatul se anunță cu dust { eats:[{id,s},...] } (un frame, până la 24).
+    Pachetul vechi { id, s } tot e acceptat. Gaura neagră îl consumă local, fără mesaj.
+    După eat, id-ul N e înlocuit imediat cu N+200, alt loc pe hartă, același la toți.
+  • Ouăle din camere: egg { eats } sau legacy { id, s }. Slotul reapare local, după delay.
+  • Boții. În duel nu există.
+  • Scorul ENTITY_SCORE. E local. Pe card e doar citit.
+  • Modurile x1, x2, x3. În duel rămân abilitățile de bază.
+
+================================================================================
+LIMITĂRI
+================================================================================
+
+  • Cel mare crește când ajunge hitAck-ul (cam 100ms), cu exact px pe care i-a pierdut cel mic.
+  • Rift-ul de bază stă pe loc. Cel din rift pierde raza pe loc; casterul primește jumătate
+    la riftAck (~100ms). Sub rază 5, rift-ul omoară, fără bonusul de înghițire.
+  • Cardul învinsului apare după explozia de 2,5s. Învingătorul își vede cardul imediat.
+  • Esc nu există în singleplayer. În duel nu închide cardul de la final; acolo sunt butoanele.
+  • START MATCH nu pornește singur după RETRY sau Esc. Hostul îl apasă din lobby.
+  • Dacă cineva pleacă în cele 2,5s de explozie, cardul rămas e OPPONENT DISCONNECTED.
+  • Hostul poate apăsa START în timp ce alții sunt încă în meciul vechi.
+    Cine e deja în arenă ignoră al doilea matchStart. Non-hostul nu-l mai poate trimite prin relay.
+  • Reconnect în timpul meciului nu există. Starea nu e pe server.
+    Un disconnect = ieșire din cameră (lobby: RELAY LOST). Nu reintri în arena veche.
+  • Rate-limit-ul de state e peste ritmul onest (16ms ≈ 62 Hz). Nu taie un client legitim.
+    Un flood e plafonat; interpolarea ține celula, nu o teleportează la fiecare pachet în plus.
+
+================================================================================
+URMĂTORUL LUCRU, DACĂ VREI SĂ CONTINUI
+================================================================================
+
+  [x] Praf stelar identic în duel (seed + id, fără poziții pe rețea).
+  [x] Camere de sticlă în duel (același seed, mesaj „egg” doar când se mănâncă un ou).
+  [x] Relay filtrat: allowlist, matchStart doar host, rate-limit pe state, ping, maxPayload.
+  [x] Trimitere state: delta + keepalive, rotunjire, backpressure, dust/egg în batch.
+  [x] Camere public/private (lacăt pe CREATE, listă 3 semnale, FIND SIGNAL, cap 8).
+  [x] Abilități de bază în duel (rift, shriek, dash) + damage de rift, fără x1/x2/x3.
+  [ ] Același seed de nutrienți, dacă vrei și hrana verde identică.
+  [ ] Moduri x1 / x2 / x3 în duel.
+  [ ] Relay public (nu doar localhost / LAN). Validarea de host pe matchStart e deja făcută.
+  [ ] Protocol binar — doar dacă JSON la 16ms rămâne scump la CPU. Nu e necesar acum.
+      Nu reduce intervalul sub 16ms și nu atinge interpolarea ca „optimizare”.
+  [ ] Reconnect mid-match — nu, fără stare pe server. Doar lobby, dacă e nevoie.
+
+================================================================================
+PROTOCOL
+================================================================================
+
+  Lobby: join | joined | peerJoined | peerLeft | error
+         join.create = true doar la CREATE. join.public = true → cameră vizibilă.
+         JOIN fără cameră → error NO_ROOM. CREATE public peste cap → PUBLIC_FULL.
+         peerLeft include hostPeerId (noul host, dacă cel vechi a ieșit).
+         chat { text, t }
+         lobby {}           — abonare la lista publică (fără a intra în cameră)
+         leave {}           — iese din cameră, rămâne pe socket, primește roomList
+         roomIdle {}        — camera publică revine în listă după meci
+         roomList { rooms:[{ roomId, host, n, max }] }
+
+  Meci:
+    matchStart   { t0, roomId?, peerOrder, dustSeed }
+                 relay: doar de la host. Restul se aruncă.
+    dust         { eats:[{ id, s }, ...] }   — până la 24 mâncăruri din același frame
+                 sau legacy { id, s }
+                 s = secunda de meci a înlocuitorului
+    egg          { eats:[{ id, s }, ...] } sau legacy { id, s }
+                 slotul reapare la rând, fără alt mesaj
+    cast         { kind:"vampire"|"warp"|"speed", t, x, y, seq }
+                 un pachet per Space. Relay: 6/s, burst 3.
+                 Efectul pornește local la primire (rift fix, shriek, dash).
+    riftAck      { t, amount, ownerPeerId }
+                 îl trimite victima, ~10/s. amount = px pierduți de la ack-ul anterior.
+                 ownerul adaugă amount/2 dacă victima e lângă riftul lui.
+                 Relay: 15/s, burst 4, amount ≤ 20.
+    state        { t, x, y, radius, ability, cd, cdMax }
+                 + color, glow, entity la full (start, schimbare skin, keepalive 300ms)
+                 x/y ≈ 0.1px; radius/cd ≈ 0.01
+                 dropIfBuffered dacă socket.bufferedAmount > 8KB
+    claimHit     { t, kind:"eat", targetPeerId, x, y, radius }
+                 îl trimite cel mare, cel mult o dată la 100ms, cât vede contact
+    hitAck       { t, kind, targetPeerId, amount?, eatenRadius? }
+                 kind "drain" — amount = px pierduți de victimă de la ack-ul anterior
+                 kind "kill"  — eatenRadius, plus amount pentru contactul încă neconfirmat
+    respawn      { x, y, radius }     — re-enter după moarte
+    eliminated   { byPeerId, killerCallsign }
+    forfeit      { esc?: true }
+                 esc true  = a apăsat Esc; celălalt vede OPPONENT DISCONNECTED
+                 fără esc  = a părăsit de pe cardul de moarte; cel viu poate câștiga
+    matchEnd     { entity, winnerCallsign, winnerPeerId }
+
+  Server (server/relay-packets.js + server/index.js):
+    allowlist pe tip + copiere explicită de câmpuri; fromPeerId e pus de server
+    state: token bucket 70/s, burst 12
+    ping 15s, maxPayload 4096, perMessageDeflate oprit
+    un stringify pe cameră, apoi send raw la ceilalți
+
+================================================================================
+FIȘIERE
+================================================================================
+
+  entities.js             wiring, input, clearLocalAbilityEffects la re-enter
+  js/mirror-match.js      meci, PvP, carduri, Esc; batch dust/egg + fallback legacy
+  js/mp-abilities.js      cast, rift, shriek, dash, riftAck (doar baza, fără x1/x2/x3)
+  js/mp-session.js        state (full/delta/keepalive), interpolare, mesaje de meci
+  js/mp-mirror.js         WebSocket; backpressure doar pe state
+  js/mp-lobby.js          cameră, host, chat
+  js/mp-remotes.js        celulele remote
+  js/mp-callsigns.js      indicative
+  js/sim-update.js        după update: state, apoi contact PvP
+  js/sim-draw.js          desenul adversarului
+  js/glass-vault.js       camerele de sticlă din duel
+  js/particle.js          praf stelar: seed + id, refill N → N+200
+  js/ui-shell.js          #gameOver singleplayer și cardul de duel
+  js/run-lifecycle.js     moarte și retry singleplayer
+  js/hub-flow.js          hub și navigare
+  js/entity-select-ui.js  PLAY versus intrarea în lobby
+  server/index.js         relay, host, CREATE versus JOIN, ping, maxPayload
+  server/relay-packets.js allowlist, sanitize, rate-limit state
+  test/*.test.js          42 teste (pachete, server WS, client delta/glow, abilități)
+  index.html / style.css  lobby și #gameOver
+
+================================================================================
+TEST SCURT
+================================================================================
+
+  0. cd server && npm test
+     Trebuie 42 pass. Acoperă flood de state, matchStart de la guest, glow pe delta,
+     interpolare, snap, batch dust, ping, payload prea mare.
+  1. server/start-relay.bat rămâne deschis. După o modificare în server/index.js
+     sau server/relay-packets.js, închide fereastra și pornește-l din nou.
+     Reîncarcă tab-urile din browser.
+  2. Două tab-uri → MULTIPLAYER → același skin flow.
+     Tab A: lacăt deschis, CREATE. Tab B: vede callsign-ul lui A, click = join.
+     Lacăt închis: B nu vede camera; JOIN tot merge cu codul.
+  3. START MATCH. Mișcare, skin, X de cooldown. Adversarul trebuie să rămână lin
+     (16ms + interpolare neschimbate).
+  3b. Space: rift-ul, unda de shriek și urma de dash se văd la celălalt.
+      În rift, cel mic pierde rază pe loc; cel mare crește cu jumătate, la riftAck.
+      Shriek-ul îl oprește ~0.75s (celulă albă). x1/x2/x3 nu își schimbă abilitatea.
+  4. Contact: cel mic pierde rază doar când cercurile se ating. Cel mare crește
+     cu aceeași cantitate, la următorul hitAck.
+  4b. Dreptunghiurile stau în aceleași locuri. Ouăle apar pe loc, unul câte unul.
+      Cel mâncat dispare și la celălalt. Intrarea face sunet și shake doar la tine.
+      PLAY tot arată jeleul moale.
+  4c. Praful mâncat dispare la amândoi și reapare altundeva (același loc la toți).
+  5. Esc la cel viu: revine în lobby, camera rămâne, fără Void Matter.
+     Celălalt vede OPPONENT DISCONNECTED.
+  6. PLAY din hub: moartea e tot VOID CONSUMED YOU + Void Matter. Esc nu iese din run.
+
+================================================================================
+NOTĂ
+================================================================================
+
+E multiplayer pentru prieteni, pe același PC sau în LAN. Nu e un duel cu anti-cheat.
+Allowlist-ul și capul de state opresc pachete accidentale și flood, nu un cheater dedicat.
+Ecranul de final e același șablon ca singleplayer, cu alte texte.
+Nu există un al doilea overlay.
+
+================================================================================

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1280">
+    <title>COSMIC QUIZ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem("cosmic-quiz-signal");
+                if (saved && /^#[0-9a-f]{6}$/.test(saved)) {
+                    document.documentElement.style.setProperty("--signal", saved);
+                }
+            } catch (err) { /* storage unavailable */ }
+        })();
+    </script>
+</head>
+<body>
+    <div class="stars"></div>
+
+    <section id="start-screen" class="screen active">
+        <div class="start-stack">
+            <div class="brand-zone">
+                <button type="button" class="signal-logo" id="signal-tint-btn" aria-label="Signal tint, Blood rift">
+                    <svg class="mark-alien" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <g class="mark-alien-body">
+                            <g class="mark-alien-antenna-wrap">
+                                <path class="mark-alien-antenna" fill="var(--signal, #ff2d2d)" d="M11.2 3.1 12 1.2 12.8 3.1 12 3.6Z"/>
+                            </g>
+                            <path class="mark-alien-head" fill="var(--signal, #ff2d2d)" d="M12 4.2c-4.8 0-7.2 4.6-7.2 8.4 0 4.2 3.1 6.8 7.2 6.8s7.2-2.6 7.2-6.8c0-3.8-2.4-8.4-7.2-8.4Z"/>
+                            <ellipse class="mark-alien-eye mark-alien-eye--l" cx="9.15" cy="12.1" rx="1.55" ry="2.35" fill="#060606"/>
+                            <ellipse class="mark-alien-eye mark-alien-eye--r" cx="14.85" cy="12.1" rx="1.55" ry="2.35" fill="#060606"/>
+                        </g>
+                    </svg>
+                </button>
+                <h1 class="mega-title">COSMIC<span>QUIZ</span></h1>
+            </div>
+            <div class="start-reveal">
+                <p class="subtitle">SELECT MODE TO START</p>
+                <div class="menu-actions">
+                    <button id="single-btn" class="btn-textured cyan">
+                        <span class="btn-text">SINGLE PLAYER</span>
+                    </button>
+                    <button id="multi-btn" class="btn-textured magenta">
+                        <span class="btn-text">PLAY WITH FRIENDS</span>
+                    </button>
+                    <button id="about-btn" type="button" class="btn-textured">
+                        <span class="btn-text">ABOUT</span>
+                    </button>
+                </div>
+                <p class="studio-sign">SPACEJUNK GAMES</p>
+            </div>
+        </div>
+
+        <div class="start-toolbar">
+            <button type="button" class="icon-btn is-active" id="sound-toggle-btn" aria-label="Mute sound">
+                <svg viewBox="6.9 4.7 10.2 14.6" aria-hidden="true">
+                    <ellipse class="egg-rim" cx="12" cy="12" rx="4.42" ry="6.72"/>
+                    <ellipse cx="12" cy="12" rx="4.2" ry="6.5"/>
+                </svg>
+                <span class="icon-hint">SOUND</span>
+            </button>
+            <button type="button" class="icon-btn" id="fullscreen-toggle-btn" aria-label="Fullscreen">
+                <svg viewBox="6.9 4.7 10.2 14.6" aria-hidden="true">
+                    <ellipse class="egg-rim" cx="12" cy="12" rx="4.42" ry="6.72"/>
+                    <ellipse cx="12" cy="12" rx="4.2" ry="6.5"/>
+                </svg>
+                <span class="icon-hint">SCREEN</span>
+            </button>
+        </div>
+    </section>
+
+    <div id="about-screen" class="about-overlay" hidden>
+        <p class="about-tag">ARCHIVE</p>
+        <h2 class="about-title">ABOUT</h2>
+        <div class="about-frame">
+            <svg class="mark-alien about-mark" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <g class="mark-alien-body">
+                    <g class="mark-alien-antenna-wrap">
+                        <path class="mark-alien-antenna" fill="var(--signal, #ff2d2d)" d="M11.2 3.1 12 1.2 12.8 3.1 12 3.6Z"/>
+                    </g>
+                    <path class="mark-alien-head" fill="var(--signal, #ff2d2d)" d="M12 4.2c-4.8 0-7.2 4.6-7.2 8.4 0 4.2 3.1 6.8 7.2 6.8s7.2-2.6 7.2-6.8c0-3.8-2.4-8.4-7.2-8.4Z"/>
+                    <ellipse class="mark-alien-eye mark-alien-eye--l" cx="9.15" cy="12.1" rx="1.55" ry="2.35" fill="#060606"/>
+                    <ellipse class="mark-alien-eye mark-alien-eye--r" cx="14.85" cy="12.1" rx="1.55" ry="2.35" fill="#060606"/>
+                </g>
+            </svg>
+            <div class="about-body">
+                <p><strong>COSMIC QUIZ</strong> is a run of fifty questions about space, technology, and the strange facts that sit between them. No capitals. No maps. Open it alone, or pass a room code to one friend.</p>
+                <p class="about-kicker">MODES</p>
+                <p><strong>CLASSIC</strong> — A wrong answer costs a life. The next question follows.</p>
+                <p><strong>SURVIVAL</strong> — A miss costs a life and keeps this question until you answer it.</p>
+                <p><strong>BLITZ</strong> — Fifteen seconds each. Faster answers score higher. Running out of time costs a life.</p>
+                <p><strong>SPACEJUNK GAMES</strong> makes small games for the quiet between bigger ones. The alien above is the same mark as Nebula Void: a signal, a blink, then you are on your own.</p>
+            </div>
+        </div>
+        <footer class="about-footer">
+            <p class="about-signoff">STAY CURIOUS. THE VOID KEEPS THE SCORE.</p>
+            <button type="button" id="about-back-btn" class="about-back">BACK</button>
+        </footer>
+    </div>
+
+    <section id="lobby-screen" class="screen">
+        <p class="subtitle lobby-heading">MULTIPLAYER ROOM</p>
+        <p class="lobby-hint" id="lobby-status">Create a room or join with a code (max 2 players)</p>
+
+        <div id="lobby-idle" class="lobby-panel">
+            <button type="button" id="lobby-create-btn" class="btn-textured cyan">
+                <span class="btn-text">CREATE ROOM</span>
+            </button>
+            <div class="lobby-join">
+                <input type="text" id="lobby-code-input" class="lobby-code-input" maxlength="6" placeholder="ROOM CODE" autocomplete="off" spellcheck="false">
+                <button type="button" id="lobby-join-btn" class="btn-textured magenta">
+                    <span class="btn-text">JOIN ROOM</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="lobby-active" class="lobby-panel" hidden>
+            <p class="lobby-code-label">ROOM CODE</p>
+            <p class="lobby-code-display" id="lobby-code-display">------</p>
+            <p class="lobby-waiting" id="lobby-waiting-text">Waiting for friend to join…</p>
+        </div>
+
+        <button type="button" id="lobby-back-btn" class="btn-textured mode-back">
+            <span class="btn-text">BACK</span>
+        </button>
+    </section>
+
+    <section id="mode-screen" class="screen">
+        <p class="subtitle mode-heading">CHOOSE MODE</p>
+        <div class="mode-list">
+            <button type="button" class="mode-option" data-mode="classic">
+                <span class="btn-text">CLASSIC</span>
+            </button>
+            <button type="button" class="mode-option" data-mode="survival">
+                <span class="btn-text">SURVIVAL</span>
+            </button>
+            <button type="button" class="mode-option" data-mode="blitz">
+                <span class="btn-text">BLITZ</span>
+            </button>
+        </div>
+        <p class="lobby-hint mode-host-hint" id="mode-host-hint" hidden>Waiting for host to choose a mode…</p>
+        <button type="button" id="mode-back-btn" class="btn-textured mode-back">
+            <span class="btn-text">BACK</span>
+        </button>
+    </section>
+
+    <section id="quiz-screen" class="screen">
+        <div class="quiz-void" aria-hidden="true">
+            <div class="quiz-stars"></div>
+        </div>
+        <div class="game-hud">
+            <div class="hud-stack">
+                <div class="session-progress" id="session-progress" hidden aria-live="polite">
+                    Q <span id="progress-current">1</span> / <span id="progress-total">50</span>
+                </div>
+                <div class="mode-badge" id="mode-badge" hidden></div>
+                <div class="timer-display" id="timer-display" hidden aria-live="polite"></div>
+                <div class="player-turn" id="player-turn" hidden></div>
+                <div class="lives-display" id="lives-display" aria-label="3 lives remaining"></div>
+                <div class="score-display" id="score-display">SCORE <span id="score-val">0000</span></div>
+            </div>
+        </div>
+
+        <div class="question-container">
+            <h2 id="question-display">WAITING FOR QUESTIONS...</h2>
+            <p class="question-meta" id="question-meta" hidden></p>
+
+            <div class="quiz-brand-stack">
+                <div class="question-brand" aria-hidden="true">
+                    <svg class="mark-alien question-mark" viewBox="0 0 24 24" focusable="false">
+                        <g class="mark-alien-body">
+                            <g class="mark-alien-antenna-wrap">
+                                <path class="mark-alien-antenna" fill="var(--signal, #ff2d2d)" d="M11.2 3.1 12 1.2 12.8 3.1 12 3.6Z"/>
+                            </g>
+                            <path class="mark-alien-head" fill="var(--signal, #ff2d2d)" d="M12 4.2c-4.8 0-7.2 4.6-7.2 8.4 0 4.2 3.1 6.8 7.2 6.8s7.2-2.6 7.2-6.8c0-3.8-2.4-8.4-7.2-8.4Z"/>
+                            <ellipse class="mark-alien-eye mark-alien-eye--l" cx="9.15" cy="12.1" rx="1.55" ry="2.35" fill="#060606"/>
+                            <ellipse class="mark-alien-eye mark-alien-eye--r" cx="14.85" cy="12.1" rx="1.55" ry="2.35" fill="#060606"/>
+                        </g>
+                    </svg>
+                </div>
+
+                <div id="powerup-bar" class="powerup-bar" hidden>
+                    <span class="stardust-display" aria-live="polite">
+                        <span class="stardust-icon" aria-hidden="true">✦</span>
+                        <span id="stardust-val">0</span>
+                    </span>
+                    <div class="powerup-actions">
+                        <div class="powerup-wing powerup-wing--left">
+                            <button type="button" class="powerup-btn" data-powerup="quantum50" title="Quantum 50 — remove 2 wrong answers">
+                                <span class="powerup-name">50-50</span>
+                                <span class="powerup-cost">5</span>
+                            </button>
+                            <button type="button" class="powerup-btn" data-powerup="timeWarp" title="Time Warp — +8 seconds (Blitz)">
+                                <span class="powerup-name">+8s</span>
+                                <span class="powerup-cost">6</span>
+                            </button>
+                        </div>
+                        <button type="button" class="powerup-btn powerup-btn--center" data-powerup="lifePod" title="Life Pod — +1 life (max 4)">
+                            <span class="powerup-name">LIFE</span>
+                            <span class="powerup-cost">8</span>
+                        </button>
+                        <div class="powerup-wing powerup-wing--right">
+                            <button type="button" class="powerup-btn" data-powerup="shield" title="Gravity Shield — blocks the next wrong answer">
+                                <span class="powerup-name">SHIELD</span>
+                                <span class="powerup-cost">7</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="answer-options" class="answer-options"></div>
+            <p class="question-fact" id="question-fact" hidden></p>
+
+            <div id="end-actions" class="end-actions" hidden>
+                <button type="button" id="play-again-btn" class="btn-textured cyan">
+                    <span class="btn-text">PLAY AGAIN</span>
+                </button>
+                <button type="button" id="back-menu-btn" class="btn-textured mode-back">
+                    <span class="btn-text">BACK TO MENU</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <script src="questions.js"></script>
+    <script src="sounds.js"></script>
+    <script src="multiplayer.js"></script>
+    <script src="deck.js"></script>
+    <script src="powerups.js"></script>
+    <script src="hud.js"></script>
+    <script src="online.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

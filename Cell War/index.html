@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<!--
+  ═══════════════════════════════════════════════════════════════════════════
+   CELL WARS · RETRO EDITION
+   Entry Point — Document Structure & Screen Flow
+
+   Screens:  Intro → Menu → Options / Game → Death Overlay
+  ═══════════════════════════════════════════════════════════════════════════
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CELL WARS · RETRO EDITION — arcade arena relay by SPACEJUNK GAMES. Grow, split, dominate on phosphor and scanlines.">
+    <title>CELL WARS · RETRO · SPACEJUNK</title>
+    <script>
+        (function () {
+            var KEYS = ["spacejunkStudioTint", "nebulaVoidHubTitleColor", "cosmic-quiz-signal"];
+            function isHex(value) {
+                return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value);
+            }
+            try {
+                for (var i = 0; i < KEYS.length; i++) {
+                    var saved = localStorage.getItem(KEYS[i]);
+                    if (saved && isHex(saved)) {
+                        document.documentElement.style.setProperty("--sj-signal", saved.toLowerCase());
+                        break;
+                    }
+                }
+            } catch (err) { /* storage unavailable */ }
+        })();
+    </script>
+
+    <!-- Styles & Typography -->
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- ────────────────────────────────────────────────────────────────────
+         SCREEN: Intro — Boot sequence & branding
+         ──────────────────────────────────────────────────────────────────── -->
+    <section id="screen-intro" class="screen active">
+        <div class="intro-box">
+            <div class="sj-mark" role="img" aria-label="Spacejunk Games">
+                <svg class="sj-mark-alien" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <g class="sj-mark-body">
+                        <g class="sj-mark-antenna-wrap">
+                            <path class="sj-mark-antenna" fill="var(--sj-signal)" d="M11.2 3.1 12 1.2 12.8 3.1 12 3.6Z"/>
+                        </g>
+                        <path class="sj-mark-head" fill="var(--sj-signal)" d="M12 4.2c-4.8 0-7.2 4.6-7.2 8.4 0 4.2 3.1 6.8 7.2 6.8s7.2-2.6 7.2-6.8c0-3.8-2.4-8.4-7.2-8.4Z"/>
+                        <ellipse class="sj-mark-eye sj-mark-eye--l" cx="9.15" cy="12.1" rx="1.55" ry="2.35" fill="#060606"/>
+                        <ellipse class="sj-mark-eye sj-mark-eye--r" cx="14.85" cy="12.1" rx="1.55" ry="2.35" fill="#060606"/>
+                    </g>
+                </svg>
+                <p class="sj-mark-name">SPACEJUNK GAMES</p>
+            </div>
+            <h1 class="intro-logo">CELL<br>WARS</h1>
+            <p class="intro-sub">RETRO EDITION</p>
+            <div class="intro-bar"><div class="intro-bar-fill"></div></div>
+            <p class="intro-tap">CLICK OR WAIT...</p>
+        </div>
+    </section>
+
+    <!-- ────────────────────────────────────────────────────────────────────
+         SCREEN: Main Menu — Nickname & navigation
+         ──────────────────────────────────────────────────────────────────── -->
+    <section id="screen-menu" class="screen" inert>
+        <div class="menu-box">
+            <h1 class="title">CELL<br>WARS</h1>
+            <p class="subtitle">/// RETRO EDITION ///</p>
+            <input id="nick-input" type="text" maxlength="12" placeholder="NAME" autocomplete="off">
+            <button id="btn-play" class="btn-play">START</button>
+            <button id="btn-options" class="btn-secondary">OPTIONS</button>
+            <p class="hint">MOUSE · <span class="key key-space">SPACE</span> SPLIT · <span class="key key-shift">SHIFT</span> MERGE · <span class="key key-w">W</span> EJECT · <span class="key key-m">M</span> MAP</p>
+            <div class="sj-mark sj-mark--menu" role="img" aria-label="Spacejunk Games">
+                <svg class="sj-mark-alien" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <g class="sj-mark-body">
+                        <g class="sj-mark-antenna-wrap">
+                            <path class="sj-mark-antenna" fill="var(--sj-signal)" d="M11.2 3.1 12 1.2 12.8 3.1 12 3.6Z"/>
+                        </g>
+                        <path class="sj-mark-head" fill="var(--sj-signal)" d="M12 4.2c-4.8 0-7.2 4.6-7.2 8.4 0 4.2 3.1 6.8 7.2 6.8s7.2-2.6 7.2-6.8c0-3.8-2.4-8.4-7.2-8.4Z"/>
+                        <ellipse class="sj-mark-eye sj-mark-eye--l" cx="9.15" cy="12.1" rx="1.55" ry="2.35" fill="#060606"/>
+                        <ellipse class="sj-mark-eye sj-mark-eye--r" cx="14.85" cy="12.1" rx="1.55" ry="2.35" fill="#060606"/>
+                    </g>
+                </svg>
+                <p class="sj-mark-name">SPACEJUNK GAMES</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ────────────────────────────────────────────────────────────────────
+         SCREEN: Options — Gameplay, audio & display settings
+         ──────────────────────────────────────────────────────────────────── -->
+    <section id="screen-options" class="screen" inert>
+        <div class="menu-box options-box">
+            <h1 class="title small">OPTIONS</h1>
+
+            <!-- Gameplay -->
+            <label class="opt-row">
+                <span>ZOOM OUT</span>
+                <input type="range" id="opt-zoom" min="50" max="100" value="72">
+                <span id="val-zoom" class="opt-val">72%</span>
+            </label>
+            <label class="opt-row">
+                <span>SMOOTH CAMERA</span>
+                <input type="range" id="opt-camera" min="3" max="20" value="9">
+                <span id="val-camera" class="opt-val">9</span>
+            </label>
+            <label class="opt-row">
+                <span>PLAYERS</span>
+                <input type="range" id="opt-bots" min="10" max="40" value="25">
+                <span id="val-bots" class="opt-val">25</span>
+            </label>
+            <label class="opt-row">
+                <span>FOOD</span>
+                <input type="range" id="opt-food" min="400" max="1200" step="100" value="800">
+                <span id="val-food" class="opt-val">800</span>
+            </label>
+
+            <!-- Audio -->
+            <label class="opt-row toggle-row">
+                <span>SOUND</span>
+                <input type="checkbox" id="opt-sounds" checked>
+            </label>
+            <label class="opt-row">
+                <span>VOLUME</span>
+                <input type="range" id="opt-sound-vol" min="0" max="100" value="65">
+                <span id="val-sound-vol" class="opt-val">65%</span>
+            </label>
+
+            <!-- Display -->
+            <label class="opt-row toggle-row">
+                <span>FULL SCREEN</span>
+                <input type="checkbox" id="opt-fullscreen">
+            </label>
+            <label class="opt-row">
+                <span>COLOR</span>
+                <select id="opt-color">
+                    <option value="#00e5ff">CYAN</option>
+                    <option value="#39ff14">GREEN</option>
+                    <option value="#ff0055">RED</option>
+                    <option value="#ffb000">YELLOW</option>
+                    <option value="#ff44ff">MAGENTA</option>
+                </select>
+            </label>
+
+            <div class="opt-buttons">
+                <button id="btn-save-options" class="btn-play">SAVE</button>
+                <button id="btn-back-menu" class="btn-secondary">BACK</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ────────────────────────────────────────────────────────────────────
+         SCREEN: Game — Canvas, HUD & death overlay
+         ──────────────────────────────────────────────────────────────────── -->
+    <section id="screen-game" class="screen" inert>
+        <canvas id="gameCanvas"></canvas>
+        <div id="crt-overlay"></div>
+
+        <!-- HUD -->
+        <div id="hud">
+            <div id="score-box"><span id="rank-label">#—</span> · MASS <span id="score">0</span></div>
+            <div id="combo-box" class="hidden">COMBO <span id="combo-count">0</span>x</div>
+            <div id="buff-bar" class="hidden">
+                <div class="buff-track speed" id="buff-speed-row"><i id="buff-speed-fill"></i><em>SPEED</em></div>
+                <div class="buff-track shield" id="buff-shield-row"><i id="buff-shield-fill"></i><em>SHIELD</em></div>
+                <div class="buff-track magnet" id="buff-magnet-row"><i id="buff-magnet-fill"></i><em>MAGNET</em></div>
+            </div>
+            <div id="powerup-toast" class="hidden"></div>
+            <div id="spectate-label" class="hidden">SPECTATING <span id="spectate-name"></span></div>
+            <div id="rank-panel">
+                <div id="leaderboard">
+                    <h3>TOP 10</h3>
+                    <ol id="leader-list"></ol>
+                </div>
+            </div>
+            <div id="kill-feed"></div>
+            <div id="control-bar">
+                <span id="ctl-split"><span class="key key-space">SPACE</span><span class="hint-act"> SPLIT</span></span>
+                <span id="ctl-merge"><span class="key key-shift">SHIFT</span><span class="hint-act"> MERGE</span></span>
+                <span id="ctl-eject"><span class="key key-w">W</span><span class="hint-act"> EJECT</span></span>
+                <span id="ctl-map"><span class="key key-m">M</span><span class="hint-act"> MAP</span></span>
+            </div>
+        </div>
+
+        <!-- Death overlay -->
+        <div id="death-screen" class="overlay hidden">
+            <div class="death-box">
+                <h2>GAME OVER</h2>
+                <p class="death-by">EATEN BY <span id="death-killer">—</span></p>
+                <ul class="end-stats">
+                    <li><span>MASS</span><b id="final-score">0</b></li>
+                    <li><span>BEST</span><b id="death-best">0</b></li>
+                    <li><span>RANK</span><b id="death-rank">—</b></li>
+                    <li><span>TIME</span><b id="death-time">0:00</b></li>
+                </ul>
+                <button id="btn-respawn" class="btn-play">RETRY</button>
+                <button id="btn-menu-death" class="btn-secondary">MENU</button>
+            </div>
+        </div>
+
+        <!-- Victory overlay -->
+        <div id="victory-screen" class="overlay hidden">
+            <div class="victory-box">
+                <h2>VICTORY!</h2>
+                <p class="victory-sub">DOMINION COMPLETE</p>
+                <ul class="end-stats">
+                    <li><span>MASS</span><b id="victory-score">0</b></li>
+                    <li><span>BEST</span><b id="victory-best">0</b></li>
+                    <li><span>RANK</span><b id="victory-rank">#1</b></li>
+                    <li><span>TIME</span><b id="victory-time">0:00</b></li>
+                </ul>
+                <button id="btn-victory-again" class="btn-play">PLAY AGAIN</button>
+                <button id="btn-menu-victory" class="btn-secondary">MENU</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts: Audio subsystem → Core game logic -->
+    <script src="sounds.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
