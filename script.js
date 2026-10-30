@@ -36,7 +36,7 @@
             kind: "ARENA",
             status: "live",
             line: "Grow, split, dominate — retro phosphor and scanlines.",
-            href: "Cell%20War/index.html",
+            href: "Cell War/index.html",
             web: true
         }
     ];
@@ -53,6 +53,16 @@
     ];
 
     var TINT_KEY = "spacejunkStudioTint";
+
+    function gameHref(raw) {
+        if (!raw) return "";
+        if (/^https?:\/\//.test(raw)) return raw;
+        try {
+            return new URL(raw, document.baseURI).href;
+        } catch (err) {
+            return raw;
+        }
+    }
 
     function isHex(value) {
         return typeof value === "string" && /^#[0-9a-f]{6}$/.test(value);
@@ -198,15 +208,21 @@
         foot.className = "card-foot";
 
         if (live) {
+            var target = gameHref(game.href);
             var link = document.createElement("a");
             link.className = "open";
-            link.href = game.href;
+            link.href = target;
             link.textContent = "[ OPEN ]";
             if (/^https?:\/\//.test(game.href)) {
                 link.target = "_blank";
                 link.rel = "noopener noreferrer";
             }
             foot.appendChild(link);
+            li.addEventListener("click", function (ev) {
+                if (ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+                if (ev.target.closest("a")) return;
+                window.location.assign(target);
+            });
         } else {
             var seal = document.createElement("span");
             seal.className = "sealed";

@@ -296,7 +296,10 @@ h2 {
     padding-top: 4px;
 }
 
-.card--live { border-color: color-mix(in srgb, var(--signal) 55%, var(--line)); }
+.card--live {
+    border-color: color-mix(in srgb, var(--signal) 55%, var(--line));
+    cursor: pointer;
+}
 
 .card--live:hover {
     background: var(--signal-wash);
