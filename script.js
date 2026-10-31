@@ -9,6 +9,7 @@
  *   line: "One sentence.",
  *   href: "NebulaVoid/index.html",   // omit or leave "" while the build is sealed
  *   web: true                           // browser badge (optional; defaults from href)
+ *   tablet: true                        // tablet badge (optional)
  * }
  */
 (function () {
@@ -37,7 +38,8 @@
             status: "live",
             line: "Grow, split, dominate — retro phosphor and scanlines.",
             href: "Cell War/index.html",
-            web: true
+            web: true,
+            tablet: true
         }
     ];
 
@@ -151,10 +153,36 @@
         return svg;
     }
 
+    function tabletBadgeIcon() {
+        var ns = "http://www.w3.org/2000/svg";
+        var svg = document.createElementNS(ns, "svg");
+        svg.setAttribute("viewBox", "0 0 24 24");
+        svg.setAttribute("aria-hidden", "true");
+        svg.setAttribute("focusable", "false");
+
+        svg.appendChild(
+            strokeEl(ns, "path", {
+                d: "M8 4.75h8A1.25 1.25 0 0 1 17.25 6v12A1.25 1.25 0 0 1 16 19.25H8A1.25 1.25 0 0 1 6.75 18V6A1.25 1.25 0 0 1 8 4.75z"
+            })
+        );
+        svg.appendChild(
+            strokeEl(ns, "circle", {
+                cx: "12",
+                cy: "17.25",
+                r: "0.75"
+            })
+        );
+        return svg;
+    }
+
     function gameWebCompat(game) {
         if (game.web === true) return true;
         if (game.web === false) return false;
         return !!game.href;
+    }
+
+    function gameTabletCompat(game) {
+        return game.tablet === true;
     }
 
     function browserBadge() {
@@ -169,13 +197,42 @@
         return el;
     }
 
+    function tabletBadge() {
+        var el = document.createElement("span");
+        el.className = "card-platform card-platform--on";
+        el.title = "Playable on tablet";
+        var hidden = document.createElement("span");
+        hidden.className = "card-platform__label";
+        hidden.textContent = "Tablet";
+        el.appendChild(hidden);
+        el.appendChild(tabletBadgeIcon());
+        return el;
+    }
+
     function cardPlatforms(game) {
-        if (!gameWebCompat(game)) return null;
+        var web = gameWebCompat(game);
+        var tablet = gameTabletCompat(game);
+        if (!web && !tablet) return null;
         var wrap = document.createElement("div");
         wrap.className = "card-platforms";
         wrap.setAttribute("role", "img");
-        wrap.setAttribute("aria-label", "Runs in browser");
-        wrap.appendChild(browserBadge());
+        var parts = [];
+        if (web) {
+            parts.push("browser");
+            wrap.appendChild(browserBadge());
+        }
+        if (tablet) {
+            parts.push("tablet");
+            wrap.appendChild(tabletBadge());
+        }
+        wrap.setAttribute(
+            "aria-label",
+            parts.length === 1
+                ? parts[0] === "browser"
+                    ? "Runs in browser"
+                    : "Runs on tablet"
+                : "Runs in browser and on tablet"
+        );
         return wrap;
     }
 
