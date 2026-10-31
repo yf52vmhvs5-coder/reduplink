@@ -10,7 +10,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="description" content="CELL WARS · RETRO EDITION — arcade arena relay by SPACEJUNK GAMES. Grow, split, dominate on phosphor and scanlines.">
     <title>CELL WARS · RETRO · SPACEJUNK</title>
     <script>
@@ -182,6 +182,36 @@
                 <span id="ctl-merge"><span class="key key-shift">SHIFT</span><span class="hint-act"> MERGE</span></span>
                 <span id="ctl-eject"><span class="key key-w">W</span><span class="hint-act"> EJECT</span></span>
                 <span id="ctl-map"><span class="key key-m">M</span><span class="hint-act"> MAP</span></span>
+            </div>
+            <div id="tablet-pad" class="hidden" aria-hidden="true">
+                <button type="button" id="pad-split" class="pad-btn pad-split" aria-label="Split">
+                    <svg class="pad-glyph" viewBox="0 0 32 18" aria-hidden="true">
+                        <circle cx="7" cy="9" r="5.2"/>
+                        <circle cx="25" cy="9" r="5.2"/>
+                        <path d="M13 9h2.2M16.8 9H19"/>
+                    </svg>
+                    <span class="pad-label">SPLIT</span>
+                </button>
+                <button type="button" id="pad-merge" class="pad-btn pad-merge" aria-label="Merge">
+                    <svg class="pad-glyph" viewBox="0 0 32 18" aria-hidden="true">
+                        <circle cx="12" cy="9" r="6"/>
+                        <circle cx="20" cy="9" r="6"/>
+                    </svg>
+                    <span class="pad-label">MERGE</span>
+                </button>
+                <button type="button" id="pad-map" class="pad-btn pad-map" aria-label="Map">
+                    <svg class="pad-glyph" viewBox="0 0 18 18" aria-hidden="true">
+                        <rect x="1.2" y="1.2" width="15.6" height="15.6"/>
+                        <rect class="pad-fill" x="4" y="4.2" width="2.3" height="2.3"/>
+                        <rect class="pad-fill" x="8" y="11" width="2.3" height="2.3"/>
+                        <rect class="pad-fill" x="11.2" y="5.6" width="3" height="3"/>
+                    </svg>
+                    <span class="pad-label">MAP</span>
+                </button>
+                <button type="button" id="pad-eject" class="pad-btn pad-eject" aria-label="Eject">
+                    <span class="pad-mark">W</span>
+                    <span class="pad-label">EJECT</span>
+                </button>
             </div>
         </div>
 

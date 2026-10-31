@@ -125,7 +125,7 @@ function getMergeAnchor(cells) {
 }
 
 function isMergeKeyHeld() {
-    return !!(state.keys.ShiftLeft || state.keys.ShiftRight || state.mergeHeld);
+    return !!(state.keys.ShiftLeft || state.keys.ShiftRight || state.mergeHeld || state.mergePointerHeld);
 }
 
 function canMergePair(a, b) {
@@ -583,6 +583,7 @@ const state = {
     nick: 'You',
     keys: {},
     mergeHeld: false,
+    mergePointerHeld: false,
     mergeSoundPlayed: false,
     lastRank: -1,
     lastPlayerMass: 0,
@@ -711,6 +712,16 @@ function randColor() { return COLORS[Math.floor(Math.random() * COLORS.length)];
 function setHintAct(el, text) {
     const act = el && el.querySelector('.hint-act');
     if (act) act.textContent = text;
+}
+function toggleMinimap() {
+    if (!state.playing) return;
+    state.showMinimap = !state.showMinimap;
+    const mapEl = document.getElementById('ctl-map');
+    if (mapEl) {
+        setHintAct(mapEl, state.showMinimap ? ' MAP' : ' MAP OFF');
+        mapEl.classList.toggle('wait', !state.showMinimap);
+    }
+    document.getElementById('pad-map')?.classList.toggle('wait', !state.showMinimap);
 }
 function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
 
@@ -1308,6 +1319,7 @@ const game = {
         document.getElementById('victory-screen').classList.add('hidden');
         document.getElementById('spectate-label')?.classList.add('hidden');
         document.getElementById('control-bar')?.classList.remove('hidden');
+        document.getElementById('tablet-pad')?.classList.remove('hidden');
         screens.show('game');
         Sfx.play('start');
         engine.start();
@@ -1327,6 +1339,7 @@ const game = {
         state.spectateName = '';
         document.getElementById('spectate-label')?.classList.add('hidden');
         document.getElementById('control-bar')?.classList.remove('hidden');
+        document.getElementById('tablet-pad')?.classList.remove('hidden');
         state.combo = 0;
         state.comboTimer = 0;
         clearKillFeed();
@@ -1341,6 +1354,8 @@ const game = {
         state.playerDead = true;
         state.keys = {};
         state.mergeHeld = false;
+        state.mergePointerHeld = false;
+        tabletPad.stop();
         const mass = Math.floor(score || 0);
         state.maxMass = Math.max(state.maxMass, mass);
         document.getElementById('final-score').textContent = mass;
@@ -1351,6 +1366,7 @@ const game = {
         document.getElementById('death-killer').textContent = state.lastBlow?.name || '—';
         document.getElementById('death-screen').classList.remove('hidden');
         document.getElementById('control-bar')?.classList.add('hidden');
+        document.getElementById('tablet-pad')?.classList.add('hidden');
         document.getElementById('combo-box')?.classList.add('hidden');
         document.getElementById('buff-bar')?.classList.add('hidden');
         state.combo = 0;
@@ -1365,6 +1381,8 @@ const game = {
         state.playerWon = true;
         state.keys = {};
         state.mergeHeld = false;
+        state.mergePointerHeld = false;
+        tabletPad.stop();
         const score = state.cells.filter(c => c.isPlayer).reduce((s, c) => s + c.mass, 0);
         state.maxMass = Math.max(state.maxMass, score);
         const rank = ui.getPlayerRank();
@@ -1375,6 +1393,7 @@ const game = {
         document.getElementById('victory-screen').classList.remove('hidden');
         document.getElementById('spectate-label')?.classList.add('hidden');
         document.getElementById('control-bar')?.classList.add('hidden');
+        document.getElementById('tablet-pad')?.classList.add('hidden');
         document.getElementById('combo-box')?.classList.add('hidden');
         document.getElementById('buff-bar')?.classList.add('hidden');
         state.combo = 0;
@@ -1666,9 +1685,14 @@ const ui = {
 
     updateControls(merging) {
         const bar = document.getElementById('control-bar');
+        const pad = document.getElementById('tablet-pad');
         if (!bar) return;
         const live = state.playing && !state.playerDead && !state.playerWon;
         bar.classList.toggle('hidden', !live);
+        pad?.classList.toggle('hidden', !live);
+        if (pad) {
+            pad.setAttribute('aria-hidden', live && document.body.classList.contains('tablet-mode') ? 'false' : 'true');
+        }
         if (!live) return;
 
         const cells = state.cells.filter(c => c.isPlayer && c.alive);
@@ -1699,6 +1723,29 @@ const ui = {
         if (mapEl) {
             setHintAct(mapEl, state.showMinimap ? ' MAP' : ' MAP OFF');
             mapEl.classList.toggle('wait', !state.showMinimap);
+        }
+        const padSplit = document.getElementById('pad-split');
+        const padMerge = document.getElementById('pad-merge');
+        const padMap = document.getElementById('pad-map');
+        if (padSplit) {
+            const label = padSplit.querySelector('.pad-label');
+            if (!ready && wait < Infinity) {
+                if (label) label.textContent = (wait / 60).toFixed(1);
+                padSplit.classList.add('wait');
+            } else {
+                if (label) label.textContent = 'SPLIT';
+                padSplit.classList.remove('wait');
+            }
+        }
+        if (padMerge) {
+            const canMerge = pieces >= 2;
+            padMerge.classList.toggle('armed', canMerge && !merging);
+            padMerge.classList.toggle('hot', canMerge && merging);
+            padMerge.setAttribute('aria-pressed', canMerge && merging ? 'true' : 'false');
+        }
+        if (padMap) {
+            padMap.classList.toggle('wait', !state.showMinimap);
+            padMap.setAttribute('aria-pressed', state.showMinimap ? 'true' : 'false');
         }
         if (merging && pieces >= 2 && !state.mergeSoundPlayed) {
             state.mergeSoundPlayed = true;
@@ -1786,6 +1833,116 @@ const ui = {
 
 
 /* ───────────────────────────────────────────────────────────────────────────
+ *  TABLET PAD — touch aim + round controls. PC mouse/keyboard stay untouched.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+function isTabletDevice() {
+    const shortSide = Math.min(window.innerWidth, window.innerHeight);
+    if (shortSide < 600) return false;
+    const ua = navigator.userAgent || '';
+    const iPad = /iPad/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const androidTablet = /Android/i.test(ua) && !/Mobile/i.test(ua);
+    if (iPad || androidTablet) return true;
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) return false;
+    const coarse = window.matchMedia('(pointer: coarse)').matches;
+    const noHover = window.matchMedia('(hover: none)').matches;
+    return (coarse || noHover) && navigator.maxTouchPoints > 0;
+}
+
+function syncTabletMode() {
+    const on = isTabletDevice();
+    document.body.classList.toggle('tablet-mode', on);
+    if (!on) tabletPad.stop();
+}
+
+function padLive() {
+    return document.body.classList.contains('tablet-mode')
+        && state.playing && !state.playerDead && !state.playerWon;
+}
+
+const tabletPad = {
+    bound: false,
+    splitTimer: 0,
+    ejectTimer: 0,
+
+    stop() {
+        clearInterval(this.splitTimer);
+        clearInterval(this.ejectTimer);
+        this.splitTimer = 0;
+        this.ejectTimer = 0;
+        state.mergePointerHeld = false;
+        document.querySelectorAll('#tablet-pad .pressed').forEach(el => el.classList.remove('pressed'));
+    },
+
+    hold(id, start, end) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const finish = () => {
+            el.classList.remove('pressed');
+            end();
+        };
+        el.addEventListener('pointerdown', e => {
+            if (!padLive()) return;
+            e.preventDefault();
+            e.stopPropagation();
+            try { el.setPointerCapture(e.pointerId); } catch (_) { /* already released */ }
+            el.classList.add('pressed');
+            start();
+        });
+        el.addEventListener('pointerup', finish);
+        el.addEventListener('pointercancel', finish);
+        el.addEventListener('contextmenu', e => e.preventDefault());
+    },
+
+    bind() {
+        if (this.bound) return;
+        this.bound = true;
+        this.hold('pad-split', () => {
+            game.split();
+            clearInterval(this.splitTimer);
+            this.splitTimer = setInterval(() => {
+                if (!padLive()) {
+                    clearInterval(tabletPad.splitTimer);
+                    tabletPad.splitTimer = 0;
+                    return;
+                }
+                game.split();
+            }, 140);
+        }, () => {
+            clearInterval(this.splitTimer);
+            this.splitTimer = 0;
+        });
+        this.hold('pad-merge', () => {
+            state.mergePointerHeld = true;
+        }, () => {
+            state.mergePointerHeld = false;
+        });
+        this.hold('pad-eject', () => {
+            game.eject();
+            clearInterval(this.ejectTimer);
+            this.ejectTimer = setInterval(() => {
+                if (!padLive()) {
+                    clearInterval(tabletPad.ejectTimer);
+                    tabletPad.ejectTimer = 0;
+                    return;
+                }
+                game.eject();
+            }, 80);
+        }, () => {
+            clearInterval(this.ejectTimer);
+            this.ejectTimer = 0;
+        });
+        this.hold('pad-map', () => toggleMinimap(), () => {});
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) tabletPad.stop();
+        });
+    }
+};
+
+window.addEventListener('resize', syncTabletMode);
+
+
+/* ───────────────────────────────────────────────────────────────────────────
  *  RENDER ENGINE — Canvas · Pixel buffer · Draw calls
  * ─────────────────────────────────────────────────────────────────────────── */
 
@@ -1814,14 +1971,7 @@ const engine = {
                 if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') state.mergeHeld = true;
                 if (e.code === 'Space' && live) game.split();
                 if (e.code === 'KeyW' && live) game.eject();
-                if (e.code === 'KeyM' && state.playing && !e.repeat) {
-                    state.showMinimap = !state.showMinimap;
-                    const mapEl = document.getElementById('ctl-map');
-                    if (mapEl) {
-                        setHintAct(mapEl, state.showMinimap ? ' MAP' : ' MAP OFF');
-                        mapEl.classList.toggle('wait', !state.showMinimap);
-                    }
-                }
+                if (e.code === 'KeyM' && state.playing && !e.repeat) toggleMinimap();
             });
             window.addEventListener('keyup', e => {
                 state.keys[e.code] = false;
@@ -1832,7 +1982,30 @@ const engine = {
             window.addEventListener('blur', () => {
                 state.keys = {};
                 state.mergeHeld = false;
+                tabletPad.stop();
             });
+            const steerIds = new Set();
+            const steerTouch = e => {
+                if (!document.body.classList.contains('tablet-mode') || e.pointerType === 'mouse') return;
+                const r = this.canvas.getBoundingClientRect();
+                state.mouse.x = e.clientX - r.left;
+                state.mouse.y = e.clientY - r.top;
+                state.pointerSeen = true;
+            };
+            this.canvas.addEventListener('pointerdown', e => {
+                if (!document.body.classList.contains('tablet-mode') || e.pointerType === 'mouse') return;
+                steerIds.add(e.pointerId);
+                e.preventDefault();
+                steerTouch(e);
+            });
+            this.canvas.addEventListener('pointermove', e => {
+                if (!steerIds.has(e.pointerId)) return;
+                steerTouch(e);
+            });
+            const endSteer = e => steerIds.delete(e.pointerId);
+            this.canvas.addEventListener('pointerup', endSteer);
+            this.canvas.addEventListener('pointercancel', endSteer);
+            tabletPad.bind();
             this.resize();
             if (!state.pointerSeen) {
                 state.mouse.x = this.canvas.width / 2;
@@ -1846,6 +2019,7 @@ const engine = {
     },
 
     resize() {
+        syncTabletMode();
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
         this.buffer.width = Math.floor(this.canvas.width * this.pixelScale);
@@ -1908,7 +2082,9 @@ const engine = {
         if (!state.gameSession || !state.showMinimap) return;
         const size = 128;
         const x = 16;
-        const y = Math.max(8, ctx.canvas.height - size - 12);
+        const y = document.body.classList.contains('tablet-mode')
+            ? 12
+            : Math.max(8, ctx.canvas.height - size - 12);
         ctx.save();
         ctx.fillStyle = 'rgba(8, 6, 18, 0.9)';
         ctx.fillRect(x, y, size, size);
@@ -2232,4 +2408,7 @@ function darken(hex, amt) {
  *  BOOT
  * ─────────────────────────────────────────────────────────────────────────── */
 
-window.onload = () => screens.init();
+window.onload = () => {
+    syncTabletMode();
+    screens.init();
+};
