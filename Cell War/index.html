@@ -36,7 +36,11 @@
             var coarse = window.matchMedia("(pointer: coarse)").matches;
             var noHover = window.matchMedia("(hover: none)").matches;
             var tablet = shortSide >= 600 && (iPad || androidTablet || (!fine && (coarse || noHover) && navigator.maxTouchPoints > 0));
-            if (tablet) document.documentElement.classList.add("tablet-mode");
+            if (tablet) {
+                document.documentElement.classList.add("tablet-mode");
+                var viewport = document.querySelector('meta[name="viewport"]');
+                if (viewport) viewport.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover");
+            }
         })();
     </script>
 

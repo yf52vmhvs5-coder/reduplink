@@ -1875,12 +1875,12 @@ function isTabletDevice() {
 
 function setTabletChrome(live) {
     const shown = live && document.body.classList.contains('tablet-mode');
-    ['tablet-pad', 'tablet-stick'].forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.classList.toggle('hidden', !live);
-        el.setAttribute('aria-hidden', shown ? 'false' : 'true');
-    });
+    const pad = document.getElementById('tablet-pad');
+    if (pad) {
+        pad.classList.toggle('hidden', !live);
+        pad.setAttribute('aria-hidden', shown ? 'false' : 'true');
+    }
+    if (!live) tabletPad.hideStick();
 }
 
 function syncTabletMode() {
@@ -1906,11 +1906,7 @@ const tabletPad = {
         this.splitTimer = 0;
         this.ejectTimer = 0;
         state.mergePointerHeld = false;
-        state.joystick.active = false;
-        state.joystick.x = 0;
-        state.joystick.y = 0;
-        const knob = document.getElementById('tablet-knob');
-        if (knob) knob.style.transform = '';
+        this.hideStick();
         document.querySelectorAll('#tablet-pad .pressed').forEach(el => el.classList.remove('pressed'));
     },
 
@@ -1974,26 +1970,45 @@ const tabletPad = {
         });
         this.hold('pad-map', () => toggleMinimap(), () => {});
         this.bindStick();
+        this.bindTabletGuards();
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) tabletPad.stop();
         });
     },
 
+    hideStick() {
+        state.joystick.active = false;
+        state.joystick.x = 0;
+        state.joystick.y = 0;
+        const el = document.getElementById('tablet-stick');
+        const knob = document.getElementById('tablet-knob');
+        if (knob) knob.style.transform = '';
+        if (el) {
+            el.classList.remove('shown');
+            el.classList.add('hidden');
+            el.setAttribute('aria-hidden', 'true');
+        }
+    },
+
     bindStick() {
         const el = document.getElementById('tablet-stick');
         const knob = document.getElementById('tablet-knob');
-        if (!el || !knob) return;
+        const canvas = document.getElementById('gameCanvas');
+        if (!el || !knob || !canvas) return;
+        let pointerId = null;
+        let origin = null;
+
         const place = e => {
-            const rect = el.getBoundingClientRect();
-            const max = rect.width / 2 - 22;
-            let dx = e.clientX - (rect.left + rect.width / 2);
-            let dy = e.clientY - (rect.top + rect.height / 2);
+            if (!origin) return;
+            const max = (el.offsetWidth / 2) - 22;
+            let dx = e.clientX - origin.x;
+            let dy = e.clientY - origin.y;
             const dist = Math.hypot(dx, dy);
-            if (dist > max) {
+            if (dist > max && max > 0) {
                 dx = dx / dist * max;
                 dy = dy / dist * max;
             }
-            const mag = max > 0 ? Math.hypot(dx, dy) / max : 0;
+            const mag = max > 0 ? Math.min(1, Math.hypot(dx, dy) / max) : 0;
             state.joystick.active = mag > 0.12;
             state.joystick.x = max > 0 ? dx / max : 0;
             state.joystick.y = max > 0 ? dy / max : 0;
@@ -2003,26 +2018,57 @@ const tabletPad = {
             }
             knob.style.transform = `translate(${dx}px, ${dy}px)`;
         };
-        const end = () => {
-            state.joystick.active = false;
-            state.joystick.x = 0;
-            state.joystick.y = 0;
+
+        const showAt = (clientX, clientY) => {
+            el.classList.remove('hidden');
+            el.classList.add('shown');
+            const size = el.offsetWidth || 108;
+            const half = size / 2;
+            const x = Math.max(half, Math.min(window.innerWidth - half, clientX));
+            const y = Math.max(half, Math.min(window.innerHeight - half, clientY));
+            el.style.left = (x - half) + 'px';
+            el.style.top = (y - half) + 'px';
+            el.setAttribute('aria-hidden', 'false');
             knob.style.transform = '';
+            origin = { x, y };
         };
-        el.addEventListener('pointerdown', e => {
-            if (!padLive()) return;
+
+        const end = e => {
+            if (pointerId == null || (e && e.pointerId !== pointerId)) return;
+            pointerId = null;
+            origin = null;
+            this.hideStick();
+        };
+
+        canvas.addEventListener('pointerdown', e => {
+            if (!padLive() || e.pointerType === 'mouse' || pointerId != null) return;
             e.preventDefault();
-            e.stopPropagation();
-            try { el.setPointerCapture(e.pointerId); } catch (_) { /* already released */ }
+            pointerId = e.pointerId;
+            try { canvas.setPointerCapture(e.pointerId); } catch (_) { /* already gone */ }
+            showAt(e.clientX, e.clientY);
             place(e);
         });
-        el.addEventListener('pointermove', e => {
-            if (!el.hasPointerCapture?.(e.pointerId)) return;
+        canvas.addEventListener('pointermove', e => {
+            if (e.pointerId !== pointerId) return;
             place(e);
         });
-        el.addEventListener('pointerup', end);
-        el.addEventListener('pointercancel', end);
-        el.addEventListener('contextmenu', e => e.preventDefault());
+        canvas.addEventListener('pointerup', end);
+        canvas.addEventListener('pointercancel', end);
+        canvas.addEventListener('contextmenu', e => e.preventDefault());
+    },
+
+    bindTabletGuards() {
+        const blockZoom = e => {
+            if (document.documentElement.classList.contains('tablet-mode')) e.preventDefault();
+        };
+        document.addEventListener('gesturestart', blockZoom, { passive: false });
+        document.addEventListener('gesturechange', blockZoom, { passive: false });
+        document.addEventListener('touchmove', e => {
+            const game = document.getElementById('screen-game');
+            if (document.body.classList.contains('tablet-mode') && game && game.classList.contains('active')) {
+                e.preventDefault();
+            }
+        }, { passive: false });
     }
 };
 

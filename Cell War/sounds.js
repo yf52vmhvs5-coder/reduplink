@@ -44,22 +44,38 @@ const Sfx = {
     _ctx: null,
     _master: null,
     _warmth: null,
+    _primed: false,
     _lastFood: 0,
     _lastEject: 0,
 
 
     /* ── Lifecycle ── */
 
-    /** Inițializează unlock-ul audio la prima interacțiune utilizator */
+    /** Pornește audio în gestul utilizatorului. Pe iPad click-ul singur nu ajunge. */
+    unlock() {
+        const ctx = this._ensureCtx();
+        if (!ctx) return;
+        if (ctx.state === 'suspended') {
+            const pending = ctx.resume();
+            if (pending && typeof pending.catch === 'function') pending.catch(() => {});
+        }
+        if (this._primed) return;
+        try {
+            const buf = ctx.createBuffer(1, 1, 22050);
+            const src = ctx.createBufferSource();
+            src.buffer = buf;
+            src.connect(ctx.destination);
+            src.start(0);
+            if (ctx.state === 'running') this._primed = true;
+        } catch (_) { /* context not ready yet */ }
+    },
+
     init() {
-        const unlock = () => {
-            this._ensureCtx();
-            if (this._ctx?.state === 'suspended') this._ctx.resume();
-            document.removeEventListener('click', unlock);
-            document.removeEventListener('keydown', unlock);
-        };
-        document.addEventListener('click', unlock);
-        document.addEventListener('keydown', unlock);
+        const unlock = () => this.unlock();
+        document.addEventListener('pointerdown', unlock, true);
+        document.addEventListener('touchstart', unlock, { capture: true, passive: true });
+        document.addEventListener('click', unlock, true);
+        document.addEventListener('keydown', unlock, true);
     },
 
     setEnabled(on) {
@@ -76,7 +92,7 @@ const Sfx = {
         if (!this.enabled) return;
         const ctx = this._ensureCtx();
         if (!ctx) return;
-        if (ctx.state === 'suspended') ctx.resume();
+        if (ctx.state === 'suspended') this.unlock();
         const fn = this._presets[name];
         if (!fn) return;
         try {
