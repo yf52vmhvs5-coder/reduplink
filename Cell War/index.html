@@ -28,6 +28,15 @@
                     }
                 }
             } catch (err) { /* storage unavailable */ }
+            var shortSide = Math.min(window.innerWidth, window.innerHeight);
+            var ua = navigator.userAgent || "";
+            var iPad = /iPad/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+            var androidTablet = /Android/i.test(ua) && !/Mobile/i.test(ua);
+            var fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+            var coarse = window.matchMedia("(pointer: coarse)").matches;
+            var noHover = window.matchMedia("(hover: none)").matches;
+            var tablet = shortSide >= 600 && (iPad || androidTablet || (!fine && (coarse || noHover) && navigator.maxTouchPoints > 0));
+            if (tablet) document.documentElement.classList.add("tablet-mode");
         })();
     </script>
 
@@ -187,10 +196,10 @@
                 <i id="tablet-knob"></i>
             </div>
             <div id="tablet-pad" class="hidden" aria-hidden="true">
-                <button type="button" id="pad-map" class="pad-btn" aria-label="Map">M</button>
-                <button type="button" id="pad-merge" class="pad-btn" aria-label="Merge">U</button>
-                <button type="button" id="pad-split" class="pad-btn" aria-label="Split">S</button>
-                <button type="button" id="pad-eject" class="pad-btn" aria-label="Eject">E</button>
+                <button type="button" id="pad-map" class="pad-btn pad-map" aria-label="Map">M</button>
+                <button type="button" id="pad-merge" class="pad-btn pad-merge" aria-label="Merge">U</button>
+                <button type="button" id="pad-split" class="pad-btn pad-split" aria-label="Split">S</button>
+                <button type="button" id="pad-eject" class="pad-btn pad-eject" aria-label="Eject">E</button>
             </div>
         </div>
 

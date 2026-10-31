@@ -1885,6 +1885,7 @@ function setTabletChrome(live) {
 
 function syncTabletMode() {
     const on = isTabletDevice();
+    document.documentElement.classList.toggle('tablet-mode', on);
     document.body.classList.toggle('tablet-mode', on);
     if (!on) tabletPad.stop();
 }
@@ -2474,6 +2475,7 @@ function darken(hex, amt) {
  *  BOOT
  * ─────────────────────────────────────────────────────────────────────────── */
 
+syncTabletMode();
 window.onload = () => {
     syncTabletMode();
     screens.init();

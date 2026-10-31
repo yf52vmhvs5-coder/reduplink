@@ -602,6 +602,26 @@ body {
 #control-bar > span.hot .key { display: none; }
 
 /* Tablet only — keyboard legend stays on PC. The round pad replaces it. */
+:root.tablet-mode .intro-logo,
+body.tablet-mode .intro-logo,
+:root.tablet-mode .title,
+body.tablet-mode .title {
+    image-rendering: auto;
+    text-shadow: 2px 2px 0 #063848;
+}
+
+:root.tablet-mode .death-box h2,
+body.tablet-mode .death-box h2 {
+    image-rendering: auto;
+    text-shadow: 2px 2px 0 #3a0614;
+}
+
+:root.tablet-mode .victory-box h2,
+body.tablet-mode .victory-box h2 {
+    image-rendering: auto;
+    text-shadow: 2px 2px 0 #3a2a08;
+}
+
 body.tablet-mode #control-bar { display: none !important; }
 
 body.tablet-mode #combo-box {
@@ -632,7 +652,7 @@ body.tablet-mode #gameCanvas { touch-action: none; }
     width: 108px;
     height: 108px;
     border-radius: 50%;
-    border: 2px solid #ff0055;
+    border: 2px solid var(--cyan);
     background: var(--panel);
 }
 
@@ -644,7 +664,7 @@ body.tablet-mode #gameCanvas { touch-action: none; }
     height: 40px;
     margin: -20px 0 0 -20px;
     border-radius: 50%;
-    border: 2px solid #ff0055;
+    border: 2px solid var(--you);
     background: rgba(8, 6, 18, 0.96);
     pointer-events: none;
 }
@@ -664,18 +684,19 @@ body.tablet-mode #tablet-pad:not(.hidden) {
 }
 
 .pad-btn {
+    --pad: var(--cyan);
     width: 48px;
     height: 48px;
-    padding: 0 0 1px;
+    padding: 1px 0 0;
     border-radius: 50%;
-    border: 2px solid #ff0055;
+    border: 2px solid var(--pad);
     appearance: none;
     -webkit-appearance: none;
     cursor: pointer;
-    color: #ff0055;
+    color: var(--pad);
     background: var(--panel);
     font-family: var(--font-pixel);
-    font-size: 0.72rem;
+    font-size: 18px;
     line-height: 1;
     display: flex;
     align-items: center;
@@ -683,16 +704,20 @@ body.tablet-mode #tablet-pad:not(.hidden) {
     box-shadow: none;
 }
 
+.pad-split { --pad: #5ce1ff; }
+.pad-merge { --pad: #ffc14d; }
+.pad-eject { --pad: #ff4fd8; }
+.pad-map { --pad: #39ff14; }
+
 .pad-btn.pressed,
 .pad-btn.hot {
-    color: #140208;
-    background: #ff0055;
+    color: #041018;
+    background: var(--pad);
+    border-color: var(--pad);
 }
 
 .pad-btn.wait {
-    color: #5c6378;
-    border-color: #334;
-    background: var(--panel);
+    opacity: 0.42;
 }
 
 .pad-btn:focus { outline: none; }
