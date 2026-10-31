@@ -10,6 +10,7 @@
  *   href: "NebulaVoid/index.html",   // omit or leave "" while the build is sealed
  *   web: true                           // browser badge (optional; defaults from href)
  *   tablet: true                        // tablet badge (optional)
+ *   windows: true                       // Windows PC badge (optional; defaults on unless false)
  * }
  */
 (function () {
@@ -20,26 +21,29 @@
             title: "NEBULA VOID",
             kind: "ARENA",
             status: "live",
-            line: "The studio signature: a hungry singularity. Grow, or be pulled in.",
+            line: "Survival arena in a drifting starfield. Consume, chain kills, and beat the pull — solo or multiplayer rooms.",
             href: "NebulaVoid/index.html",
-            web: true
+            web: true,
+            windows: true
         },
         {
             title: "COSMIC QUIZ",
             kind: "TRIVIA",
             status: "live",
-            line: "Fifty questions on space, tech, and odd facts. Solo or pass a room code.",
+            line: "Fifty questions on space, tech, and in-between facts. Classic, Survival, or Blitz — solo or a shared room code.",
             href: "CosmicQuiz/index.html",
-            web: true
+            web: true,
+            windows: true
         },
         {
             title: "CELL WARS",
             kind: "ARENA",
             status: "live",
-            line: "Grow, split, dominate — retro phosphor and scanlines.",
+            line: "Mass-and-split arena on phosphor and scanlines. Outgrow the bots with mouse and keys, or the tablet pad.",
             href: "Cell War/index.html",
             web: true,
-            tablet: true
+            tablet: true,
+            windows: true
         }
     ];
 
@@ -175,6 +179,36 @@
         return svg;
     }
 
+    function windowsBadgeIcon() {
+        var ns = "http://www.w3.org/2000/svg";
+        var svg = document.createElementNS(ns, "svg");
+        svg.setAttribute("viewBox", "0 0 24 24");
+        svg.setAttribute("aria-hidden", "true");
+        svg.setAttribute("focusable", "false");
+
+        svg.appendChild(
+            strokeEl(ns, "path", {
+                d: "M4.75 5.25h6.75v6.75H4.75V5.25z"
+            })
+        );
+        svg.appendChild(
+            strokeEl(ns, "path", {
+                d: "M12.5 5.25h6.75v6.75H12.5V5.25z"
+            })
+        );
+        svg.appendChild(
+            strokeEl(ns, "path", {
+                d: "M4.75 12.5h6.75v6.75H4.75V12.5z"
+            })
+        );
+        svg.appendChild(
+            strokeEl(ns, "path", {
+                d: "M12.5 12.5h6.75v6.75H12.5V12.5z"
+            })
+        );
+        return svg;
+    }
+
     function gameWebCompat(game) {
         if (game.web === true) return true;
         if (game.web === false) return false;
@@ -183,6 +217,12 @@
 
     function gameTabletCompat(game) {
         return game.tablet === true;
+    }
+
+    function gameWindowsCompat(game) {
+        if (game.windows === false) return false;
+        if (game.windows === true) return true;
+        return !!game.href;
     }
 
     function browserBadge() {
@@ -209,10 +249,47 @@
         return el;
     }
 
+    function windowsBadge() {
+        var el = document.createElement("span");
+        el.className = "card-platform card-platform--on";
+        el.title = "Runs on Windows PC";
+        var hidden = document.createElement("span");
+        hidden.className = "card-platform__label";
+        hidden.textContent = "Windows";
+        el.appendChild(hidden);
+        el.appendChild(windowsBadgeIcon());
+        return el;
+    }
+
+    function platformAriaLabel(parts) {
+        var labels = {
+            browser: "browser",
+            tablet: "tablet",
+            windows: "Windows PC"
+        };
+        var spoken = [];
+        for (var i = 0; i < parts.length; i++) {
+            spoken.push(labels[parts[i]] || parts[i]);
+        }
+        if (spoken.length === 0) return "";
+        if (spoken.length === 1) {
+            return parts[0] === "browser"
+                ? "Runs in browser"
+                : parts[0] === "tablet"
+                  ? "Runs on tablet"
+                  : "Runs on Windows PC";
+        }
+        if (spoken.length === 2) {
+            return "Runs on " + spoken[0] + " and " + spoken[1];
+        }
+        return "Runs on " + spoken.slice(0, -1).join(", ") + ", and " + spoken[spoken.length - 1];
+    }
+
     function cardPlatforms(game) {
         var web = gameWebCompat(game);
         var tablet = gameTabletCompat(game);
-        if (!web && !tablet) return null;
+        var windows = gameWindowsCompat(game);
+        if (!web && !tablet && !windows) return null;
         var wrap = document.createElement("div");
         wrap.className = "card-platforms";
         wrap.setAttribute("role", "img");
@@ -221,18 +298,15 @@
             parts.push("browser");
             wrap.appendChild(browserBadge());
         }
+        if (windows) {
+            parts.push("windows");
+            wrap.appendChild(windowsBadge());
+        }
         if (tablet) {
             parts.push("tablet");
             wrap.appendChild(tabletBadge());
         }
-        wrap.setAttribute(
-            "aria-label",
-            parts.length === 1
-                ? parts[0] === "browser"
-                    ? "Runs in browser"
-                    : "Runs on tablet"
-                : "Runs in browser and on tablet"
-        );
+        wrap.setAttribute("aria-label", platformAriaLabel(parts));
         return wrap;
     }
 
