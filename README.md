@@ -22,4 +22,4 @@ npx --yes serve .
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+All rights reserved — see [LICENSE](LICENSE). Viewing / playing is fine; copying, reuse, or sale is not allowed without permission.
