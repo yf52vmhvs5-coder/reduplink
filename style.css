@@ -335,11 +335,19 @@ main,
     max-width: min(17.5rem, calc(100vw - var(--pad) * 2));
 }
 
-.bar-nav a.fuel:hover .fuel-tip,
-.bar-nav a.fuel:focus-visible .fuel-tip {
+.bar-nav a.fuel.is-tip-open .fuel-tip {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .bar-nav a.fuel:hover .fuel-tip,
+    .bar-nav a.fuel:focus-visible .fuel-tip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
 }
 
 main {
@@ -561,11 +569,19 @@ h2 {
     transform: translateY(-4px);
 }
 
-.card-platform:hover .platform-tip,
-.card-platform:focus-visible .platform-tip {
+.card-platform.is-tip-open .platform-tip {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .card-platform:hover .platform-tip,
+    .card-platform:focus-visible .platform-tip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
 }
 
 .card-platform:focus-visible {
@@ -744,11 +760,19 @@ button:focus-visible {
     max-width: min(15rem, calc(100vw - var(--pad) * 2));
 }
 
-.tx-ack:hover .tx-ack-tip,
-.tx-ack:focus-visible .tx-ack-tip {
+.tx-ack.is-tip-open .tx-ack-tip {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .tx-ack:hover .tx-ack-tip,
+    .tx-ack:focus-visible .tx-ack-tip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
 }
 
 .tx-ack:hover,

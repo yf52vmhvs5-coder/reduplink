@@ -84,9 +84,44 @@
         return tip;
     }
 
+    function coarsePointer() {
+        return window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    }
+
+    function closeOpenTips(except) {
+        var open = document.querySelectorAll(".is-tip-open");
+        for (var i = 0; i < open.length; i++) {
+            if (except && open[i] === except) continue;
+            open[i].classList.remove("is-tip-open");
+        }
+    }
+
+    function toggleTip(el) {
+        var willOpen = !el.classList.contains("is-tip-open");
+        closeOpenTips();
+        if (willOpen) el.classList.add("is-tip-open");
+    }
+
     function bindPlatformBadge(el) {
         el.addEventListener("click", function (ev) {
             ev.stopPropagation();
+            if (!coarsePointer()) return;
+            toggleTip(el);
+        });
+    }
+
+    function bindTipDismiss() {
+        document.addEventListener(
+            "pointerdown",
+            function (ev) {
+                if (!document.querySelector(".is-tip-open")) return;
+                if (ev.target.closest && ev.target.closest(".is-tip-open")) return;
+                closeOpenTips();
+            },
+            true
+        );
+        document.addEventListener("keydown", function (ev) {
+            if (ev.key === "Escape") closeOpenTips();
         });
     }
 
@@ -477,6 +512,10 @@
             fuelLink.setAttribute("aria-label", "Fuel — Ko-fi link coming later");
             fuelLink.addEventListener("click", function (ev) {
                 ev.preventDefault();
+                if (coarsePointer()) {
+                    ev.stopPropagation();
+                    toggleTip(fuelLink);
+                }
             });
             fuelLink.addEventListener("auxclick", function (ev) {
                 ev.preventDefault();
@@ -484,6 +523,7 @@
         }
     }
 
+    bindTipDismiss();
     buildTints();
     buildDeck();
     paintField();
