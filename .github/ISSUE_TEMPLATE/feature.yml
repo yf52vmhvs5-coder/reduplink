@@ -1,0 +1,24 @@
+name: Feature idea
+description: Suggest an improvement for the studio or a game
+title: "[idea] "
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: game
+    attributes:
+      label: Where
+      options:
+        - Studio (index)
+        - Nebula Void
+        - Cosmic Quiz
+        - Cell Wars
+        - Whole studio
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Idea
+      placeholder: What should change, and why it helps
+    validations:
+      required: true
