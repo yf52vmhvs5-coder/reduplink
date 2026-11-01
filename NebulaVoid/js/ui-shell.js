@@ -85,6 +85,7 @@
     // -------------------------------------------------------------------------
 
     const HUB_TITLE_COLOR_STORAGE_KEY = "nebulaVoidHubTitleColor";
+    const STUDIO_TINT_KEY = "spacejunkStudioTint";
     const HUB_SPECTRUM_OPENED_KEY = "nebulaVoidSpectrumOpened";
     const HUB_ALIEN_BECKON_KEY = "nebulaVoidAlienTintHintSeen";
     const HUB_TITLE_COLOR_DEFAULT = "#ff2d2d";
@@ -125,7 +126,21 @@
         return HUB_TITLE_COLOR_LEGACY[v] || v;
     }
 
+    function readStudioTint() {
+        try {
+            const raw = localStorage.getItem(STUDIO_TINT_KEY);
+            if (typeof raw !== "string") return "";
+            const v = raw.trim().toLowerCase();
+            if (!/^#[0-9a-f]{6}$/.test(v)) return "";
+            return HUB_TITLE_COLOR_LEGACY[v] || v;
+        } catch (e) {
+            return "";
+        }
+    }
+
     function readHubTitleColor() {
+        const studio = readStudioTint();
+        if (studio) return studio;
         try {
             const raw = localStorage.getItem(HUB_TITLE_COLOR_STORAGE_KEY);
             const next = normalizeHubTitleColor(raw);
@@ -137,8 +152,10 @@
     }
 
     function writeHubTitleColor(color) {
+        const next = normalizeHubTitleColor(color);
         try {
-            localStorage.setItem(HUB_TITLE_COLOR_STORAGE_KEY, normalizeHubTitleColor(color));
+            localStorage.setItem(HUB_TITLE_COLOR_STORAGE_KEY, next);
+            localStorage.setItem(STUDIO_TINT_KEY, next);
         } catch (e) {
             /* storage indisponibil */
         }

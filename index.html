@@ -13,10 +13,20 @@
                 return;
             }
             var base = document.createElement("base");
-            base.href = /\.html$/i.test(path)
-                ? new URL(".", window.location.href).href
-                : new URL(window.location.href.endsWith("/") ? window.location.href : window.location.href + "/").href;
+            if (/\.html$/i.test(path)) {
+                base.href = window.location.href.split("#")[0];
+            } else {
+                base.href = window.location.href.endsWith("/")
+                    ? window.location.href
+                    : window.location.href + "/";
+            }
             document.head.appendChild(base);
+            try {
+                var tint = localStorage.getItem("spacejunkStudioTint");
+                if (tint && /^#[0-9a-f]{6}$/i.test(tint)) {
+                    document.documentElement.style.setProperty("--signal", tint.toLowerCase());
+                }
+            } catch (err) { /* private mode */ }
         })();
     </script>
     <link rel="stylesheet" href="style.css">
@@ -42,6 +52,27 @@
         <nav class="bar-nav" aria-label="Studio">
             <a href="#signals">Signals</a>
             <a href="#archive">Archive</a>
+            <a class="fuel" id="fuelLink" href="#" aria-disabled="true" aria-describedby="fuelTip">
+                <svg class="fuel-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <g class="fuel-steam" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8.25 4.2c-.55 1.35-.85 2.05-.85 3.1"/>
+                        <path d="M12 3.4c-.65 1.55-.95 2.35-.95 3.55"/>
+                        <path d="M15.75 4.2c-.5 1.25-.8 1.95-.8 3.1"/>
+                    </g>
+                    <g fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M5.75 8.25h10.85l-1.15 9.25H6.9L5.75 8.25z"/>
+                        <path d="M5.35 17.85h11.55"/>
+                        <path d="M4.85 18.35c0 .55.45 1 1 1h11.3c.55 0 1-.45 1-1"/>
+                        <path d="M16.85 10.25h1.35c1.65 0 2.65 1.35 2.65 2.75s-1 2.75-2.65 2.75h-1.35"/>
+                        <path class="fuel-liquid" d="M7.35 11.1h7.55"/>
+                    </g>
+                </svg>
+                <span class="fuel-label">Fuel</span>
+                <span class="signal-tip fuel-tip" id="fuelTip" role="tooltip">
+                    <span class="signal-tip-kicker">[ LATER ]</span>
+                    <span class="signal-tip-text">Ko-fi lands here later. Nothing to open yet — no perks, no guilt.</span>
+                </span>
+            </a>
         </nav>
     </header>
 
@@ -59,15 +90,27 @@
         <section id="signals" class="band" aria-labelledby="signalsTitle">
             <div class="band-head">
                 <h2 id="signalsTitle">SIGNALS</h2>
-                <p id="signalCount" class="band-meta"></p>
+                <p id="signalCount" class="band-meta">3 LIVE / 3</p>
             </div>
             <ul id="deck" class="deck">
                 <noscript>
                     <li class="card card--live">
                         <p class="card-kicker"><span>ARENA</span><span>LIVE</span></p>
                         <h3>NEBULA VOID</h3>
-                        <p>A hungry singularity. Grow, or be pulled in.</p>
-                        <a class="open" href="NebulaVoid/index.html">[ OPEN ]</a>
+                        <p class="blurb">Survival arena in a drifting starfield. Consume, chain kills, and beat the pull — solo or multiplayer rooms.</p>
+                        <div class="card-foot"><a class="open" href="NebulaVoid/index.html">[ OPEN ]</a></div>
+                    </li>
+                    <li class="card card--live">
+                        <p class="card-kicker"><span>TRIVIA</span><span>LIVE</span></p>
+                        <h3>COSMIC QUIZ</h3>
+                        <p class="blurb">Fifty questions on space, tech, and in-between facts. Classic, Survival, or Blitz — solo or a shared room code.</p>
+                        <div class="card-foot"><a class="open" href="CosmicQuiz/index.html">[ OPEN ]</a></div>
+                    </li>
+                    <li class="card card--live">
+                        <p class="card-kicker"><span>ARENA</span><span>LIVE</span></p>
+                        <h3>CELL WARS</h3>
+                        <p class="blurb">Mass-and-split arena on phosphor and scanlines. Outgrow the bots with mouse and keys, or the tablet pad.</p>
+                        <div class="card-foot"><a class="open" href="Cell War/index.html">[ OPEN ]</a></div>
                     </li>
                 </noscript>
             </ul>
@@ -79,14 +122,14 @@
             </div>
             <div class="archive">
                 <p>SPACEJUNK is the studio mark — the alien, the tint you set above, and the thread shared across these builds. Each signal on the deck is its own game. This page is the uplink: it routes you out; play happens inside each build.</p>
-                <p>Cards marked LIVE open when you choose [ OPEN ]. SEALED means that frequency is held — no link yet, nothing to launch.</p>
+                <p>A LIVE card opens from [ OPEN ], or from a plain click on the card. SEALED means that frequency is held — no link yet, nothing to launch.</p>
             </div>
         </section>
     </main>
 
     <footer class="colophon">
         <p>A STUDIO PAGE BY <span>FLORIN ZAIN</span></p>
-        <p id="year"></p>
+        <p id="year">2026</p>
     </footer>
 
     <script src="script.js"></script>

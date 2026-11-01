@@ -2,7 +2,7 @@
     --void: #020202;
     --ink: #f2f2f2;
     --dim: #8d8d8d;
-    --mute: #5c5c5c;
+    --mute: #7a7a7a;
     --line: rgba(255, 255, 255, 0.16);
     --signal: #ff2d2d;
     --signal-soft: color-mix(in srgb, var(--signal) 55%, transparent);
@@ -75,6 +75,7 @@ main,
 }
 
 .bar {
+    z-index: 4;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -164,6 +165,9 @@ main,
 
 .bar-nav {
     display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     gap: 18px;
 }
 
@@ -180,6 +184,115 @@ main,
 .bar-nav a:focus-visible {
     color: #fff;
     text-shadow: 0 0 10px var(--signal-soft);
+}
+
+.bar-nav a.fuel {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.bar-nav .fuel-icon {
+    display: block;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: rgba(255, 255, 255, 0.82);
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--signal) 32%, transparent));
+    transition:
+        color 0.18s ease,
+        filter 0.18s ease,
+        transform 0.18s ease;
+}
+
+.fuel-liquid {
+    stroke: var(--signal);
+    stroke-opacity: 0.85;
+    opacity: 0.9;
+}
+
+.fuel-steam path {
+    animation: fuelSteam 2.8s ease-in-out infinite;
+}
+
+.fuel-steam path:nth-child(2) { animation-delay: 0.45s; }
+
+.fuel-steam path:nth-child(3) { animation-delay: 0.9s; }
+
+@keyframes fuelSteam {
+    0%, 100% {
+        opacity: 0.28;
+        transform: translateY(1px);
+    }
+    45% {
+        opacity: 0.95;
+        transform: translateY(-1.5px);
+    }
+}
+
+.bar-nav a.fuel:hover .fuel-icon,
+.bar-nav a.fuel:focus-visible .fuel-icon {
+    color: var(--signal);
+    filter: drop-shadow(0 0 9px var(--signal-soft));
+    transform: translateY(-1px);
+}
+
+.fuel-label { line-height: 1; }
+
+.signal-tip {
+    z-index: 4;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-top-color: color-mix(in srgb, var(--signal) 42%, var(--line));
+    background: rgba(0, 0, 0, 0.88);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.04em;
+    text-transform: none;
+    text-align: left;
+    text-shadow: none;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(5px);
+    transition:
+        opacity 0.16s ease,
+        transform 0.16s ease,
+        visibility 0.16s;
+}
+
+.signal-tip-kicker {
+    display: block;
+    margin: 0 0 8px;
+    color: var(--dim);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+}
+
+.signal-tip-text {
+    display: block;
+    margin: 0;
+}
+
+.fuel-tip {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 17.5rem;
+    max-width: min(17.5rem, calc(100vw - var(--pad) * 2));
+}
+
+.bar-nav a.fuel:hover .fuel-tip,
+.bar-nav a.fuel:focus-visible .fuel-tip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
 }
 
 main {
@@ -236,6 +349,7 @@ h1 {
 .tint-row { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .swatch {
+    position: relative;
     width: 18px;
     height: 18px;
     padding: 0;
@@ -245,9 +359,23 @@ h1 {
     box-shadow: 0 0 10px color-mix(in srgb, var(--swatch) 55%, transparent);
 }
 
+.swatch::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+}
+
 .swatch[aria-pressed="true"] {
     outline: 1px solid rgba(255, 255, 255, 0.8);
     outline-offset: 3px;
+}
+
+.swatch[aria-pressed="true"]:focus-visible {
+    outline-color: #fff;
+    outline-offset: 6px;
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.8),
+        0 0 10px color-mix(in srgb, var(--swatch) 55%, transparent);
 }
 
 .band { padding-top: 48px; }
@@ -277,7 +405,12 @@ h2 {
     gap: 14px;
 }
 
+@media (scripting: none) {
+    .deck noscript { display: contents; }
+}
+
 .card {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -304,6 +437,11 @@ h2 {
 .card--live:hover {
     background: var(--signal-wash);
     box-shadow: 0 0 24px color-mix(in srgb, var(--signal) 18%, transparent);
+}
+
+.card:has(.card-platform:hover),
+.card:has(.card-platform:focus-visible) {
+    z-index: 2;
 }
 
 .card-kicker {
@@ -356,13 +494,37 @@ h2 {
 }
 
 .card-platform {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 0;
     color: rgba(255, 255, 255, 0.2);
-    pointer-events: none;
+    pointer-events: auto;
     user-select: none;
+    cursor: cell;
+}
+
+.card-platform .platform-tip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    width: 15rem;
+    max-width: min(15rem, calc(100vw - var(--pad) * 2));
+    transform: translateY(-4px);
+}
+
+.card-platform:hover .platform-tip,
+.card-platform:focus-visible .platform-tip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.card-platform:focus-visible {
+    outline: 1px solid var(--signal);
+    outline-offset: 3px;
+    border-radius: 1px;
 }
 
 .card-platform svg {
@@ -439,4 +601,7 @@ button:focus-visible {
     .mark-alien-body,
     .mark-alien-antenna-wrap,
     .mark-alien-eye { animation: none; }
+    .fuel-steam path { animation: none; opacity: 0.55; }
+    .fuel-tip,
+    .signal-tip { transition: none; }
 }

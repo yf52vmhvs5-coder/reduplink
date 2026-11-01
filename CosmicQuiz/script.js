@@ -899,17 +899,22 @@ document.addEventListener('DOMContentLoaded', () => {
         { color: '#ff2ed1', label: 'Void signal' },
         { color: '#c86bff', label: 'Phase glow' },
         { color: '#8a2be2', label: 'Shifter' },
-        { color: '#3da5ff', label: 'Phase cage' },
         { color: '#00e5ff', label: 'Velocity' },
+        { color: '#3da5ff', label: 'Phase cage' },
+        { color: '#39ff14', label: 'Spore' },
         { color: '#ffdd22', label: 'Bounty' },
     ];
     const SIGNAL_TINT_KEY = 'cosmic-quiz-signal';
+    const STUDIO_TINT_KEY = 'spacejunkStudioTint';
 
     function readSignalTint() {
         try {
-            const saved = localStorage.getItem(SIGNAL_TINT_KEY);
-            const match = SIGNAL_TINTS.find((entry) => entry.color === saved);
-            if (match) return match;
+            const keys = [STUDIO_TINT_KEY, SIGNAL_TINT_KEY];
+            for (let i = 0; i < keys.length; i++) {
+                const saved = (localStorage.getItem(keys[i]) || '').trim().toLowerCase();
+                const match = SIGNAL_TINTS.find((entry) => entry.color === saved);
+                if (match) return match;
+            }
         } catch (_) { /* ignore */ }
         return SIGNAL_TINTS[0];
     }
@@ -969,6 +974,7 @@ document.addEventListener('DOMContentLoaded', () => {
             applySignalTint(next);
             try {
                 localStorage.setItem(SIGNAL_TINT_KEY, next.color);
+                localStorage.setItem(STUDIO_TINT_KEY, next.color);
             } catch (_) { /* ignore */ }
             pulseSignalLogo();
             sfx('click');

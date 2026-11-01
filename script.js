@@ -1,6 +1,7 @@
 /**
  * SPACEJUNK studio deck.
- * Add a game by appending one object. Do not edit the page for that.
+ * Add a game by appending one object, and mirror that card in the
+ * noscript block in index.html so it still appears with JavaScript off.
  *
  * {
  *   title: "NEBULA VOID",
@@ -10,11 +11,13 @@
  *   href: "NebulaVoid/index.html",   // omit or leave "" while the build is sealed
  *   web: true                           // browser badge (optional; defaults from href)
  *   tablet: true                        // tablet badge (optional)
- *   windows: true                       // Windows PC badge (optional; defaults on unless false)
  * }
  */
 (function () {
     "use strict";
+
+    /** Set your Ko-fi page when ready, e.g. "https://ko-fi.com/yourname" */
+    var KO_FI_URL = "";
 
     var GAMES = [
         {
@@ -23,8 +26,7 @@
             status: "live",
             line: "Survival arena in a drifting starfield. Consume, chain kills, and beat the pull — solo or multiplayer rooms.",
             href: "NebulaVoid/index.html",
-            web: true,
-            windows: true
+            web: true
         },
         {
             title: "COSMIC QUIZ",
@@ -32,8 +34,7 @@
             status: "live",
             line: "Fifty questions on space, tech, and in-between facts. Classic, Survival, or Blitz — solo or a shared room code.",
             href: "CosmicQuiz/index.html",
-            web: true,
-            windows: true
+            web: true
         },
         {
             title: "CELL WARS",
@@ -42,8 +43,7 @@
             line: "Mass-and-split arena on phosphor and scanlines. Outgrow the bots with mouse and keys, or the tablet pad.",
             href: "Cell War/index.html",
             web: true,
-            tablet: true,
-            windows: true
+            tablet: true
         }
     ];
 
@@ -59,6 +59,35 @@
     ];
 
     var TINT_KEY = "spacejunkStudioTint";
+
+    var deckTipId = 0;
+
+    function nextDeckTipId() {
+        deckTipId += 1;
+        return "deck-tip-" + deckTipId;
+    }
+
+    function signalTip(tipId, kicker, text) {
+        var tip = document.createElement("span");
+        tip.className = "signal-tip platform-tip";
+        tip.id = tipId;
+        tip.setAttribute("role", "tooltip");
+        var kick = document.createElement("span");
+        kick.className = "signal-tip-kicker";
+        kick.textContent = kicker;
+        var body = document.createElement("span");
+        body.className = "signal-tip-text";
+        body.textContent = text;
+        tip.appendChild(kick);
+        tip.appendChild(body);
+        return tip;
+    }
+
+    function bindPlatformBadge(el) {
+        el.addEventListener("click", function (ev) {
+            ev.stopPropagation();
+        });
+    }
 
     function gameHref(raw) {
         if (!raw) return "";
@@ -179,36 +208,6 @@
         return svg;
     }
 
-    function windowsBadgeIcon() {
-        var ns = "http://www.w3.org/2000/svg";
-        var svg = document.createElementNS(ns, "svg");
-        svg.setAttribute("viewBox", "0 0 24 24");
-        svg.setAttribute("aria-hidden", "true");
-        svg.setAttribute("focusable", "false");
-
-        svg.appendChild(
-            strokeEl(ns, "path", {
-                d: "M4.75 5.25h6.75v6.75H4.75V5.25z"
-            })
-        );
-        svg.appendChild(
-            strokeEl(ns, "path", {
-                d: "M12.5 5.25h6.75v6.75H12.5V5.25z"
-            })
-        );
-        svg.appendChild(
-            strokeEl(ns, "path", {
-                d: "M4.75 12.5h6.75v6.75H4.75V12.5z"
-            })
-        );
-        svg.appendChild(
-            strokeEl(ns, "path", {
-                d: "M12.5 12.5h6.75v6.75H12.5V12.5z"
-            })
-        );
-        return svg;
-    }
-
     function gameWebCompat(game) {
         if (game.web === true) return true;
         if (game.web === false) return false;
@@ -219,94 +218,68 @@
         return game.tablet === true;
     }
 
-    function gameWindowsCompat(game) {
-        if (game.windows === false) return false;
-        if (game.windows === true) return true;
-        return !!game.href;
-    }
-
     function browserBadge() {
+        var tipId = nextDeckTipId();
         var el = document.createElement("span");
         el.className = "card-platform card-platform--on";
-        el.title = "Runs in browser";
+        el.setAttribute("tabindex", "0");
+        el.setAttribute("role", "img");
+        el.setAttribute("aria-label", "Browser");
+        el.setAttribute("aria-describedby", tipId);
         var hidden = document.createElement("span");
         hidden.className = "card-platform__label";
         hidden.textContent = "Browser";
         el.appendChild(hidden);
         el.appendChild(browserBadgeIcon());
+        el.appendChild(
+            signalTip(
+                tipId,
+                "[ BROWSER ]",
+                "Runs in a modern browser. No install — hit [ OPEN ] and play."
+            )
+        );
+        bindPlatformBadge(el);
         return el;
     }
 
     function tabletBadge() {
+        var tipId = nextDeckTipId();
         var el = document.createElement("span");
         el.className = "card-platform card-platform--on";
-        el.title = "Playable on tablet";
+        el.setAttribute("tabindex", "0");
+        el.setAttribute("role", "img");
+        el.setAttribute("aria-label", "Tablet");
+        el.setAttribute("aria-describedby", tipId);
         var hidden = document.createElement("span");
         hidden.className = "card-platform__label";
         hidden.textContent = "Tablet";
         el.appendChild(hidden);
         el.appendChild(tabletBadgeIcon());
+        el.appendChild(
+            signalTip(
+                tipId,
+                "[ TABLET ]",
+                "Touch-friendly — on-screen pad and controls, not just a shrunk desktop view."
+            )
+        );
+        bindPlatformBadge(el);
         return el;
-    }
-
-    function windowsBadge() {
-        var el = document.createElement("span");
-        el.className = "card-platform card-platform--on";
-        el.title = "Runs on Windows PC";
-        var hidden = document.createElement("span");
-        hidden.className = "card-platform__label";
-        hidden.textContent = "Windows";
-        el.appendChild(hidden);
-        el.appendChild(windowsBadgeIcon());
-        return el;
-    }
-
-    function platformAriaLabel(parts) {
-        var labels = {
-            browser: "browser",
-            tablet: "tablet",
-            windows: "Windows PC"
-        };
-        var spoken = [];
-        for (var i = 0; i < parts.length; i++) {
-            spoken.push(labels[parts[i]] || parts[i]);
-        }
-        if (spoken.length === 0) return "";
-        if (spoken.length === 1) {
-            return parts[0] === "browser"
-                ? "Runs in browser"
-                : parts[0] === "tablet"
-                  ? "Runs on tablet"
-                  : "Runs on Windows PC";
-        }
-        if (spoken.length === 2) {
-            return "Runs on " + spoken[0] + " and " + spoken[1];
-        }
-        return "Runs on " + spoken.slice(0, -1).join(", ") + ", and " + spoken[spoken.length - 1];
     }
 
     function cardPlatforms(game) {
         var web = gameWebCompat(game);
         var tablet = gameTabletCompat(game);
-        var windows = gameWindowsCompat(game);
-        if (!web && !tablet && !windows) return null;
+        if (!web && !tablet) return null;
         var wrap = document.createElement("div");
         wrap.className = "card-platforms";
-        wrap.setAttribute("role", "img");
-        var parts = [];
+        wrap.setAttribute("role", "group");
+        wrap.setAttribute("aria-label", "Where you can play");
         if (web) {
-            parts.push("browser");
             wrap.appendChild(browserBadge());
         }
-        if (windows) {
-            parts.push("windows");
-            wrap.appendChild(windowsBadge());
-        }
         if (tablet) {
-            parts.push("tablet");
             wrap.appendChild(tabletBadge());
         }
-        wrap.setAttribute("aria-label", platformAriaLabel(parts));
         return wrap;
     }
 
@@ -349,10 +322,38 @@
                 link.rel = "noopener noreferrer";
             }
             foot.appendChild(link);
+            var pressX = 0;
+            var pressY = 0;
+            function openBeside() {
+                window.open(target, "_blank", "noopener,noreferrer");
+            }
+            li.addEventListener("mousedown", function (ev) {
+                if (ev.button !== 0) return;
+                pressX = ev.clientX;
+                pressY = ev.clientY;
+            });
             li.addEventListener("click", function (ev) {
-                if (ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+                if (ev.button !== 0) return;
                 if (ev.target.closest("a")) return;
+                if (ev.target.closest(".card-platform")) return;
+                if (ev.altKey) return;
+                var moved = Math.hypot(ev.clientX - pressX, ev.clientY - pressY);
+                if (moved > 4) return;
+                var sel = window.getSelection && window.getSelection();
+                if (sel && !sel.isCollapsed && sel.anchorNode && li.contains(sel.anchorNode)) return;
+                var external = /^https?:\/\//.test(game.href);
+                if (ev.metaKey || ev.ctrlKey || ev.shiftKey || external) {
+                    openBeside();
+                    return;
+                }
                 window.location.assign(target);
+            });
+            li.addEventListener("auxclick", function (ev) {
+                if (ev.button !== 1) return;
+                if (ev.target.closest("a")) return;
+                if (ev.target.closest(".card-platform")) return;
+                ev.preventDefault();
+                openBeside();
             });
         } else {
             var seal = document.createElement("span");
@@ -387,30 +388,54 @@
         var ctx = canvas.getContext("2d");
         var stars = [];
         var running = true;
+        var viewW = 0;
+        var viewH = 0;
+
+        function spawn(w, h) {
+            return {
+                x: Math.random() * w,
+                y: Math.random() * h,
+                r: Math.random() * 1.2 + 0.3,
+                v: Math.random() * 0.15 + 0.04,
+                a: Math.random() * 0.45 + 0.15
+            };
+        }
 
         function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            var n = Math.round((canvas.width * canvas.height) / 18000);
-            stars = [];
-            for (var i = 0; i < n; i++) {
-                stars.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    r: Math.random() * 1.2 + 0.3,
-                    v: Math.random() * 0.15 + 0.04,
-                    a: Math.random() * 0.45 + 0.15
-                });
+            var w = canvas.clientWidth || window.innerWidth;
+            var h = canvas.clientHeight || window.innerHeight;
+            if (!w || !h) return;
+            var dpr = Math.min(window.devicePixelRatio || 1, 2);
+            var widthChanged = Math.abs(w - viewW) > 1;
+            var heightChanged = viewH > 0 && Math.abs(h - viewH) > 1;
+
+            canvas.width = Math.round(w * dpr);
+            canvas.height = Math.round(h * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            if (!stars.length || widthChanged) {
+                var n = Math.round((w * h) / 18000);
+                stars = [];
+                for (var i = 0; i < n; i++) stars.push(spawn(w, h));
+            } else if (heightChanged) {
+                var scale = h / viewH;
+                for (var j = 0; j < stars.length; j++) {
+                    stars[j].y *= scale;
+                    if (stars[j].y >= h) stars[j].y %= h;
+                }
             }
+
+            viewW = w;
+            viewH = h;
         }
 
         function frame() {
             if (!running) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, viewW, viewH);
             for (var i = 0; i < stars.length; i++) {
                 var s = stars[i];
                 s.y += s.v;
-                if (s.y > canvas.height) s.y = 0;
+                if (s.y > viewH) s.y = 0;
                 ctx.globalAlpha = s.a;
                 ctx.fillStyle = "#f4f4f4";
                 ctx.fillRect(s.x, s.y, s.r, s.r);
@@ -434,7 +459,37 @@
 
     var year = document.getElementById("year");
     if (year) year.textContent = String(new Date().getFullYear());
+
+    var fuelLink = document.getElementById("fuelLink");
+    if (fuelLink) {
+        var fuelKicker = fuelLink.querySelector(".signal-tip-kicker");
+        var fuelText = fuelLink.querySelector(".signal-tip-text");
+        if (KO_FI_URL) {
+            fuelLink.href = KO_FI_URL;
+            fuelLink.target = "_blank";
+            fuelLink.rel = "noopener noreferrer";
+            fuelLink.removeAttribute("aria-disabled");
+            fuelLink.setAttribute("aria-label", "Fuel — optional support on Ko-fi");
+            if (fuelKicker) fuelKicker.textContent = "[ OPTIONAL ]";
+            if (fuelText) fuelText.textContent = "Small games take quiet hours. Ko-fi is a coffee if you want one — no perks, no guilt.";
+        } else {
+            fuelLink.setAttribute("aria-label", "Fuel — Ko-fi link coming later");
+            fuelLink.addEventListener("click", function (ev) {
+                ev.preventDefault();
+            });
+            fuelLink.addEventListener("auxclick", function (ev) {
+                ev.preventDefault();
+            });
+        }
+    }
+
     buildTints();
     buildDeck();
     paintField();
+    window.addEventListener("storage", function (ev) {
+        if (ev.key !== TINT_KEY || !ev.newValue) return;
+        var next = String(ev.newValue).toLowerCase();
+        if (!isHex(next)) return;
+        applyTint(next);
+    });
 })();
