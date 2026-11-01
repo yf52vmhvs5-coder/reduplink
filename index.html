@@ -52,6 +52,14 @@
         <nav class="bar-nav" aria-label="Studio">
             <a href="#signals">Signals</a>
             <a href="#archive">Archive</a>
+            <a class="tx-nav" href="#transmissions" aria-label="Transmissions">
+                <svg class="tx-chat-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path class="tx-chat-frame" d="M4 5h15v8H9.5L6 18v-5H4V5z"/>
+                    <circle class="tx-chat-dot" cx="8.5" cy="9" r="1"/>
+                    <circle class="tx-chat-dot" cx="12" cy="9" r="1"/>
+                    <circle class="tx-chat-dot" cx="15.5" cy="9" r="1"/>
+                </svg>
+            </a>
             <a class="fuel" id="fuelLink" href="#" aria-disabled="true" aria-describedby="fuelTip">
                 <svg class="fuel-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                     <g class="fuel-steam" fill="none" stroke="currentColor" stroke-width="1.15" stroke-linecap="round" stroke-linejoin="round">
@@ -125,6 +133,53 @@
                 <p>A LIVE card opens from [ OPEN ], or from a plain click on the card. SEALED means that frequency is held — no link yet, nothing to launch.</p>
             </div>
         </section>
+
+        <section id="transmissions" class="band" aria-labelledby="transmissionsTitle">
+            <div class="band-head">
+                <h2 id="transmissionsTitle">TRANSMISSIONS</h2>
+                <p id="txLiveCount" class="band-meta">QUIET</p>
+            </div>
+            <div class="tx">
+                <div class="tx-toolbar">
+                    <div class="tx-mark">
+                        <svg class="tx-chat-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path class="tx-chat-frame" d="M4 5h15v8H9.5L6 18v-5H4V5z"/>
+                            <circle class="tx-chat-dot" cx="8.5" cy="9" r="1"/>
+                            <circle class="tx-chat-dot" cx="12" cy="9" r="1"/>
+                            <circle class="tx-chat-dot" cx="15.5" cy="9" r="1"/>
+                        </svg>
+                        <span class="tx-mark-label">leave a ping</span>
+                    </div>
+                    <button type="button" class="tx-ack" id="txAck" aria-pressed="false" aria-describedby="txAckTip" aria-label="Like this studio">
+                        <svg class="tx-ack-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <g fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M7 10v12"/>
+                                <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/>
+                            </g>
+                        </svg>
+                        <span class="tx-ack-count" id="txAckCount" hidden></span>
+                        <span class="signal-tip tx-ack-tip" id="txAckTip" role="tooltip">
+                            <span class="signal-tip-kicker">[ LIKE ]</span>
+                            <span class="signal-tip-text">One like per browser.</span>
+                        </span>
+                    </button>
+                </div>
+                <form class="tx-form" id="txForm">
+                    <label class="tx-label" for="txCallsign">CALLSIGN</label>
+                    <input class="tx-input" id="txCallsign" name="callsign" type="text" maxlength="16" autocomplete="nickname" placeholder="UNKNOWN" spellcheck="false">
+                    <label class="tx-label" for="txBody">SIGNAL</label>
+                    <textarea class="tx-input tx-body" id="txBody" name="body" maxlength="280" rows="3" required placeholder="Write a short signal…"></textarea>
+                    <div class="tx-form-foot">
+                        <button class="tx-send" type="submit">[ TRANSMIT ]</button>
+                    </div>
+                </form>
+                <p class="tx-status" id="txStatus" hidden></p>
+                <ul class="tx-list" id="txList"></ul>
+                <noscript>
+                    <p class="tx-empty">Transmissions need a live browser.</p>
+                </noscript>
+            </div>
+        </section>
     </main>
 
     <footer class="colophon">
@@ -133,5 +188,6 @@
     </footer>
 
     <script src="script.js"></script>
+    <script src="transmissions.js"></script>
 </body>
 </html>
