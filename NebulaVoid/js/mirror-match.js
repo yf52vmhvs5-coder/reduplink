@@ -1410,6 +1410,7 @@
     global.noteMirrorOpponentLeft = noteMirrorOpponentLeft;
     global.noteMirrorRelayLost = noteMirrorRelayLost;
     global.abortMirrorMatchToLobby = abortMirrorMatchToLobby;
+    global.tryMirrorEscapeToLobby = tryMirrorEscapeToLobby;
     global.tryMirrorGameOverRetry = tryMirrorGameOverRetry;
     global.tryMirrorGameOverChangeEntity = tryMirrorGameOverChangeEntity;
     global.isMirrorEliminationOverlayActive = isMirrorEliminationOverlayActive;

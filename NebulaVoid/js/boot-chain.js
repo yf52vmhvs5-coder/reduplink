@@ -40,7 +40,7 @@
             "js/spore-ghosts.js",
         ],
         ["js/mp-offscreen-indicators.js", "js/sim-update.js", "js/sim-draw.js"],
-        ["entities.js"],
+        ["entities.js", "js/tablet-pad.js"],
     ];
 
     var MODULE_SCRIPTS = [];

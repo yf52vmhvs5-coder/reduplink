@@ -8,7 +8,7 @@
     --signal-soft: color-mix(in srgb, var(--signal) 55%, transparent);
     --signal-wash: color-mix(in srgb, var(--signal) 12%, transparent);
     --pad: clamp(20px, 4vw, 48px);
-    --measure: 68rem;
+    --measure: 100rem;
     /* Fundal fix — nu urmează SIGNAL TINT */
     --ambient-a: #0a0614;
     --ambient-b: #04080a;

@@ -152,6 +152,7 @@
         drawLastTime = currentTime;
 
         if (typeof global.tickMpTaunts === "function") global.tickMpTaunts(dt);
+        if (typeof global.tickTabletPad === "function") global.tickTabletPad();
 
         ctx.fillStyle = "#020202";
         ctx.fillRect(0, 0, screenW, screenH);
@@ -180,9 +181,12 @@
         const centerY = screenH / 2;
         const controlScheme =
             typeof deps.getControlScheme === "function" ? deps.getControlScheme() : "mouse";
+        const useVectorAim =
+            (typeof global.usesVectorAim === "function" && global.usesVectorAim()) ||
+            controlScheme === "wasd";
         let desiredLookAheadX;
         let desiredLookAheadY;
-        if (controlScheme === "wasd" && typeof deps.getWasdInputSmoothed === "function") {
+        if (useVectorAim && typeof deps.getWasdInputSmoothed === "function") {
             const v = deps.getWasdInputSmoothed();
             const len = Math.hypot(v.x, v.y);
             const lookAheadMax = 110;

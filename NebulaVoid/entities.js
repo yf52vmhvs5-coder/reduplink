@@ -849,6 +849,12 @@ configureMirrorMatch({
 });
 
 window.addEventListener("mousemove", (e) => {
+    if (
+        document.documentElement.classList.contains("tablet-mode") &&
+        document.body.classList.contains("game-running")
+    ) {
+        return;
+    }
     mouse.x = e.clientX;
     mouse.y = e.clientY;
 });
@@ -1163,10 +1169,30 @@ configureHubFlow({
 
 if (typeof wireMenuSystemButtons === "function") wireMenuSystemButtons();
 
+window.getTabletAbilityState = function () {
+    const ability = selectedAbility || "";
+    const base = GAME_SETTINGS["CD_" + ability.toUpperCase()] || 5;
+    const mul = typeof getSignalCooldownMultiplier === "function" ? getSignalCooldownMultiplier() : 1;
+    const vampireBlocked = ability === "vampire" && player.radius <= ABILITY_SETTINGS.VAMPIRE_MIN_RADIUS;
+    const alive = !!(gameActive && !isDying);
+    return {
+        alive: alive,
+        ready: alive && player.cooldown <= 0 && !vampireBlocked,
+        cooldown: player.cooldown > 0 ? player.cooldown : 0,
+        maxCd: base * mul,
+        accent: player.glow || "#d8d8d8",
+    };
+};
+window.triggerPlayerAbility = declanseazaAbilitatea;
+
 window.addEventListener("mousemove", function initAudioOnMove() {
     if (NebulaAudio.isSoundEnabled()) initAudio();
     window.removeEventListener("mousemove", initAudioOnMove);
 });
+window.addEventListener("pointerdown", function initAudioOnPointer() {
+    if (NebulaAudio.isSoundEnabled()) initAudio();
+    window.removeEventListener("pointerdown", initAudioOnPointer);
+}, { passive: true });
 
 initMainHub();
 initMenuState();

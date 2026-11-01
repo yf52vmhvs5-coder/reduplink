@@ -609,8 +609,9 @@
 
         const rgb = parseHex(b.color || cell.glow);
         const gap = tauntCfg().gapPx;
-        const tx = Math.round(clamp(sp.x, 18, view.screenW - 18));
-        const ty = Math.round(clamp(sp.y - sr - gap, 16, view.screenH - 14));
+        const dpr = global.devicePixelRatio || 1;
+        const tx = Math.round(clamp(sp.x, 18, view.screenW - 18) * dpr) / dpr;
+        const ty = Math.round(clamp(sp.y - sr - gap, 16, view.screenH - 14) * dpr) / dpr;
 
         ctx.save();
         ctx.globalAlpha = alpha;
@@ -618,14 +619,9 @@
         ctx.textAlign = "center";
         ctx.textBaseline = "bottom";
         ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
         ctx.shadowColor = "transparent";
-        ctx.lineJoin = "round";
-        ctx.miterLimit = 2;
-
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = "rgba(255,255,255,0.28)";
-        ctx.strokeText(b.text, tx, ty);
-
         ctx.fillStyle = "rgb(" + rgb.r + "," + rgb.g + "," + rgb.b + ")";
         ctx.fillText(b.text, tx, ty);
         ctx.restore();

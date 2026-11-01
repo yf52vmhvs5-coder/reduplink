@@ -2,8 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>NEBULA VOID</title>
+    <script>
+        (function () {
+            var shortSide = Math.min(window.innerWidth, window.innerHeight);
+            var ua = navigator.userAgent || "";
+            var iPad = /iPad/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+            var androidTablet = /Android/i.test(ua) && !/Mobile/i.test(ua);
+            var fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+            var coarse = window.matchMedia("(pointer: coarse)").matches;
+            var noHover = window.matchMedia("(hover: none)").matches;
+            var tablet = shortSide >= 600 && (iPad || androidTablet || (!fine && (coarse || noHover) && navigator.maxTouchPoints > 0));
+            if (!tablet) return;
+            document.documentElement.classList.add("tablet-mode");
+            var viewport = document.querySelector('meta[name="viewport"]');
+            if (viewport) {
+                viewport.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover");
+            }
+        })();
+    </script>
     <!-- Anti-flicker: ascunde hub/meniu înainte de style.css (evită flash la refresh) -->
     <style>
         #introScreen, #startMenu { opacity: 0; visibility: hidden; }
@@ -90,6 +108,7 @@
                 </div>
                 <p class="options-control-hint" data-for="wasd" hidden>WASD sets your heading — the entity moves that way. Cursor stays hidden in the arena; the camera follows your direction.</p>
                 <p class="options-control-hint" data-for="mouse">The entity moves toward your cursor. The camera shifts slightly ahead of where you point.</p>
+                <p class="options-control-hint options-control-hint--pad" hidden>The entity follows the on-screen stick. The round button casts your ability. In a duel the message icon stays in the corner, and the red mark leaves the match.</p>
             </section>
             <section class="options-block options-block--system" aria-labelledby="optionsSystemLabel">
                 <p id="optionsSystemLabel" class="options-block-tag">SYSTEM</p>
@@ -230,6 +249,18 @@
         <div id="timeIntruded">00:00</div>
         <button id="retryBtn" type="button">RETRY</button>
         <button id="backToMenuBtn" type="button">CHANGE ENTITY</button>
+    </div>
+
+    <div id="tabletStick" aria-hidden="true">
+        <span id="tabletStickKnob"></span>
+    </div>
+    <div id="tabletPad" hidden>
+        <button id="tabletLeaveBtn" type="button" hidden aria-label="Leave match">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M7 7 L17 17 M17 7 L7 17" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/>
+            </svg>
+        </button>
+        <button id="tabletAbilityBtn" type="button" aria-label="Signature ability"></button>
     </div>
 
     <canvas id="gameCanvas"></canvas>

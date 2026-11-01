@@ -24,9 +24,10 @@
             title: "NEBULA VOID",
             kind: "ARENA",
             status: "live",
-            line: "Survival arena in a drifting starfield. Consume, chain kills, and beat the pull — solo or multiplayer rooms.",
+            line: "Survival arena in a drifting starfield. Consume, chain kills, and beat the pull — solo or multiplayer, with a tablet pad.",
             href: "NebulaVoid/index.html",
-            web: true
+            web: true,
+            tablet: true
         },
         {
             title: "COSMIC QUIZ",

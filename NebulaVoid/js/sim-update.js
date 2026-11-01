@@ -227,9 +227,12 @@
     // Player Movement (px/sec)
     const controlScheme =
         typeof deps.getControlScheme === "function" ? deps.getControlScheme() : "mouse";
+    const useVectorAim =
+        (typeof global.usesVectorAim === "function" && global.usesVectorAim()) ||
+        controlScheme === "wasd";
     let tX;
     let tY;
-    if (controlScheme === "wasd" && typeof deps.getWasdInputSmoothed === "function") {
+    if (useVectorAim && typeof deps.getWasdInputSmoothed === "function") {
         const v = deps.getWasdInputSmoothed();
         const aimDist = 220;
         tX = v.x * aimDist;
