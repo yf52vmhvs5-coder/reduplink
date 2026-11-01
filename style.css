@@ -186,15 +186,41 @@ main,
     text-shadow: 0 0 10px var(--signal-soft);
 }
 
+.bar-nav a.nav-ico {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.bar-nav a.nav-ico .nav-ico-svg {
+    display: block;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--signal);
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--signal) 32%, transparent));
+    transition:
+        color 0.18s ease,
+        filter 0.18s ease,
+        transform 0.18s ease;
+}
+
+.bar-nav a.nav-ico:hover .nav-ico-svg,
+.bar-nav a.nav-ico:focus-visible .nav-ico-svg {
+    filter: drop-shadow(0 0 9px var(--signal-soft));
+    transform: translateY(-1px);
+}
+
 .bar-nav a.tx-nav {
     display: inline-flex;
     align-items: center;
+    gap: 7px;
 }
 
 .bar-nav a.tx-nav .tx-chat-icon {
     width: 20px;
     height: 20px;
-    color: rgba(255, 255, 255, 0.82);
+    color: var(--signal);
     filter: drop-shadow(0 0 6px color-mix(in srgb, var(--signal) 32%, transparent));
     transition:
         color 0.18s ease,
@@ -204,7 +230,6 @@ main,
 
 .bar-nav a.tx-nav:hover .tx-chat-icon,
 .bar-nav a.tx-nav:focus-visible .tx-chat-icon {
-    color: var(--signal);
     filter: drop-shadow(0 0 9px var(--signal-soft));
     transform: translateY(-1px);
 }
@@ -218,10 +243,10 @@ main,
 
 .bar-nav .fuel-icon {
     display: block;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     flex-shrink: 0;
-    color: rgba(255, 255, 255, 0.82);
+    color: var(--signal);
     filter: drop-shadow(0 0 6px color-mix(in srgb, var(--signal) 32%, transparent));
     transition:
         color 0.18s ease,
@@ -230,7 +255,7 @@ main,
 }
 
 .fuel-liquid {
-    stroke: var(--signal);
+    stroke: currentColor;
     stroke-opacity: 0.85;
     opacity: 0.9;
 }
@@ -256,7 +281,6 @@ main,
 
 .bar-nav a.fuel:hover .fuel-icon,
 .bar-nav a.fuel:focus-visible .fuel-icon {
-    color: var(--signal);
     filter: drop-shadow(0 0 9px var(--signal-soft));
     transform: translateY(-1px);
 }
