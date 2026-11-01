@@ -232,11 +232,17 @@
         controlScheme === "wasd";
     let tX;
     let tY;
+    let stickDrive = 1;
     if (useVectorAim && typeof deps.getWasdInputSmoothed === "function") {
         const v = deps.getWasdInputSmoothed();
         const aimDist = 220;
         tX = v.x * aimDist;
         tY = v.y * aimDist;
+        if (typeof global.isTabletStickEngaged === "function" && global.isTabletStickEngaged()) {
+            const mag = Math.min(1, Math.hypot(v.x, v.y));
+            const dead = 0.12;
+            stickDrive = mag <= dead ? 0 : (mag - dead) / (1 - dead);
+        }
     } else {
         tX = mouse.x - screenW / 2;
         tY = mouse.y - screenH / 2;
@@ -247,9 +253,9 @@
     const speed=Math.max(GAME_SETTINGS.MIN_SPEED,spdBase-(player.radius/GAME_SETTINGS.RADIUS_SPEED_DIVISOR));
     const mirrorFrozen =
         typeof player.mirrorFreezeUntil === "number" && performance.now() < player.mirrorFreezeUntil;
-    if (!mirrorFrozen && tX * tX + tY * tY > 225) {
-        player.x += Math.cos(ang) * speed * dt;
-        player.y += Math.sin(ang) * speed * dt;
+    if (!mirrorFrozen && stickDrive > 0 && tX * tX + tY * tY > 225) {
+        player.x += Math.cos(ang) * speed * stickDrive * dt;
+        player.y += Math.sin(ang) * speed * stickDrive * dt;
     }
     
     // Jeleul moale rămâne în singleplayer. În duel e înlocuit de camerele de sticlă.

@@ -158,8 +158,30 @@
         return getWasdInputRaw();
     }
 
+    function isTabletMode() {
+        return (
+            typeof document !== "undefined" &&
+            !!document.documentElement &&
+            document.documentElement.classList.contains("tablet-mode")
+        );
+    }
+
     function tickWasdInputSmoothing(dt) {
         if (!usesVectorAim()) return;
+        if (tabletStickEngaged()) {
+            const aim = getWasdInputRaw();
+            smoothX = aim.x;
+            smoothY = aim.y;
+            return;
+        }
+        if (isTabletMode()) {
+            const idle = getWasdInputRaw();
+            if (Math.hypot(idle.x, idle.y) < 1e-6) {
+                smoothX = 0;
+                smoothY = 0;
+                return;
+            }
+        }
         const step = Math.max(0, Number(dt) || 0);
         if (step <= 0) return;
 
@@ -236,6 +258,7 @@
     global.clearWasdKeysState = clearWasdKeysState;
     global.setTabletAim = setTabletAim;
     global.usesVectorAim = usesVectorAim;
+    global.isTabletStickEngaged = tabletStickEngaged;
     global.syncControlSchemePickerUi = syncControlSchemePickerUi;
     global.initControlSettings = initControlSettings;
 })(typeof window !== "undefined" ? window : globalThis);

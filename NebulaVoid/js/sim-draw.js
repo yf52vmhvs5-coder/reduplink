@@ -210,7 +210,10 @@
             desiredLookAheadX = (mouseOffsetX / mouseOffsetLen) * lookAheadDist;
             desiredLookAheadY = (mouseOffsetY / mouseOffsetLen) * lookAheadDist;
         }
-        const lookAheadLerp = Math.min(1, dt * 7.5);
+        const lookAheadLerp =
+            typeof global.isTabletStickEngaged === "function" && global.isTabletStickEngaged()
+                ? 1
+                : Math.min(1, dt * 7.5);
         cam.cameraLookAheadX += (desiredLookAheadX - cam.cameraLookAheadX) * lookAheadLerp;
         cam.cameraLookAheadY += (desiredLookAheadY - cam.cameraLookAheadY) * lookAheadLerp;
         const targetCameraX = player.x + cam.cameraLookAheadX;

@@ -81,11 +81,6 @@
         );
     }
 
-    function syncFullscreenOffer() {
-        const fs = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
-        document.documentElement.classList.toggle("tablet-no-fullscreen", tabletOn() && !fs);
-    }
-
     function syncOptionsCopy() {
         const padHint = document.querySelector(".options-control-hint--pad");
         if (padHint) padHint.hidden = !tabletOn();
@@ -101,7 +96,6 @@
             if (typeof global.resetWasdInputSmoothing === "function") global.resetWasdInputSmoothing();
         }
         syncViewportLock(on);
-        syncFullscreenOffer();
         syncOptionsCopy();
         syncChrome();
     }

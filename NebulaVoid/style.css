@@ -3936,10 +3936,6 @@ html.tablet-mode #optionsScreen .options-control-hint[data-for] {
     display: none !important;
 }
 
-html.tablet-mode.tablet-no-fullscreen #optionsScreen #fullscreenBtn {
-    display: none !important;
-}
-
 html.tablet-mode #evolutionLabBtn,
 html.tablet-mode .evo-bar-action {
     min-height: 44px;
