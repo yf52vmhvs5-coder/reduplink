@@ -1,0 +1,29 @@
+name: Nebula relay
+
+on:
+  push:
+    paths:
+      - "NebulaVoid/server/**"
+      - "NebulaVoid/test/**"
+      - ".github/workflows/nebula-relay.yml"
+  pull_request:
+    paths:
+      - "NebulaVoid/server/**"
+      - "NebulaVoid/test/**"
+      - ".github/workflows/nebula-relay.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: NebulaVoid/server
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: NebulaVoid/server/package-lock.json
+      - run: npm ci
+      - run: npm test

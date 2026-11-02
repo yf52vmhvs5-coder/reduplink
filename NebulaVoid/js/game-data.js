@@ -498,6 +498,7 @@ window.__GAME_DATA_SOURCE = {
   // ═══════════════════════════════════════════════════════════════════════════
   "multiplayer": {
     "relayWsUrl": "ws://127.0.0.1:8080",
+    "relayWsUrlPublic": "wss://reduplink-nebula-relay.onrender.com",
     "maxRoomPlayers": 6,
     "minPlayersToStart": 2,
     "allowMockPeerFallback": false,

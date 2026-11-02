@@ -20,12 +20,41 @@
     /** @type {{ onJoined?: Function, onPeerJoined?: Function, onPeerLeft?: Function, onError?: Function, onRelay?: Function, onDisconnected?: Function, onRoomList?: Function }} */
     let handlers = {};
 
+    function isLocalHostname(hostname) {
+        if (!hostname) return true;
+        const host = String(hostname).toLowerCase().replace(/^\[|\]$/g, "");
+        if (host === "localhost" || host === "127.0.0.1" || host === "::1" || host === "0.0.0.0") {
+            return true;
+        }
+        if (host.endsWith(".local")) return true;
+        if (/^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host)) return true;
+        if (/^192\.168\.\d{1,3}\.\d{1,3}$/.test(host)) return true;
+        if (/^172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}$/.test(host)) return true;
+        return false;
+    }
+
+    /** Public pages use relayWsUrlPublic. localhost, file://, and LAN stay on relayWsUrl. */
+    function pageUsesPublicRelay() {
+        const loc = global.location;
+        if (!loc || loc.protocol === "file:") return false;
+        return !isLocalHostname(loc.hostname);
+    }
+
+    function resolveRelayUrl(mp) {
+        const cfg = mp && typeof mp === "object" ? mp : {};
+        const localUrl =
+            typeof cfg.relayWsUrl === "string" && cfg.relayWsUrl.length > 0
+                ? cfg.relayWsUrl
+                : "ws://127.0.0.1:8080";
+        const publicUrl = typeof cfg.relayWsUrlPublic === "string" ? cfg.relayWsUrlPublic.trim() : "";
+        if (pageUsesPublicRelay() && publicUrl) return publicUrl;
+        return localUrl;
+    }
+
     function getBootRelayUrl() {
         const boot = global.__GAME_BOOT;
-        if (boot && boot.multiplayer && typeof boot.multiplayer.relayWsUrl === "string") {
-            return boot.multiplayer.relayWsUrl;
-        }
-        return null;
+        if (!boot || !boot.multiplayer || typeof boot.multiplayer !== "object") return null;
+        return resolveRelayUrl(boot.multiplayer);
     }
 
     function configureMpMirror(opts) {
@@ -35,6 +64,10 @@
             const fromBoot = getBootRelayUrl();
             if (fromBoot) relayWsUrl = fromBoot;
         }
+    }
+
+    function getRelayUrl() {
+        return relayWsUrl;
     }
 
     function setHandlers(next) {
@@ -206,6 +239,9 @@
 
     global.NebulaMpMirror = {
         configureMpMirror,
+        resolveRelayUrl,
+        usesPublicRelay: pageUsesPublicRelay,
+        getRelayUrl,
         setHandlers,
         connect,
         send,

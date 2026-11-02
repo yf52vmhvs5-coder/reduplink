@@ -9,10 +9,29 @@ const { assignCallsign } = require("./callsign-pool");
 const { buildRelayPayload } = require("./relay-packets");
 
 const PORT = Number(process.env.PORT) || 8080;
+const HOST = process.env.HOST || "0.0.0.0";
 const MAX_PER_ROOM = 6;
 const MAX_WS_MESSAGE_BYTES = 4096;
 const PING_INTERVAL_MS = 15000;
 const MAX_PUBLIC_WAITING = 8;
+
+/** @returns {Set<string> | null} null means any Origin is accepted */
+function originAllowlistFrom(raw) {
+    if (raw == null) return null;
+    const text = String(raw).trim();
+    if (!text) return null;
+    const set = new Set();
+    for (const part of text.split(",")) {
+        const origin = part.trim().replace(/\/+$/, "");
+        if (origin) set.add(origin);
+    }
+    return set.size ? set : null;
+}
+
+function requestOrigin(info) {
+    const raw = info && typeof info.origin === "string" ? info.origin : "";
+    return raw.trim().replace(/\/+$/, "");
+}
 
 function send(ws, payload) {
     if (!ws || ws.readyState !== 1) return false;
@@ -85,6 +104,7 @@ function createRelayServer(opts) {
         typeof options.pingIntervalMs === "number" && Number.isFinite(options.pingIntervalMs)
             ? options.pingIntervalMs
             : PING_INTERVAL_MS;
+    const allowedOrigins = originAllowlistFrom(options.allowedOrigins);
 
     /** @type {Map<string, Map<import('ws').WebSocket, { peerId: string, callsign: string, skinName?: string, color?: string, ability?: string }>>} */
     const rooms = new Map();
@@ -260,16 +280,34 @@ function createRelayServer(opts) {
         broadcastDirectory();
     }
 
-    const server = http.createServer((_req, res) => {
+    const server = http.createServer((req, res) => {
+        const path = String(req.url || "/").split("?")[0];
+        if (path === "/health") {
+            res.writeHead(200, {
+                "Content-Type": "application/json; charset=utf-8",
+                "Cache-Control": "no-store",
+            });
+            res.end('{"ok":true,"service":"nebula-void-relay"}\n');
+            return;
+        }
         res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
         res.end("NEBULA VOID relay — use WebSocket\n");
     });
 
-    const wss = new WebSocketServer({
+    /** @type {import('ws').ServerOptions} */
+    const wssOptions = {
         server,
         maxPayload: MAX_WS_MESSAGE_BYTES,
         perMessageDeflate: false,
-    });
+    };
+    if (allowedOrigins) {
+        wssOptions.verifyClient = function (info) {
+            const origin = requestOrigin(info);
+            return origin.length > 0 && allowedOrigins.has(origin);
+        };
+    }
+
+    const wss = new WebSocketServer(wssOptions);
 
     broadcastDirectory = function () {
         let raw;
@@ -411,9 +449,28 @@ function createRelayServer(opts) {
 }
 
 if (require.main === module) {
-    const { server } = createRelayServer();
-    server.listen(PORT, () => {
-        console.log(`[NEBULA relay] ws://127.0.0.1:${PORT} (max ${MAX_PER_ROOM}/room)`);
+    const { server, close } = createRelayServer({
+        allowedOrigins: process.env.ALLOWED_ORIGINS,
+    });
+    let shuttingDown = false;
+
+    function shutdown(signal) {
+        if (shuttingDown) return;
+        shuttingDown = true;
+        console.log(`[NEBULA relay] ${signal}, closing`);
+        const force = setTimeout(() => process.exit(1), 8000);
+        if (typeof force.unref === "function") force.unref();
+        close().then(
+            () => process.exit(0),
+            () => process.exit(1)
+        );
+    }
+
+    process.on("SIGTERM", () => shutdown("SIGTERM"));
+    process.on("SIGINT", () => shutdown("SIGINT"));
+
+    server.listen(PORT, HOST, () => {
+        console.log(`[NEBULA relay] ${HOST}:${PORT} (max ${MAX_PER_ROOM}/room)`);
     });
 }
 

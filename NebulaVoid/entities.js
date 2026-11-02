@@ -116,8 +116,15 @@ if (typeof configureHubFlow !== "function") {
 
 const __MP_CFG = __GAME_BOOT.multiplayer || {};
 if (globalThis.NebulaMpMirror && typeof globalThis.NebulaMpMirror.configureMpMirror === "function") {
-    globalThis.NebulaMpMirror.configureMpMirror({
-        relayWsUrl: typeof __MP_CFG.relayWsUrl === "string" ? __MP_CFG.relayWsUrl : undefined,
+    const mirror = globalThis.NebulaMpMirror;
+    const picked =
+        typeof mirror.resolveRelayUrl === "function"
+            ? mirror.resolveRelayUrl(__MP_CFG)
+            : typeof __MP_CFG.relayWsUrl === "string"
+              ? __MP_CFG.relayWsUrl
+              : undefined;
+    mirror.configureMpMirror({
+        relayWsUrl: picked,
     });
 }
 

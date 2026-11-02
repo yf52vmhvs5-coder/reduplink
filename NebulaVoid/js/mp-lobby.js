@@ -16,6 +16,9 @@
     const DEFAULT_MIN_PLAYERS_TO_START = 2;
     const PUBLIC_LIST_VISIBLE = 3;
     const MAX_CREATE_RETRIES = 5;
+    const PUBLIC_WAKE_TRIES = 3;
+    const PUBLIC_WAKE_ATTEMPT_MS = 15000;
+    const PUBLIC_WAKE_GAP_MS = 2000;
 
     /** @type {null | Record<string, unknown>} */
     let deps = null;
@@ -44,6 +47,10 @@
 
     let createPublic = true;
     let createRetryCount = 0;
+    let wakeGen = 0;
+    let wakeActive = false;
+    /** @type {ReturnType<typeof setTimeout> | null} */
+    let wakeTimer = null;
     /** @type {{ roomId: string, host: string, n: number, max: number }[]} */
     let publicRoomsCache = [];
 
@@ -966,13 +973,32 @@
         };
     }
 
-    function tryRelayJoin(roomId, creating, listedPublic) {
+    function pageUsesPublicRelay() {
+        const api = mirrorApi();
+        return !!(api && typeof api.usesPublicRelay === "function" && api.usesPublicRelay());
+    }
+
+    function relayDownMessage() {
+        return pageUsesPublicRelay() ? "RELAY OFF" : "RELAY OFF — RUN server\\start-relay.bat";
+    }
+
+    function cancelRelayWake() {
+        wakeGen += 1;
+        wakeActive = false;
+        if (wakeTimer) {
+            clearTimeout(wakeTimer);
+            wakeTimer = null;
+        }
+    }
+
+    function tryRelayJoin(roomId, creating, listedPublic, attemptGen) {
         const api = mirrorApi();
         if (!api) return Promise.resolve(false);
         bindMirrorHandlers();
         return api
             .connect()
             .then(function () {
+                if (attemptGen != null && attemptGen !== wakeGen) return null;
                 const ok = api.joinRoom({
                     roomId,
                     create: creating === true,
@@ -980,6 +1006,10 @@
                     ...skinJoinPayload(),
                 });
                 if (!ok) throw new Error("join send failed");
+                if (attemptGen != null && attemptGen !== wakeGen) {
+                    leaveRelay();
+                    return null;
+                }
                 state.roomId = roomId;
                 state.status = "waiting";
                 if (creating === true) state.roomPublic = createPublic;
@@ -989,9 +1019,93 @@
                 return true;
             })
             .catch(function () {
+                if (attemptGen != null && attemptGen !== wakeGen) return null;
                 leaveRelay();
                 return false;
             });
+    }
+
+    function tryRelayJoinUntil(roomId, creating, listedPublic, timeoutMs, attemptGen) {
+        return new Promise(function (resolve) {
+            let settled = false;
+            const timer = setTimeout(function () {
+                if (settled) return;
+                settled = true;
+                leaveRelay();
+                resolve(false);
+            }, timeoutMs);
+            tryRelayJoin(roomId, creating, listedPublic, attemptGen).then(function (ok) {
+                if (settled) {
+                    if (ok) leaveRelay();
+                    return;
+                }
+                settled = true;
+                clearTimeout(timer);
+                resolve(ok);
+            });
+        });
+    }
+
+    function relayJoinWithWake(roomId, creating, listedPublic) {
+        if (!pageUsesPublicRelay()) return tryRelayJoin(roomId, creating, listedPublic);
+        if (wakeActive) return Promise.resolve(null);
+        cancelRelayWake();
+        wakeActive = true;
+        const gen = wakeGen;
+        return new Promise(function (resolve) {
+            let settled = false;
+            const hint = setTimeout(function () {
+                if (!settled && gen === wakeGen) setError("WAKING RELAY");
+            }, 600);
+            function finish(result) {
+                if (settled) return;
+                settled = true;
+                clearTimeout(hint);
+                if (wakeTimer) {
+                    clearTimeout(wakeTimer);
+                    wakeTimer = null;
+                }
+                if (gen === wakeGen) wakeActive = false;
+                if (gen !== wakeGen) {
+                    resolve(null);
+                    return;
+                }
+                if (result === true) setError(null);
+                resolve(result);
+            }
+            function run(attempt) {
+                if (gen !== wakeGen) {
+                    finish(null);
+                    return;
+                }
+                if (attempt > 0) setError("WAKING RELAY");
+                tryRelayJoinUntil(
+                    roomId,
+                    creating,
+                    listedPublic,
+                    PUBLIC_WAKE_ATTEMPT_MS,
+                    gen
+                ).then(function (ok) {
+                    if (gen !== wakeGen || ok == null) {
+                        finish(null);
+                        return;
+                    }
+                    if (ok) {
+                        finish(true);
+                        return;
+                    }
+                    if (attempt + 1 >= PUBLIC_WAKE_TRIES) {
+                        finish(false);
+                        return;
+                    }
+                    wakeTimer = setTimeout(function () {
+                        wakeTimer = null;
+                        run(attempt + 1);
+                    }, PUBLIC_WAKE_GAP_MS);
+                });
+            }
+            run(0);
+        });
     }
 
     function clearOptimisticRoom() {
@@ -1007,7 +1121,8 @@
 
     function beginCreateRoom() {
         const code = generateRoomCode();
-        tryRelayJoin(code, true).then(function (ok) {
+        relayJoinWithWake(code, true).then(function (ok) {
+            if (ok == null) return;
             if (ok) {
                 if (deps.dom.mpRoomCodeInput) deps.dom.mpRoomCodeInput.value = "";
                 return;
@@ -1022,7 +1137,7 @@
                 if (deps.dom.mpRoomCodeInput) deps.dom.mpRoomCodeInput.value = "";
                 return;
             }
-            setError("RELAY OFF — RUN server\\start-relay.bat");
+            setError(relayDownMessage());
         });
     }
 
@@ -1053,12 +1168,13 @@
         if (isInRoom()) return;
         setError(null);
         clearMockTimer();
-        tryRelayJoin(code, false, true).then(function (ok) {
+        relayJoinWithWake(code, false, true).then(function (ok) {
+            if (ok == null) return;
             if (ok) {
                 if (deps.dom.mpRoomCodeInput) deps.dom.mpRoomCodeInput.value = "";
                 return;
             }
-            setError("RELAY OFF — RUN server\\start-relay.bat");
+            setError(relayDownMessage());
         });
     }
 
@@ -1081,7 +1197,8 @@
         if (isInRoom()) return;
         setError(null);
         clearMockTimer();
-        tryRelayJoin(code, false).then(function (ok) {
+        relayJoinWithWake(code, false).then(function (ok) {
+            if (ok == null) return;
             if (ok) return;
             if (allowMockFallback()) {
                 state.roomId = code;
@@ -1092,13 +1209,14 @@
                 scheduleMockPeer(Math.round(MOCK_PEER_MS * 0.65));
                 return;
             }
-            setError("RELAY OFF — RUN server\\start-relay.bat");
+            setError(relayDownMessage());
         });
     }
 
     function leaveMultiplayerRoom() {
         playHover();
         if (!isInRoom()) return;
+        cancelRelayWake();
         clearMockTimer();
         const api = mirrorApi();
         if (api && typeof api.leaveRoom === "function" && isSocketOpen()) {
@@ -1127,6 +1245,7 @@
     }
 
     function resetMultiplayerLobby() {
+        cancelRelayWake();
         clearMockTimer();
         leaveRelay();
         state.roomId = null;
@@ -1147,6 +1266,7 @@
 
     function openMultiplayerLobbySession(skin) {
         if (!deps) return;
+        cancelRelayWake();
         lobbySkin = skin || null;
         state.roomId = null;
         state.isHost = false;

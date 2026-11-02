@@ -3,10 +3,13 @@
   "private": true,
   "version": "1.0.0",
   "description": "NEBULA VOID — blind mirror WebSocket relay (no game logic)",
+  "engines": {
+    "node": ">=20"
+  },
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "node --test ../test/relay-packets.test.js ../test/relay-server.test.js ../test/mp-client.test.js"
+    "test": "node --test ../test/relay-packets.test.js ../test/relay-server.test.js ../test/mp-client.test.js ../test/relay-url.test.js"
   },
   "dependencies": {
     "ws": "^8.18.0"

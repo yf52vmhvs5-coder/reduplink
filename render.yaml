@@ -1,0 +1,19 @@
+# Nebula Void blind WebSocket relay.
+# Rooms live in one process, so this service stays at a single instance.
+services:
+  - type: web
+    name: reduplink-nebula-relay
+    runtime: node
+    plan: free
+    region: frankfurt
+    rootDir: NebulaVoid/server
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    numInstances: 1
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: ALLOWED_ORIGINS
+        value: https://yf52vmhvs5-coder.github.io

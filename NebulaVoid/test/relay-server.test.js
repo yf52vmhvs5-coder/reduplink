@@ -2,6 +2,7 @@
 
 const { describe, it, before, after } = require("node:test");
 const assert = require("node:assert/strict");
+const http = require("http");
 const { WebSocket } = require("../server/node_modules/ws");
 const { createRelayServer, MAX_WS_MESSAGE_BYTES, MAX_PUBLIC_WAITING } = require("../server/index.js");
 
@@ -590,5 +591,76 @@ describe("relay ping watchdog", () => {
             }),
         ]);
         await pingRelay.close();
+    });
+});
+
+function getText(port, path) {
+    return new Promise((resolve, reject) => {
+        const req = http.get({ hostname: "127.0.0.1", port, path }, (res) => {
+            let body = "";
+            res.setEncoding("utf8");
+            res.on("data", (chunk) => {
+                body += chunk;
+            });
+            res.on("end", () => resolve({ status: res.statusCode, body }));
+        });
+        req.on("error", reject);
+    });
+}
+
+function openOrigin(url, origin) {
+    return new Promise((resolve, reject) => {
+        const headers = {};
+        if (origin) headers.Origin = origin;
+        const ws = new WebSocket(url, { headers });
+        const timer = setTimeout(() => {
+            ws.terminate();
+            reject(new Error("open timed out"));
+        }, 2000);
+        ws.once("open", () => {
+            clearTimeout(timer);
+            resolve(ws);
+        });
+        ws.once("error", (err) => {
+            clearTimeout(timer);
+            reject(err);
+        });
+    });
+}
+
+describe("relay health and origin", () => {
+    it("answers /health and leaves the root page unchanged", async () => {
+        const relay = createRelayServer({ pingIntervalMs: 0 });
+        await new Promise((resolve) => relay.server.listen(0, "127.0.0.1", resolve));
+        const port = relay.server.address().port;
+        try {
+            const health = await getText(port, "/health");
+            assert.equal(health.status, 200);
+            assert.equal(health.body, '{"ok":true,"service":"nebula-void-relay"}\n');
+            const root = await getText(port, "/");
+            assert.equal(root.status, 200);
+            assert.equal(root.body, "NEBULA VOID relay — use WebSocket\n");
+        } finally {
+            await relay.close();
+        }
+    });
+
+    it("accepts the configured Origin and rejects any other", async () => {
+        const origin = "https://yf52vmhvs5-coder.github.io";
+        const relay = createRelayServer({
+            pingIntervalMs: 0,
+            allowedOrigins: origin + "/",
+        });
+        await new Promise((resolve) => relay.server.listen(0, "127.0.0.1", resolve));
+        const port = relay.server.address().port;
+        const url = `ws://127.0.0.1:${port}`;
+        try {
+            const ws = await openOrigin(url, origin);
+            ws.close();
+            await assert.rejects(() => openOrigin(url, "https://evil.example"));
+            await assert.rejects(() => openOrigin(url));
+        } finally {
+            await relay.close();
+        }
     });
 });
