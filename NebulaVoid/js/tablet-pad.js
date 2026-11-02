@@ -130,7 +130,7 @@
             pad.hidden = !live;
             pad.setAttribute("aria-hidden", live ? "false" : "true");
         }
-        if (leave) leave.hidden = !(live && mirrorLive());
+        if (leave) leave.hidden = !live;
         if (!live) hideStick();
         syncAbility();
     }
@@ -230,7 +230,7 @@
         };
 
         const forfeit = (e) => {
-            if (!combatAlive() || !mirrorLive()) return;
+            if (!combatAlive()) return;
             if (e.button != null && e.button !== 0) return;
             e.preventDefault();
             e.stopPropagation();
@@ -246,7 +246,11 @@
             leaveArmedAt = 0;
             leave.classList.remove("is-armed");
             hideStick();
-            if (typeof global.tryMirrorEscapeToLobby === "function") global.tryMirrorEscapeToLobby();
+            if (mirrorLive()) {
+                if (typeof global.tryMirrorEscapeToLobby === "function") global.tryMirrorEscapeToLobby();
+            } else if (typeof global.endRunEarly === "function") {
+                global.endRunEarly();
+            }
             syncChrome();
         };
 

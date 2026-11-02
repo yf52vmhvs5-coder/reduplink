@@ -187,6 +187,25 @@
         }, 2500);
     }
 
+    function endRunEarly() {
+        if (!deps.getGameActive() || deps.getIsDying()) return;
+        if (global.NebulaGameMode && global.NebulaGameMode.getRunMode() === "mirror") return;
+
+        const player = deps.getPlayer();
+        const matterEarnedSnapshot = Math.floor(player.score);
+        const survivedSecondsSnapshot = (performance.now() - deps.getRoundStartTime()) / 1000;
+
+        if (typeof deps.updateBlackHoleAudio === "function") deps.updateBlackHoleAudio(9999, 9999);
+        deps.setGameActive(false);
+        if (typeof deps.clearWasdKeysState === "function") deps.clearWasdKeysState();
+        document.body.classList.remove("game-running");
+        resetRunState();
+        deps.showGameOverOverlay(matterEarnedSnapshot, survivedSecondsSnapshot);
+        if (typeof global.retitleMirrorMatchOverlay === "function") {
+            global.retitleMirrorMatchOverlay("INTRUSION ABORTED");
+        }
+    }
+
     function onGameOverRetry() {
         if (typeof global.restoreTabletScreen === "function") global.restoreTabletScreen();
         if (typeof global.tryMirrorGameOverRetry === "function" && global.tryMirrorGameOverRetry()) {
@@ -291,6 +310,7 @@
     global.spawnInitialBots = spawnInitialBots;
     global.startRunFromRetry = startRunFromRetry;
     global.playerDeath = playerDeath;
+    global.endRunEarly = endRunEarly;
     global.onGameOverRetry = onGameOverRetry;
     global.onGameOverChangeEntity = onGameOverChangeEntity;
     global.startGameWithSkin = startGameWithSkin;
