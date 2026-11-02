@@ -1,8 +1,8 @@
-# SPACEJUNK GAMES
+# REDUPLINK GAMES
 
 Small browser games for the quiet between bigger ones. This repo is the studio uplink: open a live signal, or leave the next frequency dark.
 
-**Play:** [yf52vmhvs5-coder.github.io/spacejunk](https://yf52vmhvs5-coder.github.io/spacejunk/)
+**Play:** [yf52vmhvs5-coder.github.io/reduplink](https://yf52vmhvs5-coder.github.io/reduplink/)
 
 ## Signals
 
