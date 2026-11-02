@@ -1453,3 +1453,426 @@ a, button, input { cursor: inherit; }
         transform: translateX(-50%);
     }
 }
+
+/* ==========================================================================
+   TABLET
+   Desktop stays on the 1280 canvas. These rules apply only with .tablet-mode.
+   Bands are the screen short side, in CSS pixels:
+     mini  600–779  iPad mini 744×1133, small Android
+     air   780–899  iPad 810×1080, Air 11" 820×1180, Pro 11" 834×1194
+     pro   ≥ 900    Air 13" / Pro 12.9" 1024×1366, Pro 13" 1032×1376
+   ========================================================================== */
+html.tablet-mode {
+    --cq-title: clamp(1.85rem, 6.6vw, 3.5rem);
+    --cq-title-track: 0.12em;
+    --cq-btn-w: 260px;
+    --cq-btn-h: 52px;
+    --cq-gap: 14px;
+    --cq-logo: 52px;
+    --cq-sub-margin: 12px 0 28px;
+    --cq-sign-gap: 18px;
+    --cq-q: clamp(1.05rem, 2.5vw, 1.6rem);
+    --cq-q-long: clamp(0.96rem, 2.2vw, 1.38rem);
+    --cq-q-vlong: clamp(0.88rem, 2vw, 1.18rem);
+    --cq-q-gap: 14px;
+    --cq-answer: 1rem;
+    --cq-answer-py: 16px;
+    --cq-answer-w: 440px;
+    --cq-col: 560px;
+    --cq-quiz: 680px;
+    --cq-hud-top: max(20px, env(safe-area-inset-top));
+    --cq-hud-gap: 8px;
+    --cq-about: 14px;
+}
+
+html.tablet-mode.tablet-mini {
+    --cq-title: clamp(1.7rem, 6.8vw, 3.15rem);
+    --cq-title-track: 0.1em;
+    --cq-btn-w: 248px;
+    --cq-btn-h: 50px;
+    --cq-gap: 12px;
+    --cq-logo: 46px;
+    --cq-sub-margin: 10px 0 22px;
+    --cq-q: clamp(1rem, 2.8vw, 1.42rem);
+    --cq-q-long: clamp(0.92rem, 2.4vw, 1.22rem);
+    --cq-q-vlong: clamp(0.86rem, 2.1vw, 1.08rem);
+    --cq-answer: 0.96rem;
+    --cq-answer-py: 14px;
+    --cq-answer-w: 400px;
+    --cq-col: 480px;
+    --cq-quiz: 560px;
+    --cq-hud-top: max(16px, env(safe-area-inset-top));
+}
+
+html.tablet-mode.tablet-mini.tablet-land {
+    --cq-title: clamp(1.55rem, 4.2vw, 2.35rem);
+    --cq-btn-h: 46px;
+    --cq-gap: 10px;
+    --cq-logo: 40px;
+    --cq-sub-margin: 6px 0 12px;
+    --cq-sign-gap: 8px;
+    --cq-q: clamp(0.98rem, 2.35vh, 1.28rem);
+    --cq-q-long: clamp(0.9rem, 2.1vh, 1.14rem);
+    --cq-q-vlong: clamp(0.84rem, 1.9vh, 1.05rem);
+    --cq-q-gap: 8px;
+    --cq-answer: 0.92rem;
+    --cq-answer-py: 11px;
+    --cq-hud-top: max(8px, env(safe-area-inset-top));
+    --cq-hud-gap: 3px;
+}
+
+html.tablet-mode.tablet-air.tablet-land {
+    --cq-title: clamp(1.7rem, 3.6vw, 2.75rem);
+    --cq-btn-h: 50px;
+    --cq-gap: 12px;
+    --cq-logo: 46px;
+    --cq-sub-margin: 8px 0 16px;
+    --cq-sign-gap: 12px;
+    --cq-q: clamp(1.02rem, 2.5vh, 1.45rem);
+    --cq-q-long: clamp(0.94rem, 2.2vh, 1.28rem);
+    --cq-q-vlong: clamp(0.88rem, 2vh, 1.12rem);
+    --cq-q-gap: 10px;
+    --cq-answer-py: 13px;
+    --cq-hud-top: max(10px, env(safe-area-inset-top));
+    --cq-hud-gap: 4px;
+}
+
+html.tablet-mode.tablet-pro {
+    --cq-title: clamp(2rem, 6.2vw, 4.2rem);
+    --cq-title-track: 0.14em;
+    --cq-btn-w: 300px;
+    --cq-btn-h: 56px;
+    --cq-gap: 16px;
+    --cq-logo: 62px;
+    --cq-sub-margin: 16px 0 36px;
+    --cq-sign-gap: 22px;
+    --cq-q: clamp(1.15rem, 2.2vw, 1.85rem);
+    --cq-q-long: clamp(1.05rem, 2vw, 1.5rem);
+    --cq-q-vlong: clamp(0.95rem, 1.8vw, 1.28rem);
+    --cq-answer: 1.06rem;
+    --cq-answer-py: 18px;
+    --cq-answer-w: 520px;
+    --cq-col: 640px;
+    --cq-quiz: 760px;
+    --cq-hud-top: max(36px, env(safe-area-inset-top));
+    --cq-about: 15px;
+}
+
+html.tablet-mode.tablet-pro.tablet-land {
+    --cq-title: clamp(2rem, 4vw, 3.5rem);
+    --cq-sub-margin: 12px 0 24px;
+    --cq-sign-gap: 16px;
+    --cq-q: clamp(1.12rem, 2.4vh, 1.7rem);
+    --cq-q-long: clamp(1.02rem, 2.1vh, 1.45rem);
+    --cq-q-vlong: clamp(0.94rem, 1.9vh, 1.24rem);
+    --cq-hud-top: max(16px, env(safe-area-inset-top));
+    --cq-hud-gap: 6px;
+}
+
+html.tablet-mode,
+html.tablet-mode body {
+    min-width: 0;
+    height: 100vh;
+    height: 100svh;
+    max-height: 100vh;
+    max-height: 100svh;
+    cursor: auto;
+    touch-action: manipulation;
+    overscroll-behavior: none;
+    -webkit-text-size-adjust: 100%;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+html.tablet-mode input,
+html.tablet-mode textarea,
+html.tablet-mode .about-body {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+html.tablet-mode button,
+html.tablet-mode .mode-option,
+html.tablet-mode .answer-btn {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html.tablet-mode input {
+    cursor: text;
+}
+
+html.tablet-mode .screen {
+    height: 100vh;
+    height: 100svh;
+    max-height: 100vh;
+    max-height: 100svh;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding:
+        max(16px, env(safe-area-inset-top))
+        max(16px, env(safe-area-inset-right))
+        max(16px, env(safe-area-inset-bottom))
+        max(16px, env(safe-area-inset-left));
+}
+
+html.tablet-mode .screen:not(#quiz-screen) {
+    justify-content: safe center;
+}
+
+html.tablet-mode .signal-logo .mark-alien {
+    width: var(--cq-logo);
+    height: var(--cq-logo);
+}
+
+html.tablet-mode .mega-title {
+    font-size: var(--cq-title);
+    letter-spacing: var(--cq-title-track);
+    white-space: nowrap;
+}
+
+html.tablet-mode .subtitle {
+    margin: var(--cq-sub-margin);
+}
+
+html.tablet-mode #start-screen .menu-actions,
+html.tablet-mode .mode-list,
+html.tablet-mode .lobby-panel {
+    gap: var(--cq-gap);
+}
+
+html.tablet-mode .start-reveal .studio-sign {
+    margin-top: var(--cq-sign-gap);
+}
+
+html.tablet-mode .btn-textured,
+html.tablet-mode .mode-option {
+    width: min(var(--cq-btn-w), calc(100vw - 48px));
+    height: var(--cq-btn-h);
+}
+
+html.tablet-mode .mode-list {
+    width: min(100%, var(--cq-btn-w));
+    margin-bottom: 20px;
+}
+
+html.tablet-mode .start-toolbar {
+    bottom: max(14px, env(safe-area-inset-bottom));
+    gap: 32px;
+}
+
+html.tablet-mode .icon-btn {
+    min-width: 48px;
+    min-height: 48px;
+}
+
+html.tablet-mode .lobby-code-input {
+    height: 52px;
+    font-size: 16px;
+    max-width: min(260px, calc(100vw - 48px));
+}
+
+html.tablet-mode.tablet-keyboard #lobby-screen.active {
+    justify-content: flex-start;
+    overflow-y: auto;
+    padding-bottom: calc(max(16px, env(safe-area-inset-bottom)) + var(--tablet-kb, 0px));
+}
+
+html.tablet-mode .about-overlay:not([hidden]) {
+    justify-content: flex-start;
+    overflow: hidden;
+    padding:
+        max(18px, env(safe-area-inset-top))
+        max(18px, env(safe-area-inset-right))
+        max(16px, env(safe-area-inset-bottom))
+        max(18px, env(safe-area-inset-left));
+}
+
+html.tablet-mode .about-overlay[hidden] {
+    display: none;
+}
+
+html.tablet-mode .about-frame {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    width: min(36rem, 100%);
+}
+
+html.tablet-mode .about-footer {
+    flex: 0 0 auto;
+}
+
+html.tablet-mode .about-body {
+    font-size: var(--cq-about);
+}
+
+html.tablet-mode .about-back {
+    min-height: 48px;
+}
+
+html.tablet-mode #quiz-screen {
+    height: 100vh;
+    height: 100svh;
+    max-height: 100vh;
+    max-height: 100svh;
+    padding: 0;
+    overflow: hidden;
+    justify-content: flex-start;
+}
+
+html.tablet-mode .game-hud {
+    top: var(--cq-hud-top);
+}
+
+html.tablet-mode .hud-stack {
+    gap: var(--cq-hud-gap);
+}
+
+html.tablet-mode .player-turn,
+html.tablet-mode .question-meta,
+html.tablet-mode .question-fact {
+    max-width: calc(100vw - 40px);
+}
+
+html.tablet-mode.tablet-mini.tablet-land .session-progress,
+html.tablet-mode.tablet-mini.tablet-land .player-turn,
+html.tablet-mode.tablet-mini.tablet-land .mode-badge,
+html.tablet-mode.tablet-mini.tablet-land .timer-display,
+html.tablet-mode.tablet-mini.tablet-land .score-display,
+html.tablet-mode.tablet-mini.tablet-land .question-meta {
+    letter-spacing: 0.16em;
+}
+
+html.tablet-mode.tablet-mini.tablet-land .life-mark svg {
+    width: 13px;
+    height: 18px;
+}
+
+html.tablet-mode .question-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: safe center;
+    width: min(92vw, var(--cq-quiz));
+    padding:
+        var(--hud-clearance)
+        max(16px, env(safe-area-inset-right))
+        max(16px, env(safe-area-inset-bottom))
+        max(16px, env(safe-area-inset-left));
+}
+
+html.tablet-mode.tablet-port .question-container {
+    padding-bottom: max(28px, env(safe-area-inset-bottom));
+}
+
+html.tablet-mode #question-display:not(.is-end) {
+    font-size: var(--cq-q);
+    margin-bottom: var(--cq-q-gap);
+}
+
+html.tablet-mode #question-display.is-long:not(.is-end) {
+    font-size: var(--cq-q-long);
+}
+
+html.tablet-mode #question-display.is-very-long:not(.is-end) {
+    font-size: var(--cq-q-vlong);
+}
+
+html.tablet-mode #question-display.is-end {
+    font-size: clamp(1.15rem, 3vw, 1.85rem);
+}
+
+html.tablet-mode.tablet-mini.tablet-land #question-display.is-end {
+    font-size: clamp(1.05rem, 2.8vh, 1.4rem);
+    margin-bottom: 16px;
+}
+
+html.tablet-mode .quiz-brand-stack,
+html.tablet-mode .answer-options,
+html.tablet-mode .end-actions {
+    width: min(100%, var(--cq-col));
+    max-width: var(--cq-col);
+}
+
+html.tablet-mode.tablet-mini.tablet-land .quiz-brand-stack {
+    margin-bottom: 8px;
+}
+
+html.tablet-mode.tablet-mini.tablet-land .question-brand {
+    margin-bottom: 4px;
+}
+
+html.tablet-mode.tablet-mini.tablet-land .question-mark {
+    width: 24px;
+    height: 24px;
+}
+
+html.tablet-mode .answer-btn {
+    max-width: min(100%, var(--cq-answer-w));
+    min-height: 48px;
+    padding: var(--cq-answer-py) 12px;
+    font-size: var(--cq-answer);
+}
+
+html.tablet-mode .powerup-btn {
+    min-width: 72px;
+    min-height: 44px;
+}
+
+html.tablet-mode.tablet-mini .powerup-actions {
+    gap: 6px;
+}
+
+html.tablet-mode.tablet-mini .powerup-wing {
+    display: contents;
+}
+
+html.tablet-mode.tablet-mini .powerup-btn {
+    min-width: 0;
+    flex: 1 1 0;
+    padding: 8px 6px;
+}
+
+html.tablet-mode.tablet-pro .powerup-btn {
+    min-width: 88px;
+    min-height: 48px;
+}
+
+html.tablet-mode .btn-textured:active,
+html.tablet-mode .mode-option:active,
+html.tablet-mode .about-back:active {
+    border-color: var(--signal);
+    color: #fff;
+    background: color-mix(in srgb, var(--signal) 14%, rgba(0, 0, 0, 0.35));
+}
+
+@media (hover: none) {
+    html.tablet-mode .btn-textured:hover,
+    html.tablet-mode .mode-option:hover,
+    html.tablet-mode .about-back:hover {
+        border-color: var(--frame);
+        color: var(--text-main);
+        background: rgba(0, 0, 0, 0.35);
+        box-shadow: none;
+    }
+
+    html.tablet-mode .btn-textured:hover .btn-text,
+    html.tablet-mode .mode-option:hover .btn-text {
+        color: inherit;
+    }
+
+    html.tablet-mode .powerup-btn:hover:not(:disabled):not(.is-active) {
+        color: var(--text-main);
+        border-color: var(--frame);
+        background: rgba(0, 0, 0, 0.35);
+        box-shadow: none;
+    }
+
+    html.tablet-mode .answer-btn:hover:not(.is-correct):not(.is-wrong):not(.is-pending):not(.is-eliminated) {
+        color: var(--text-main);
+        border-bottom-color: var(--line);
+        background: transparent;
+    }
+}

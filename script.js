@@ -35,7 +35,9 @@
             status: "live",
             line: "Fifty questions on space, tech, and in-between facts. Classic, Survival, or Blitz — solo or a shared room code.",
             href: "CosmicQuiz/index.html",
-            web: true
+            web: true,
+            tablet: true,
+            tabletLine: "Touch layout sized for the tablet. Same modes and room code — not a shrunk desktop page."
         },
         {
             title: "CELL WARS",
@@ -278,7 +280,7 @@
         return el;
     }
 
-    function tabletBadge() {
+    function tabletBadge(game) {
         var tipId = nextDeckTipId();
         var el = document.createElement("span");
         el.className = "card-platform card-platform--on";
@@ -295,7 +297,8 @@
             signalTip(
                 tipId,
                 "[ TABLET ]",
-                "Touch-friendly — on-screen pad and controls, not just a shrunk desktop view."
+                (game && game.tabletLine) ||
+                    "Touch-friendly — on-screen pad and controls, not just a shrunk desktop view."
             )
         );
         bindPlatformBadge(el);
@@ -314,7 +317,7 @@
             wrap.appendChild(browserBadge());
         }
         if (tablet) {
-            wrap.appendChild(tabletBadge());
+            wrap.appendChild(tabletBadge(game));
         }
         return wrap;
     }
