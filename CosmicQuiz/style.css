@@ -1572,10 +1572,10 @@ html.tablet-mode.tablet-pro.tablet-land {
 html.tablet-mode,
 html.tablet-mode body {
     min-width: 0;
-    height: 100vh;
     height: 100svh;
-    max-height: 100vh;
+    height: var(--app-height, 100svh);
     max-height: 100svh;
+    max-height: var(--app-height, 100svh);
     cursor: auto;
     touch-action: manipulation;
     overscroll-behavior: none;
@@ -1604,10 +1604,10 @@ html.tablet-mode input {
 }
 
 html.tablet-mode .screen {
-    height: 100vh;
     height: 100svh;
-    max-height: 100vh;
+    height: var(--app-height, 100svh);
     max-height: 100svh;
+    max-height: var(--app-height, 100svh);
     min-height: 0;
     overflow-x: hidden;
     overflow-y: auto;
@@ -1658,14 +1658,26 @@ html.tablet-mode .mode-list {
     margin-bottom: 20px;
 }
 
+html.tablet-mode #start-screen {
+    overflow: visible;
+    padding-bottom: calc(152px + env(safe-area-inset-bottom));
+}
+
 html.tablet-mode .start-toolbar {
-    bottom: max(14px, env(safe-area-inset-bottom));
-    gap: 32px;
+    position: fixed;
+    z-index: 30;
+    bottom: calc(88px + env(safe-area-inset-bottom));
+    gap: 36px;
 }
 
 html.tablet-mode .icon-btn {
-    min-width: 48px;
-    min-height: 48px;
+    min-width: 52px;
+    min-height: 52px;
+}
+
+html.tablet-mode .icon-btn svg {
+    width: 28px;
+    height: 40px;
 }
 
 html.tablet-mode .lobby-code-input {
@@ -1714,10 +1726,10 @@ html.tablet-mode .about-back {
 }
 
 html.tablet-mode #quiz-screen {
-    height: 100vh;
     height: 100svh;
-    max-height: 100vh;
+    height: var(--app-height, 100svh);
     max-height: 100svh;
+    max-height: var(--app-height, 100svh);
     padding: 0;
     overflow: hidden;
     justify-content: flex-start;

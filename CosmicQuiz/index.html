@@ -27,6 +27,9 @@
             else if (shortSide >= 600 && shortSide < 780) size = "tablet-mini";
             root.classList.add(size);
             root.classList.add(window.matchMedia("(orientation: landscape)").matches ? "tablet-land" : "tablet-port");
+            var vv = window.visualViewport;
+            var visibleH = (vv && vv.height) || window.innerHeight;
+            if (visibleH) root.style.setProperty("--app-height", Math.round(visibleH) + "px");
             var viewport = document.querySelector('meta[name="viewport"]');
             if (viewport) {
                 viewport.setAttribute("content", "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover");

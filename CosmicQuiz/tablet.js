@@ -56,6 +56,7 @@
         root.classList.remove("tablet-mini", "tablet-air", "tablet-pro", "tablet-land", "tablet-port");
         if (!on) {
             setViewport(VIEW_DESKTOP);
+            root.style.removeProperty("--app-height");
             root.style.removeProperty("--tablet-kb");
             root.classList.remove("tablet-keyboard");
             return;
@@ -65,19 +66,19 @@
         var land = window.matchMedia("(orientation: landscape)").matches;
         root.classList.add(land ? "tablet-land" : "tablet-port");
         setViewport(VIEW_TABLET);
+        syncVisibleHeight();
     }
 
-    function applyKeyboard() {
+    function syncVisibleHeight() {
         var root = document.documentElement;
-        var vv = window.visualViewport;
-        if (!root.classList.contains("tablet-mode") || !vv) {
-            root.style.removeProperty("--tablet-kb");
-            root.classList.remove("tablet-keyboard");
+        if (!root.classList.contains("tablet-mode")) {
+            root.style.removeProperty("--app-height");
             return;
         }
-        var inset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-        root.style.setProperty("--tablet-kb", inset.toFixed(0) + "px");
-        root.classList.toggle("tablet-keyboard", inset > 80);
+        var vv = window.visualViewport;
+        var height = vv ? vv.height : window.innerHeight;
+        if (!height) return;
+        root.style.setProperty("--app-height", Math.round(height) + "px");
     }
 
     function onRotate() {
@@ -97,8 +98,8 @@
     window.addEventListener("orientationchange", onRotate);
 
     if (window.visualViewport) {
-        window.visualViewport.addEventListener("resize", applyKeyboard);
-        window.visualViewport.addEventListener("scroll", applyKeyboard);
+        window.visualViewport.addEventListener("resize", syncVisibleHeight);
+        window.visualViewport.addEventListener("scroll", syncVisibleHeight);
     }
 
     document.addEventListener("focusin", function (e) {
