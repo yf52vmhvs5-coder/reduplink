@@ -267,20 +267,6 @@
             global.setTimeout(syncMode, 300);
         });
 
-        // Reduce Safari pull-from-top / overscroll dumping play (cannot block OS chrome 100%).
-        document.addEventListener(
-            "touchstart",
-            (e) => {
-                if (!tabletOn() || !document.body.classList.contains("game-running")) return;
-                if (!e.touches || !e.touches[0]) return;
-                if (e.target && e.target.closest && e.target.closest("#tabletLeaveBtn, #tabletPad, #tabletAbilityBtn, #tabletStick, button, a, input, textarea")) {
-                    return;
-                }
-                if (e.touches[0].clientY < 22) e.preventDefault();
-            },
-            { passive: false }
-        );
-
         const vv = global.visualViewport;
         if (vv) {
             const applyKeyboard = () => {

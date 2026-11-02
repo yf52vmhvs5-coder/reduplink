@@ -30,7 +30,6 @@
     <!-- Anti-flicker: ascunde hub/meniu înainte de style.css (evită flash la refresh) -->
     <style>
         #introScreen, #startMenu { opacity: 0; visibility: hidden; }
-        #introScreen #introTitleWrap,
         #introScreen #introTitle,
         #introScreen #hubActions { opacity: 0; }
     </style>
@@ -57,9 +56,7 @@
     </button>
 
     <div id="introScreen" class="main-hub" aria-label="Main menu">
-        <div id="introTitleWrap" class="intro-title-wrap">
-            <h1 id="introTitle" data-original-text="NEBULA VOID">NEBULA VOID</h1>
-        </div>
+        <h1 id="introTitle" data-original-text="NEBULA VOID">NEBULA VOID</h1>
         <nav id="hubActions" aria-hidden="true">
             <button id="hubPlayBtn" type="button" class="hub-menu-btn">[ PLAY ]</button>
             <button id="hubMultiplayerBtn" type="button" class="hub-menu-btn">[ MULTIPLAYER ]</button>

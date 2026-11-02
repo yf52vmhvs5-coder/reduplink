@@ -24,36 +24,6 @@
         button.innerHTML = `${label}: <span class="${isOn ? "state-on" : "state-off"}">${isOn ? "ON" : "OFF"}</span>`;
     }
 
-    function isTabletUi() {
-        return !!(document.documentElement && document.documentElement.classList.contains("tablet-mode"));
-    }
-
-    /** Desktop: Fullscreen API. Tablet/iPad: CSS immersive (Safari swipe cannot "exit" it). */
-    function isScreenEngaged() {
-        if (isTabletUi()) {
-            return !!(document.documentElement && document.documentElement.classList.contains("nv-immersive"));
-        }
-        return !!document.fullscreenElement;
-    }
-
-    function setTabletImmersive(on) {
-        const root = document.documentElement;
-        if (!root) return;
-        root.classList.toggle("nv-immersive", !!on);
-        if (document.body) document.body.classList.toggle("nv-immersive", !!on);
-    }
-
-    function toggleScreenMode() {
-        if (isTabletUi()) {
-            setTabletImmersive(!isScreenEngaged());
-            return Promise.resolve();
-        }
-        const req = !document.fullscreenElement
-            ? document.documentElement.requestFullscreen()
-            : document.exitFullscreen();
-        return req && typeof req.catch === "function" ? req.catch(() => {}) : Promise.resolve();
-    }
-
     function getEntitySelectActive() {
         return entitySelectActive;
     }
@@ -247,7 +217,7 @@
             if (typeof deps.playHoverSound === "function") deps.playHoverSound();
         } catch (e) {}
         if (typeof deps.syncControlSchemePickerUi === "function") deps.syncControlSchemePickerUi();
-        setMenuToggleLabel(d.menuFullscreenBtn, "SCREEN", isScreenEngaged());
+        setMenuToggleLabel(d.menuFullscreenBtn, "SCREEN", !!document.fullscreenElement);
         setMenuToggleLabel(d.menuSoundBtn, "SOUND", deps.getSoundEnabled());
         if (d.introScreen) d.introScreen.style.display = "none";
         showMenuOverlay(d.optionsScreen);
@@ -346,9 +316,8 @@
                 deps.ensureDrawLoop();
             });
         }
-        const titleMotion = document.getElementById("introTitleWrap") || d.menuTitle;
-        if (titleMotion) {
-            titleMotion.addEventListener("transitionend", (ev) => {
+        if (d.menuTitle) {
+            d.menuTitle.addEventListener("transitionend", (ev) => {
                 if (ev.propertyName === "top" || ev.propertyName === "transform") onHubTitleSettled();
             });
         }
@@ -369,7 +338,7 @@
 
     function initMenuState() {
         const d = deps.dom;
-        setMenuToggleLabel(d.menuFullscreenBtn, "SCREEN", isScreenEngaged());
+        setMenuToggleLabel(d.menuFullscreenBtn, "SCREEN", !!document.fullscreenElement);
         setMenuToggleLabel(d.menuSoundBtn, "SOUND", deps.getSoundEnabled());
         if (typeof deps.renderSelectedSkin === "function") deps.renderSelectedSkin();
         if (d.startMenu && hubSkippedForSession) {
@@ -381,16 +350,13 @@
         const d = deps.dom;
         if (d.menuFullscreenBtn) {
             d.menuFullscreenBtn.addEventListener("click", () => {
-                const done = toggleScreenMode();
-                if (done && typeof done.then === "function") {
-                    done.then(() => setMenuToggleLabel(d.menuFullscreenBtn, "SCREEN", isScreenEngaged()));
-                } else {
-                    setMenuToggleLabel(d.menuFullscreenBtn, "SCREEN", isScreenEngaged());
-                }
+                const req = !document.fullscreenElement
+                    ? document.documentElement.requestFullscreen()
+                    : document.exitFullscreen();
+                if (req && typeof req.catch === "function") req.catch(() => {});
             });
             document.addEventListener("fullscreenchange", () => {
-                if (isTabletUi()) return;
-                setMenuToggleLabel(d.menuFullscreenBtn, "SCREEN", isScreenEngaged());
+                setMenuToggleLabel(d.menuFullscreenBtn, "SCREEN", !!document.fullscreenElement);
             });
         }
         if (d.menuSoundBtn) {

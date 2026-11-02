@@ -383,27 +383,13 @@ body::after {
     visibility: visible;
 }
 
-/* Wrapper owns horizontal center — title size/opacity animate inside without X drift */
-#introScreen.main-hub #introTitleWrap {
+#introScreen.main-hub #introTitle {
     position: fixed;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+    margin: 0;
     z-index: 2;
-    margin: 0;
-    max-width: 96vw;
-    pointer-events: none;
-    transition:
-        top 0.85s cubic-bezier(0.22, 1, 0.36, 1),
-        transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-#introScreen.main-hub #introTitle {
-    position: relative;
-    left: auto;
-    top: auto;
-    transform: none;
-    margin: 0;
     width: max-content;
     max-width: 96vw;
     padding: 0 8px;
@@ -416,27 +402,23 @@ body::after {
     text-shadow: 0 0 20px rgba(255, 45, 45, 0.5);
     animation: titleFlicker 5s infinite;
     transition:
+        top 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.85s cubic-bezier(0.22, 1, 0.36, 1),
         font-size 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+        letter-spacing 0.85s cubic-bezier(0.22, 1, 0.36, 1),
         color 0.4s ease,
         text-shadow 0.4s ease;
     opacity: 0;
     pointer-events: none;
 }
 
-#introScreen.intro-ready #introTitleWrap {
-    opacity: 1;
-}
-
 #introScreen.intro-ready #introTitle {
     animation: hubTitleIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards, titleFlicker 5s infinite 0.55s;
 }
 
-#introScreen.hub-title-settled #introTitleWrap {
+#introScreen.hub-title-settled #introTitle {
     top: 12vh;
     transform: translate(-50%, 0);
-}
-
-#introScreen.hub-title-settled #introTitle {
     font-size: clamp(36px, 6.8vw, 74px);
     letter-spacing: clamp(4px, 1.45vw, 16px);
 }
@@ -3187,8 +3169,7 @@ body::after {
 }
 
 @keyframes titleGlitch {
-    /* Offsets relative to #introTitleWrap (wrapper keeps horizontal center) */
-    0%   { transform: translate(0, 0) skewX(0deg);    filter: none; }
+    0%   { transform: translate(0, 0)  skewX(0deg);    filter: none; }
     18%  { transform: translate(-3px, 1px) skewX(-4deg); filter: hue-rotate(45deg) saturate(1.4); }
     32%  { transform: translate(2px, -2px) skewX(3deg);  filter: hue-rotate(-30deg) blur(0.5px); }
     48%  { transform: translate(-2px, 2px) skewX(-2deg); filter: hue-rotate(80deg); }
@@ -3924,7 +3905,6 @@ html.tablet-mode,
 html.tablet-mode body {
     touch-action: manipulation;
     overscroll-behavior: none;
-    overscroll-behavior-y: none;
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
@@ -3933,26 +3913,6 @@ html.tablet-mode body {
 
 html.tablet-mode #gameCanvas,
 html.tablet-mode body.game-running {
-    touch-action: none;
-    overscroll-behavior: none;
-    overscroll-behavior-y: none;
-}
-
-html.tablet-mode body.game-running {
-    overflow: hidden;
-}
-
-/* Tablet SCREEN: immersive lock without Fullscreen API (swipe-down cannot dismiss it) */
-html.tablet-mode.nv-immersive,
-html.tablet-mode.nv-immersive body {
-    height: 100%;
-    height: 100dvh;
-    overflow: hidden;
-    overscroll-behavior: none;
-    overscroll-behavior-y: none;
-}
-
-html.tablet-mode.nv-immersive #gameCanvas {
     touch-action: none;
 }
 
@@ -4132,11 +4092,8 @@ html.tablet-keyboard #multiplayerLobbyScreen.menu-overlay {
         --hub-actions-top: 28vh;
     }
 
-    html.tablet-mode #introScreen.hub-title-settled #introTitleWrap {
-        top: 4vh;
-    }
-
     html.tablet-mode #introScreen.hub-title-settled #introTitle {
+        top: 4vh;
         font-size: clamp(28px, 6.5vh, 52px);
         letter-spacing: clamp(3px, 1vw, 10px);
     }
