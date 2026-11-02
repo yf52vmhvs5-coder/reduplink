@@ -24,6 +24,43 @@
         button.innerHTML = `${label}: <span class="${isOn ? "state-on" : "state-off"}">${isOn ? "ON" : "OFF"}</span>`;
     }
 
+    const SCREEN_WANTED_KEY = "nebulaVoidScreenWanted";
+
+    function isStandaloneApp() {
+        return global.navigator.standalone === true;
+    }
+
+    function getFullscreenElement() {
+        return document.fullscreenElement || document.webkitFullscreenElement || null;
+    }
+
+    function isScreenOn() {
+        return isStandaloneApp() || !!getFullscreenElement();
+    }
+
+    function setScreen(on) {
+        const root = document.documentElement;
+        const fn = on
+            ? root.requestFullscreen || root.webkitRequestFullscreen
+            : document.exitFullscreen || document.webkitExitFullscreen;
+        if (typeof fn !== "function") return;
+        try {
+            const req = fn.call(on ? root : document);
+            if (req && typeof req.catch === "function") req.catch(() => {});
+        } catch (e) {}
+    }
+
+    /** Safari grants fullscreen only inside a tap/click handler. */
+    function restoreTabletScreen() {
+        if (!document.documentElement.classList.contains("tablet-mode") || isScreenOn()) return;
+        try {
+            if (localStorage.getItem(SCREEN_WANTED_KEY) !== "1") return;
+        } catch (e) {
+            return;
+        }
+        setScreen(true);
+    }
+
     function getEntitySelectActive() {
         return entitySelectActive;
     }
@@ -144,6 +181,7 @@
 
     function enterMultiplayerLobby(skin) {
         if (!skin || !skin.unlocked) return;
+        restoreTabletScreen();
         const d = deps.dom;
         const player = deps.getPlayer();
         if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
@@ -217,7 +255,7 @@
             if (typeof deps.playHoverSound === "function") deps.playHoverSound();
         } catch (e) {}
         if (typeof deps.syncControlSchemePickerUi === "function") deps.syncControlSchemePickerUi();
-        setMenuToggleLabel(d.menuFullscreenBtn, "SCREEN", !!document.fullscreenElement);
+        setMenuToggleLabel(d.menuFullscreenBtn, "SCREEN", isScreenOn());
         setMenuToggleLabel(d.menuSoundBtn, "SOUND", deps.getSoundEnabled());
         if (d.introScreen) d.introScreen.style.display = "none";
         showMenuOverlay(d.optionsScreen);
@@ -338,7 +376,7 @@
 
     function initMenuState() {
         const d = deps.dom;
-        setMenuToggleLabel(d.menuFullscreenBtn, "SCREEN", !!document.fullscreenElement);
+        setMenuToggleLabel(d.menuFullscreenBtn, "SCREEN", isScreenOn());
         setMenuToggleLabel(d.menuSoundBtn, "SOUND", deps.getSoundEnabled());
         if (typeof deps.renderSelectedSkin === "function") deps.renderSelectedSkin();
         if (d.startMenu && hubSkippedForSession) {
@@ -350,14 +388,16 @@
         const d = deps.dom;
         if (d.menuFullscreenBtn) {
             d.menuFullscreenBtn.addEventListener("click", () => {
-                const req = !document.fullscreenElement
-                    ? document.documentElement.requestFullscreen()
-                    : document.exitFullscreen();
-                if (req && typeof req.catch === "function") req.catch(() => {});
+                if (isStandaloneApp()) return;
+                const next = !getFullscreenElement();
+                try {
+                    localStorage.setItem(SCREEN_WANTED_KEY, next ? "1" : "0");
+                } catch (e) {}
+                setScreen(next);
             });
-            document.addEventListener("fullscreenchange", () => {
-                setMenuToggleLabel(d.menuFullscreenBtn, "SCREEN", !!document.fullscreenElement);
-            });
+            const syncScreenLabel = () => setMenuToggleLabel(d.menuFullscreenBtn, "SCREEN", isScreenOn());
+            document.addEventListener("fullscreenchange", syncScreenLabel);
+            document.addEventListener("webkitfullscreenchange", syncScreenLabel);
         }
         if (d.menuSoundBtn) {
             d.menuSoundBtn.addEventListener("click", async () => {
@@ -382,4 +422,6 @@
     global.initMainHub = initMainHub;
     global.initMenuState = initMenuState;
     global.wireMenuSystemButtons = wireMenuSystemButtons;
+    global.restoreTabletScreen = restoreTabletScreen;
+    global.isStandaloneApp = isStandaloneApp;
 })(typeof window !== "undefined" ? window : globalThis);

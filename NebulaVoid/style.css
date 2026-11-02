@@ -158,8 +158,10 @@ body.game-running #ui #score {
     filter: drop-shadow(0 0 7px color-mix(in srgb, var(--mp-taunt-accent, #c8c8c8) 48%, transparent));
 }
 
-#mpTauntBtn.is-ready:hover {
-    transform: scale(1.07);
+@media (hover: hover) {
+    #mpTauntBtn.is-ready:hover {
+        transform: scale(1.07);
+    }
 }
 
 #mpTauntBtn.is-ready:active {
@@ -526,9 +528,11 @@ body::after {
         box-shadow 0.25s ease;
 }
 
-.hub-color-preview:hover {
-    transform: scale(1.1);
-    border-color: rgba(255, 255, 255, 0.48);
+@media (hover: hover) {
+    .hub-color-preview:hover {
+        transform: scale(1.1);
+        border-color: rgba(255, 255, 255, 0.48);
+    }
 }
 
 .hub-color-preview:active {
@@ -609,12 +613,14 @@ body::after {
     transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.hub-color-swatch:hover {
-    transform: scale(1.12);
-    border-color: rgba(255, 255, 255, 0.45);
-    box-shadow:
-        0 0 16px color-mix(in srgb, var(--swatch-color) 65%, transparent),
-        inset 0 0 8px rgba(255, 255, 255, 0.2);
+@media (hover: hover) {
+    .hub-color-swatch:hover {
+        transform: scale(1.12);
+        border-color: rgba(255, 255, 255, 0.45);
+        box-shadow:
+            0 0 16px color-mix(in srgb, var(--swatch-color) 65%, transparent),
+            inset 0 0 8px rgba(255, 255, 255, 0.2);
+    }
 }
 
 .hub-color-swatch.is-active {
@@ -648,11 +654,13 @@ body::after {
     transition: color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease, background 0.25s ease;
 }
 
-.hub-menu-btn:hover {
-    color: #ffffff;
-    border-color: rgba(255, 255, 255, 0.55);
-    background: rgba(255, 255, 255, 0.06);
-    transform: scale(1.03);
+@media (hover: hover) {
+    .hub-menu-btn:hover {
+        color: #ffffff;
+        border-color: rgba(255, 255, 255, 0.55);
+        background: rgba(255, 255, 255, 0.06);
+        transform: scale(1.03);
+    }
 }
 
 #hubPlayBtn {
@@ -662,12 +670,14 @@ body::after {
     box-shadow: 0 0 16px color-mix(in srgb, var(--hub-signal-tint) 26%, transparent);
 }
 
-#hubPlayBtn:hover {
-    color: #ffffff;
-    border-color: var(--hub-signal-tint);
-    background: color-mix(in srgb, var(--hub-signal-tint) 10%, rgba(0, 0, 0, 0.35));
-    box-shadow: 0 0 22px color-mix(in srgb, var(--hub-signal-tint) 40%, transparent);
-    transform: scale(1.04);
+@media (hover: hover) {
+    #hubPlayBtn:hover {
+        color: #ffffff;
+        border-color: var(--hub-signal-tint);
+        background: color-mix(in srgb, var(--hub-signal-tint) 10%, rgba(0, 0, 0, 0.35));
+        box-shadow: 0 0 22px color-mix(in srgb, var(--hub-signal-tint) 40%, transparent);
+        transform: scale(1.04);
+    }
 }
 
 .hub-menu-btn:active {
@@ -711,16 +721,20 @@ body::after {
     transition: transform 0.22s ease;
 }
 
-.hub-brand-alien-btn:hover {
-    transform: translateY(-1px);
+@media (hover: hover) {
+    .hub-brand-alien-btn:hover {
+        transform: translateY(-1px);
+    }
 }
 
 .hub-brand-alien-btn:active {
     transform: translateY(0) scale(0.97);
 }
 
-.hub-brand-alien-btn:hover .hub-brand-alien {
-    filter: drop-shadow(0 0 10px color-mix(in srgb, var(--hub-signal-tint, #ff2d2d) 68%, transparent));
+@media (hover: hover) {
+    .hub-brand-alien-btn:hover .hub-brand-alien {
+        filter: drop-shadow(0 0 10px color-mix(in srgb, var(--hub-signal-tint, #ff2d2d) 68%, transparent));
+    }
 }
 
 .hub-brand-alien-btn--beckon .hub-brand-alien-body {
@@ -1031,11 +1045,13 @@ body::after {
     padding: 10px 22px;
 }
 
-#aboutScreen .about-footer .menu-overlay-back:hover {
-    color: #ffffff;
-    border-color: color-mix(in srgb, var(--about-accent) 40%, rgba(255, 255, 255, 0.65));
-    background: rgba(255, 255, 255, 0.06);
-    box-shadow: 0 0 16px color-mix(in srgb, var(--about-accent) 16%, transparent);
+@media (hover: hover) {
+    #aboutScreen .about-footer .menu-overlay-back:hover {
+        color: #ffffff;
+        border-color: color-mix(in srgb, var(--about-accent) 40%, rgba(255, 255, 255, 0.65));
+        background: rgba(255, 255, 255, 0.06);
+        box-shadow: 0 0 16px color-mix(in srgb, var(--about-accent) 16%, transparent);
+    }
 }
 
 #optionsScreen.menu-overlay {
@@ -1217,11 +1233,13 @@ body::after {
         text-shadow 0.2s ease;
 }
 
-#aboutScreen .about-pager-arrow:hover:not(:disabled) {
-    border-color: color-mix(in srgb, var(--about-accent) 52%, rgba(255, 255, 255, 0.22));
-    color: rgba(255, 255, 255, 0.96);
-    box-shadow: 0 0 12px color-mix(in srgb, var(--about-accent) 26%, transparent);
-    text-shadow: 0 0 10px color-mix(in srgb, var(--about-accent) 32%, transparent);
+@media (hover: hover) {
+    #aboutScreen .about-pager-arrow:hover:not(:disabled) {
+        border-color: color-mix(in srgb, var(--about-accent) 52%, rgba(255, 255, 255, 0.22));
+        color: rgba(255, 255, 255, 0.96);
+        box-shadow: 0 0 12px color-mix(in srgb, var(--about-accent) 26%, transparent);
+        text-shadow: 0 0 10px color-mix(in srgb, var(--about-accent) 32%, transparent);
+    }
 }
 
 .about-pager-arrow:disabled {
@@ -1510,10 +1528,12 @@ body::after {
     transition: color 0.25s ease, border-color 0.25s ease, background 0.25s ease;
 }
 
-.menu-overlay-back:hover {
-    color: #ffffff;
-    border-color: rgba(255, 255, 255, 0.65);
-    background: rgba(255, 255, 255, 0.06);
+@media (hover: hover) {
+    .menu-overlay-back:hover {
+        color: #ffffff;
+        border-color: rgba(255, 255, 255, 0.65);
+        background: rgba(255, 255, 255, 0.06);
+    }
 }
 
 /* Entity select — [ BACK ] sub triada de skin-uri, aliniat cu Options/About */
@@ -1618,11 +1638,13 @@ body::after {
         inset 0 0 12px rgba(255, 255, 255, 0.03);
 }
 
-#optionsScreen .control-choice:hover {
-    color: #ffffff;
-    border-color: rgba(255, 255, 255, 0.55);
-    background: rgba(255, 255, 255, 0.06);
-    transform: scale(1.03);
+@media (hover: hover) {
+    #optionsScreen .control-choice:hover {
+        color: #ffffff;
+        border-color: rgba(255, 255, 255, 0.55);
+        background: rgba(255, 255, 255, 0.06);
+        transform: scale(1.03);
+    }
 }
 
 #optionsScreen .control-choice--active {
@@ -1633,12 +1655,14 @@ body::after {
     box-shadow: 0 0 16px color-mix(in srgb, var(--opt-accent) 26%, transparent);
 }
 
-#optionsScreen .control-choice--active:hover {
-    color: #ffffff;
-    border-color: var(--opt-accent);
-    background: color-mix(in srgb, var(--opt-accent) 10%, rgba(0, 0, 0, 0.35));
-    box-shadow: 0 0 22px color-mix(in srgb, var(--opt-accent) 40%, transparent);
-    transform: scale(1.04);
+@media (hover: hover) {
+    #optionsScreen .control-choice--active:hover {
+        color: #ffffff;
+        border-color: var(--opt-accent);
+        background: color-mix(in srgb, var(--opt-accent) 10%, rgba(0, 0, 0, 0.35));
+        box-shadow: 0 0 22px color-mix(in srgb, var(--opt-accent) 40%, transparent);
+        transform: scale(1.04);
+    }
 }
 
 .wasd-visual {
@@ -1672,10 +1696,12 @@ body::after {
         box-shadow 0.3s ease;
 }
 
-#optionsScreen .control-choice:hover:not(.control-choice--active) .key-cap {
-    color: rgba(255, 255, 255, 0.82);
-    border-color: rgba(0, 229, 255, 0.38);
-    box-shadow: 0 0 12px rgba(0, 229, 255, 0.18);
+@media (hover: hover) {
+    #optionsScreen .control-choice:hover:not(.control-choice--active) .key-cap {
+        color: rgba(255, 255, 255, 0.82);
+        border-color: rgba(0, 229, 255, 0.38);
+        box-shadow: 0 0 12px rgba(0, 229, 255, 0.18);
+    }
 }
 
 #optionsScreen .control-choice--active .key-cap {
@@ -1721,9 +1747,11 @@ body::after {
     display: none;
 }
 
-#optionsScreen .control-choice:hover:not(.control-choice--active) .mouse-body {
-    border-color: rgba(0, 229, 255, 0.38);
-    box-shadow: 0 0 12px rgba(0, 229, 255, 0.18);
+@media (hover: hover) {
+    #optionsScreen .control-choice:hover:not(.control-choice--active) .mouse-body {
+        border-color: rgba(0, 229, 255, 0.38);
+        box-shadow: 0 0 12px rgba(0, 229, 255, 0.18);
+    }
 }
 
 #optionsScreen .control-choice--active .mouse-body {
@@ -1759,9 +1787,11 @@ body::after {
         0 0 28px rgba(100, 180, 255, 0.08);
 }
 
-#optionsScreen > .menu-overlay-back:hover {
-    border-color: color-mix(in srgb, var(--opt-accent) 40%, rgba(255, 255, 255, 0.65));
-    box-shadow: 0 0 16px color-mix(in srgb, var(--opt-accent) 16%, transparent);
+@media (hover: hover) {
+    #optionsScreen > .menu-overlay-back:hover {
+        border-color: color-mix(in srgb, var(--opt-accent) 40%, rgba(255, 255, 255, 0.65));
+        box-shadow: 0 0 16px color-mix(in srgb, var(--opt-accent) 16%, transparent);
+    }
 }
 
 #multiplayerLobbyScreen {
@@ -1833,13 +1863,15 @@ body::after {
     transition: color 0.25s ease, filter 0.25s ease, transform 0.2s ease;
 }
 
-.mp-lobby-lock:hover {
-    color: #7dff5a;
-    background: transparent;
-    border: none;
-    box-shadow: none;
-    filter: drop-shadow(0 0 8px rgba(57, 255, 20, 0.9));
-    transform: scale(1.08);
+@media (hover: hover) {
+    .mp-lobby-lock:hover {
+        color: #7dff5a;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        filter: drop-shadow(0 0 8px rgba(57, 255, 20, 0.9));
+        transform: scale(1.08);
+    }
 }
 
 .mp-lobby-lock:active {
@@ -1851,9 +1883,11 @@ body::after {
     filter: drop-shadow(0 0 6px rgba(255, 59, 59, 0.7));
 }
 
-.mp-lobby-lock.is-private:hover {
-    color: #ff6b6b;
-    filter: drop-shadow(0 0 8px rgba(255, 59, 59, 0.9));
+@media (hover: hover) {
+    .mp-lobby-lock.is-private:hover {
+        color: #ff6b6b;
+        filter: drop-shadow(0 0 8px rgba(255, 59, 59, 0.9));
+    }
 }
 
 .mp-lobby-lock.is-set,
@@ -1927,12 +1961,14 @@ body::after {
         background 0.25s ease;
 }
 
-.mp-public-room-row:hover {
-    color: #fff;
-    border-color: var(--mp-accent);
-    background: color-mix(in srgb, var(--mp-accent) 10%, rgba(0, 0, 0, 0.35));
-    box-shadow: 0 0 18px color-mix(in srgb, var(--mp-accent) 32%, transparent);
-    transform: scale(1.03);
+@media (hover: hover) {
+    .mp-public-room-row:hover {
+        color: #fff;
+        border-color: var(--mp-accent);
+        background: color-mix(in srgb, var(--mp-accent) 10%, rgba(0, 0, 0, 0.35));
+        box-shadow: 0 0 18px color-mix(in srgb, var(--mp-accent) 32%, transparent);
+        transform: scale(1.03);
+    }
 }
 
 .mp-public-room-host {
@@ -1948,8 +1984,10 @@ body::after {
     color: rgba(180, 190, 210, 0.55);
 }
 
-.mp-public-room-row:hover .mp-public-room-fill {
-    color: rgba(255, 255, 255, 0.78);
+@media (hover: hover) {
+    .mp-public-room-row:hover .mp-public-room-fill {
+        color: rgba(255, 255, 255, 0.78);
+    }
 }
 
 .mp-lobby-join-stack {
@@ -2036,12 +2074,14 @@ body::after {
     pointer-events: none;
 }
 
-.mp-lobby-btn:hover {
-    color: #fff;
-    border-color: var(--mp-accent);
-    background: color-mix(in srgb, var(--mp-accent) 10%, rgba(0, 0, 0, 0.35));
-    box-shadow: 0 0 22px color-mix(in srgb, var(--mp-accent) 40%, transparent);
-    transform: scale(1.03);
+@media (hover: hover) {
+    .mp-lobby-btn:hover {
+        color: #fff;
+        border-color: var(--mp-accent);
+        background: color-mix(in srgb, var(--mp-accent) 10%, rgba(0, 0, 0, 0.35));
+        box-shadow: 0 0 22px color-mix(in srgb, var(--mp-accent) 40%, transparent);
+        transform: scale(1.03);
+    }
 }
 
 .mp-lobby-btn:active {
@@ -2313,9 +2353,11 @@ body::after {
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.mp-lobby-chat-send:hover:not(:disabled) {
-    border-color: var(--mp-accent);
-    box-shadow: 0 0 14px color-mix(in srgb, var(--mp-accent) 28%, transparent);
+@media (hover: hover) {
+    .mp-lobby-chat-send:hover:not(:disabled) {
+        border-color: var(--mp-accent);
+        box-shadow: 0 0 14px color-mix(in srgb, var(--mp-accent) 28%, transparent);
+    }
 }
 
 .mp-lobby-chat-send:disabled {
@@ -2337,9 +2379,11 @@ body::after {
     transition: color 0.25s ease, transform 0.2s ease, filter 0.25s ease;
 }
 
-.mp-lobby-chat-toggle:hover {
-    color: rgba(255, 255, 255, 0.92);
-    transform: scale(1.05);
+@media (hover: hover) {
+    .mp-lobby-chat-toggle:hover {
+        color: rgba(255, 255, 255, 0.92);
+        transform: scale(1.05);
+    }
 }
 
 .mp-lobby-chat-toggle:active {
@@ -2355,9 +2399,11 @@ body::after {
     filter: drop-shadow(0 0 5px rgba(57, 255, 20, 0.45));
 }
 
-.mp-lobby-chat-toggle.mp-lobby-chat-toggle--unread:hover {
-    color: #5fff3a;
-    filter: drop-shadow(0 0 8px rgba(93, 255, 58, 0.55));
+@media (hover: hover) {
+    .mp-lobby-chat-toggle.mp-lobby-chat-toggle--unread:hover {
+        color: #5fff3a;
+        filter: drop-shadow(0 0 8px rgba(93, 255, 58, 0.55));
+    }
 }
 
 #multiplayerLobbyScreen:not(.mp-lobby-chat-open) .mp-lobby-chat-toggle.mp-lobby-chat-toggle--unread {
@@ -2432,9 +2478,14 @@ body::after {
     transition: fill 0.25s ease, opacity 0.25s ease;
 }
 
-.mp-lobby-chat-toggle:hover .mp-lobby-chat-icon-dot,
 #multiplayerLobbyScreen.mp-lobby-chat-open .mp-lobby-chat-toggle .mp-lobby-chat-icon-dot {
     opacity: 1;
+}
+
+@media (hover: hover) {
+    .mp-lobby-chat-toggle:hover .mp-lobby-chat-icon-dot {
+        opacity: 1;
+    }
 }
 
 @media (max-width: 640px) {
@@ -2472,11 +2523,13 @@ body::after {
     box-sizing: border-box;
 }
 
-#multiplayerLobbyScreen .mp-lobby-footer .menu-overlay-back:hover {
-    color: #ffffff;
-    border-color: color-mix(in srgb, var(--mp-accent) 40%, rgba(255, 255, 255, 0.65));
-    background: rgba(255, 255, 255, 0.06);
-    box-shadow: 0 0 16px color-mix(in srgb, var(--mp-accent) 16%, transparent);
+@media (hover: hover) {
+    #multiplayerLobbyScreen .mp-lobby-footer .menu-overlay-back:hover {
+        color: #ffffff;
+        border-color: color-mix(in srgb, var(--mp-accent) 40%, rgba(255, 255, 255, 0.65));
+        background: rgba(255, 255, 255, 0.06);
+        box-shadow: 0 0 16px color-mix(in srgb, var(--mp-accent) 16%, transparent);
+    }
 }
 
 #optionsScreen #optionsMenuControls #soundBtn,
@@ -2500,13 +2553,15 @@ body::after {
         text-shadow 0.25s ease;
 }
 
-#optionsScreen #optionsMenuControls #soundBtn:hover,
-#optionsScreen #optionsMenuControls #fullscreenBtn:hover {
-    color: #ffffff;
-    border-color: var(--opt-accent);
-    background: color-mix(in srgb, var(--opt-accent) 10%, rgba(0, 0, 0, 0.35));
-    box-shadow: 0 0 22px color-mix(in srgb, var(--opt-accent) 40%, transparent);
-    transform: scale(1.04);
+@media (hover: hover) {
+    #optionsScreen #optionsMenuControls #soundBtn:hover,
+    #optionsScreen #optionsMenuControls #fullscreenBtn:hover {
+        color: #ffffff;
+        border-color: var(--opt-accent);
+        background: color-mix(in srgb, var(--opt-accent) 10%, rgba(0, 0, 0, 0.35));
+        box-shadow: 0 0 22px color-mix(in srgb, var(--opt-accent) 40%, transparent);
+        transform: scale(1.04);
+    }
 }
 
 #optionsScreen #optionsMenuControls #soundBtn .state-on,
@@ -2856,9 +2911,11 @@ body::after {
     transform: none;
 }
 
-.skin-option:not(.skin-triad-option):hover {
-    transform: scale(1.4);
-    border: 1px solid rgba(255, 255, 255, 0.8);
+@media (hover: hover) {
+    .skin-option:not(.skin-triad-option):hover {
+        transform: scale(1.4);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+    }
 }
 
 .skin-option-activate-pop {
@@ -2900,12 +2957,14 @@ body::after {
     text-shadow: 0 0 8px rgba(255, 46, 209, 0.7);
 }
 
-.skin-nav-btn:hover {
-    transform: scale(1.06);
-    filter: brightness(1.2);
-    background: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 0 18px currentColor, inset 0 0 10px rgba(255, 255, 255, 0.08);
-    text-shadow: 0 0 12px currentColor;
+@media (hover: hover) {
+    .skin-nav-btn:hover {
+        transform: scale(1.06);
+        filter: brightness(1.2);
+        background: rgba(255, 255, 255, 0.05);
+        box-shadow: 0 0 18px currentColor, inset 0 0 10px rgba(255, 255, 255, 0.08);
+        text-shadow: 0 0 12px currentColor;
+    }
 }
 
 .skin-nav-btn:active {
@@ -2963,13 +3022,15 @@ body::after {
     user-select: none;
 }
 
-#fullscreenBtn:hover,
-#soundBtn:hover {
-    color: #ffffff;
-    border-color: rgba(255, 255, 255, 0.8);
-    background: rgba(255, 255, 255, 0.1);
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-    transform: scale(1.05);
+@media (hover: hover) {
+    #fullscreenBtn:hover,
+    #soundBtn:hover {
+        color: #ffffff;
+        border-color: rgba(255, 255, 255, 0.8);
+        background: rgba(255, 255, 255, 0.1);
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        transform: scale(1.05);
+    }
 }
 
 .state-on {
@@ -3023,10 +3084,12 @@ body::after {
     margin-top: 24px;
 }
 
-#skinActionBtn:hover {
-    background: rgba(255, 255, 255, 0.05);
-    transform: scale(1.04);
-    box-shadow: 0 0 14px currentColor;
+@media (hover: hover) {
+    #skinActionBtn:hover {
+        background: rgba(255, 255, 255, 0.05);
+        transform: scale(1.04);
+        box-shadow: 0 0 14px currentColor;
+    }
 }
 
 #skinActionBtn.btn-denied {
@@ -3084,13 +3147,15 @@ body::after {
     z-index: 5;
 }
 
-#evolutionLabBtn:hover {
-    color: #ffffff;
-    border-color: rgba(220, 170, 255, 0.85);
-    background: rgba(120, 50, 200, 0.18);
-    text-shadow: 0 0 12px rgba(220, 170, 255, 0.95);
-    box-shadow: 0 0 18px rgba(180, 130, 255, 0.55);
-    transform: scale(1.05);
+@media (hover: hover) {
+    #evolutionLabBtn:hover {
+        color: #ffffff;
+        border-color: rgba(220, 170, 255, 0.85);
+        background: rgba(120, 50, 200, 0.18);
+        text-shadow: 0 0 12px rgba(220, 170, 255, 0.95);
+        box-shadow: 0 0 18px rgba(180, 130, 255, 0.55);
+        transform: scale(1.05);
+    }
 }
 
 /* Lab deschis: același rest ca butonul normal — glow doar la hover (ca peste tot). */
@@ -3103,13 +3168,15 @@ body::after {
     transform: none;
 }
 
-#evolutionLabBtn.lab-active:hover {
-    color: #ffffff;
-    border-color: rgba(220, 170, 255, 0.85);
-    background: rgba(120, 50, 200, 0.18);
-    text-shadow: 0 0 12px rgba(220, 170, 255, 0.95);
-    box-shadow: 0 0 18px rgba(180, 130, 255, 0.55);
-    transform: scale(1.05);
+@media (hover: hover) {
+    #evolutionLabBtn.lab-active:hover {
+        color: #ffffff;
+        border-color: rgba(220, 170, 255, 0.85);
+        background: rgba(120, 50, 200, 0.18);
+        text-shadow: 0 0 12px rgba(220, 170, 255, 0.95);
+        box-shadow: 0 0 18px rgba(180, 130, 255, 0.55);
+        transform: scale(1.05);
+    }
 }
 
 /* Lab inaccesibil când skin-ul activ nu e deblocat (matter-locked / ad-locked) */
@@ -3123,13 +3190,15 @@ body::after {
     transform: none;
 }
 
-#evolutionLabBtn.locked:hover {
-    color: rgba(180, 130, 255, 0.42);
-    border-color: rgba(180, 130, 255, 0.22);
-    background: rgba(40, 0, 60, 0.08);
-    text-shadow: none;
-    box-shadow: none;
-    transform: none;
+@media (hover: hover) {
+    #evolutionLabBtn.locked:hover {
+        color: rgba(180, 130, 255, 0.42);
+        border-color: rgba(180, 130, 255, 0.22);
+        background: rgba(40, 0, 60, 0.08);
+        text-shadow: none;
+        box-shadow: none;
+        transform: none;
+    }
 }
 
 #evolutionLabBtn.btn-denied {
@@ -3298,11 +3367,13 @@ body::after {
     user-select: none;
 }
 
-.evo-bar-action:hover:not(:disabled):not(.is-stable) {
-    transform: scale(1.06);
-    background: rgba(255, 255, 255, 0.06);
-    text-shadow: 0 0 10px var(--evo-glow, rgba(255,255,255,0.7));
-    box-shadow: 0 0 14px var(--evo-glow, rgba(255,255,255,0.5));
+@media (hover: hover) {
+    .evo-bar-action:hover:not(:disabled):not(.is-stable) {
+        transform: scale(1.06);
+        background: rgba(255, 255, 255, 0.06);
+        text-shadow: 0 0 10px var(--evo-glow, rgba(255,255,255,0.7));
+        box-shadow: 0 0 14px var(--evo-glow, rgba(255,255,255,0.5));
+    }
 }
 
 .evo-bar-action.affordable {
@@ -3598,17 +3669,19 @@ body::after {
     opacity: 0.92;
 }
 
-.evo-mod-btn:hover {
-    transform: scale(1.03);
-    border-color: var(--mod-color, #ffffff);
-    background: rgba(0, 0, 0, 0.65);
-    text-shadow: 0 0 14px var(--mod-glow, rgba(255, 255, 255, 0.85));
-    box-shadow: 0 0 18px var(--mod-glow, rgba(255, 255, 255, 0.45)),
-        0 0 8px var(--mod-glow, rgba(255, 255, 255, 0.35)) inset;
-}
+@media (hover: hover) {
+    .evo-mod-btn:hover {
+        transform: scale(1.03);
+        border-color: var(--mod-color, #ffffff);
+        background: rgba(0, 0, 0, 0.65);
+        text-shadow: 0 0 14px var(--mod-glow, rgba(255, 255, 255, 0.85));
+        box-shadow: 0 0 18px var(--mod-glow, rgba(255, 255, 255, 0.45)),
+            0 0 8px var(--mod-glow, rgba(255, 255, 255, 0.35)) inset;
+    }
 
-.evo-mod-btn:hover .evo-mod-x {
-    opacity: 0.85;
+    .evo-mod-btn:hover .evo-mod-x {
+        opacity: 0.85;
+    }
 }
 
 .evo-mod-btn:active {
@@ -3839,13 +3912,15 @@ body::after {
     box-shadow: 0 0 12px color-mix(in srgb, var(--go-accent-soft) 25%, transparent);
 }
 
-#retryBtn:hover {
-    transform: scale(1.04);
-    color: #ffffff;
-    border-color: color-mix(in srgb, var(--go-accent) 90%, #ffffff);
-    background: rgba(120, 50, 200, 0.14);
-    text-shadow: 0 0 10px color-mix(in srgb, var(--go-accent) 75%, transparent);
-    box-shadow: 0 0 16px color-mix(in srgb, var(--go-accent-soft) 55%, transparent);
+@media (hover: hover) {
+    #retryBtn:hover {
+        transform: scale(1.04);
+        color: #ffffff;
+        border-color: color-mix(in srgb, var(--go-accent) 90%, #ffffff);
+        background: rgba(120, 50, 200, 0.14);
+        text-shadow: 0 0 10px color-mix(in srgb, var(--go-accent) 75%, transparent);
+        box-shadow: 0 0 16px color-mix(in srgb, var(--go-accent-soft) 55%, transparent);
+    }
 }
 
 #backToMenuBtn {
@@ -3855,13 +3930,15 @@ body::after {
     background: transparent;
 }
 
-#backToMenuBtn:hover {
-    transform: scale(1.04);
-    color: rgba(220, 170, 255, 0.95);
-    border-color: rgba(180, 130, 255, 0.45);
-    background: rgba(40, 0, 60, 0.08);
-    text-shadow: 0 0 10px rgba(180, 130, 255, 0.45);
-    box-shadow: 0 0 14px rgba(180, 130, 255, 0.22);
+@media (hover: hover) {
+    #backToMenuBtn:hover {
+        transform: scale(1.04);
+        color: rgba(220, 170, 255, 0.95);
+        border-color: rgba(180, 130, 255, 0.45);
+        background: rgba(40, 0, 60, 0.08);
+        text-shadow: 0 0 10px rgba(180, 130, 255, 0.45);
+        box-shadow: 0 0 14px rgba(180, 130, 255, 0.22);
+    }
 }
 
 /* =============================================================================
@@ -3929,6 +4006,21 @@ html.tablet-mode body.game-running #startMenu * {
 html.tablet-mode #ui {
     top: max(24px, env(safe-area-inset-top));
     left: max(24px, env(safe-area-inset-left));
+}
+
+/* No % translateX here: Safari freezes it for the whole settle transition
+   while font-size shrinks, which slid the title to the left. */
+html.tablet-mode #introScreen.main-hub #introTitle {
+    left: 0;
+    right: 0;
+    width: auto;
+    max-width: none;
+    text-align: center;
+    transform: translateY(-50%);
+}
+
+html.tablet-mode #introScreen.hub-title-settled #introTitle {
+    transform: translateY(0);
 }
 
 html.tablet-mode #optionsScreen .control-picker,
@@ -4065,6 +4157,12 @@ html.tablet-mode #tabletLeaveBtn:not([hidden]) {
     width: 22px;
     height: 22px;
     display: block;
+}
+
+#tabletLeaveBtn.is-armed {
+    transform: scale(1.1);
+    background: rgba(255, 59, 59, 0.32);
+    box-shadow: 0 0 22px rgba(255, 59, 59, 0.65);
 }
 
 #tabletLeaveBtn:active {

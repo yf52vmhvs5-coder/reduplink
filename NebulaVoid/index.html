@@ -3,6 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="NEBULA VOID">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="icons/icon-180.png">
     <title>NEBULA VOID</title>
     <script>
         (function () {
@@ -113,7 +119,7 @@
                 </div>
                 <p class="options-control-hint" data-for="wasd" hidden>WASD sets your heading — the entity moves that way. Cursor stays hidden in the arena; the camera follows your direction.</p>
                 <p class="options-control-hint" data-for="mouse">The entity moves toward your cursor. The camera shifts slightly ahead of where you point.</p>
-                <p class="options-control-hint options-control-hint--pad" hidden>The entity follows the on-screen stick. The round button casts your ability. In a duel the message icon stays in the corner, and the red mark leaves the match.</p>
+                <p class="options-control-hint options-control-hint--pad" hidden>The entity follows the on-screen stick. The round button casts your ability. In a duel the message icon stays in the corner, and tapping the red mark twice leaves the match.</p>
             </section>
             <section class="options-block options-block--system" aria-labelledby="optionsSystemLabel">
                 <p id="optionsSystemLabel" class="options-block-tag">SYSTEM</p>
@@ -121,6 +127,7 @@
                     <div id="soundBtn">SOUND: <span class="state-on">ON</span></div>
                     <div id="fullscreenBtn">SCREEN: <span class="state-off">OFF</span></div>
                 </div>
+                <p class="options-control-hint options-screen-hint" hidden>On iPad, Share → Add to Home Screen keeps the game full screen. A downward drag can't close it there.</p>
             </section>
         </div>
         <button id="optionsBackBtn" type="button" class="menu-overlay-back">[ BACK ]</button>

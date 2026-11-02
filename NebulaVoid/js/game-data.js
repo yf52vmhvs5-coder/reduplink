@@ -283,7 +283,7 @@ window.__GAME_DATA_SOURCE = {
     "evolution": "The Evolution Lab advances your deployed intruder between runs. Three branches per skin: Velocity Drive (base speed), Growth Core (nutrient yield and Ravenous decay), and Ability Sync (cooldown relief). Each branch levels independently with Void Matter.",
     "entityMods": "Entity Mods are exclusive x1, x2, and x3 kits bound to a single intruder. Purchased in the lab with Void Matter; each mod alters combat behavior for that strain only. Review a mod's briefing before purchase — only one path per tier.",
     "entityScore": "ENTITY_SCORE is the live readout of mass consumed during an intrusion. It resets every run. Your end-of-run payout converts that total into Void Matter for the hub tally.",
-    "controls": "In the arena, move with the mouse (chase the cursor) or WASD (fixed heading). Press [SPACE] to trigger your intruder's signature ability. Cooldown and cost depend on the active strain. On a tablet, the stick sets heading, the round button casts, and a red mark leaves a duel.",
+    "controls": "In the arena, move with the mouse (chase the cursor) or WASD (fixed heading). Press [SPACE] to trigger your intruder's signature ability. Cooldown and cost depend on the active strain. On a tablet, the stick sets heading, the round button casts, and tapping the red mark twice leaves a duel.",
     "options": "From the hub, open Options to choose movement scheme, toggle sound, and switch fullscreen. Settings apply immediately and persist between sessions. A tablet uses the on-screen stick instead of the mouse or WASD picker.",
     "rivalsLead": "Ten rival cell types patrol the arena. Hue signals temperament; study the pattern or become salvage."
   },

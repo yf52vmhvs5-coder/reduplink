@@ -7,18 +7,23 @@
 
     const STICK_SIZE = 112;
     const STICK_DEAD = 0.12;
+    const LEAVE_CONFIRM_MS = 1200;
 
     let pointerId = null;
     let origin = null;
-    let leaveStamp = 0;
+    let leaveArmedAt = 0;
     let abilityStamp = 0;
+
+    function isIpad() {
+        const ua = global.navigator.userAgent || "";
+        return /iPad/.test(ua) || (global.navigator.platform === "MacIntel" && global.navigator.maxTouchPoints > 1);
+    }
 
     function isTabletDevice() {
         const ua = global.navigator.userAgent || "";
-        const iPad = /iPad/.test(ua) || (global.navigator.platform === "MacIntel" && global.navigator.maxTouchPoints > 1);
         const androidTablet = /Android/i.test(ua) && !/Mobile/i.test(ua);
         // Known tablets first — never gate on innerHeight (landscape Safari chrome on Mini).
-        if (iPad || androidTablet) return true;
+        if (isIpad() || androidTablet) return true;
         const sw = (global.screen && global.screen.width) || 0;
         const sh = (global.screen && global.screen.height) || 0;
         const screenShort = Math.min(sw, sh);
@@ -87,6 +92,11 @@
     function syncOptionsCopy() {
         const padHint = document.querySelector(".options-control-hint--pad");
         if (padHint) padHint.hidden = !tabletOn();
+        const screenHint = document.querySelector(".options-screen-hint");
+        if (screenHint) {
+            const app = typeof global.isStandaloneApp === "function" && global.isStandaloneApp();
+            screenHint.hidden = !(tabletOn() && isIpad()) || app;
+        }
     }
 
     function syncMode() {
@@ -136,7 +146,7 @@
         const y = Math.max(half, Math.min(global.innerHeight - half, clientY));
         el.style.left = x - half + "px";
         el.style.top = y - half + "px";
-        origin = { x: x, y: y };
+        origin = { x: clientX, y: clientY };
         const knob = knobEl();
         if (knob) knob.style.transform = "";
     }
@@ -221,11 +231,20 @@
 
         const forfeit = (e) => {
             if (!combatAlive() || !mirrorLive()) return;
-            const now = performance.now();
-            if (now - leaveStamp < 200) return;
-            leaveStamp = now;
+            if (e.button != null && e.button !== 0) return;
             e.preventDefault();
             e.stopPropagation();
+            const now = performance.now();
+            if (now - leaveArmedAt > LEAVE_CONFIRM_MS) {
+                leaveArmedAt = now;
+                leave.classList.add("is-armed");
+                global.setTimeout(() => {
+                    if (performance.now() - leaveArmedAt >= LEAVE_CONFIRM_MS) leave.classList.remove("is-armed");
+                }, LEAVE_CONFIRM_MS);
+                return;
+            }
+            leaveArmedAt = 0;
+            leave.classList.remove("is-armed");
             hideStick();
             if (typeof global.tryMirrorEscapeToLobby === "function") global.tryMirrorEscapeToLobby();
             syncChrome();
@@ -237,8 +256,7 @@
             ability.addEventListener("contextmenu", (e) => e.preventDefault());
         }
         if (leave) {
-            leave.addEventListener("pointerdown", forfeit);
-            leave.addEventListener("click", forfeit);
+            leave.addEventListener("pointerup", forfeit);
             leave.addEventListener("contextmenu", (e) => e.preventDefault());
         }
         if (pad) pad.addEventListener("contextmenu", (e) => e.preventDefault());

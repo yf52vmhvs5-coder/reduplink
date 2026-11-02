@@ -282,8 +282,8 @@
         alienBtn.addEventListener("click", onHubSpectrumToggleClick);
         previewBtn.addEventListener("click", onHubSpectrumToggleClick);
 
-        document.addEventListener("click", (e) => {
-            if (!hubSpectrumOpen) return;
+        document.addEventListener("pointerdown", (e) => {
+            if (!hubSpectrumOpen || e.button !== 0) return;
             if (colorRow.contains(e.target)) return;
             closeHubSpectrum();
         });
