@@ -238,12 +238,14 @@
             }),
             body: JSON.stringify({
                 callsign: cleanCallsign(callsignEl && callsignEl.value),
-                body: body
+                body: body,
+                live: true
             })
         }).then(function () {
             markSent();
             if (bodyEl) bodyEl.value = "";
-            setStatus("HELD. It goes live after ACK.", true);
+            setStatus("Signal live.", true);
+            return loadPings();
         }).catch(function () {
             setStatus("Transmit failed.");
         }).then(function () {

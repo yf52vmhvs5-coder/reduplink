@@ -387,6 +387,7 @@ body::after {
     position: fixed;
     left: 50%;
     top: 50%;
+    /* translateX(-50%) stays locked; only Y changes on settle — avoids left jump on tablet */
     transform: translate(-50%, -50%);
     margin: 0;
     z-index: 2;
@@ -405,9 +406,9 @@ body::after {
         top 0.85s cubic-bezier(0.22, 1, 0.36, 1),
         transform 0.85s cubic-bezier(0.22, 1, 0.36, 1),
         font-size 0.85s cubic-bezier(0.22, 1, 0.36, 1),
-        letter-spacing 0.85s cubic-bezier(0.22, 1, 0.36, 1),
         color 0.4s ease,
         text-shadow 0.4s ease;
+    /* letter-spacing not transitioned — width morph was shifting the title left on tablet */
     opacity: 0;
     pointer-events: none;
 }
@@ -3169,13 +3170,14 @@ body::after {
 }
 
 @keyframes titleGlitch {
-    0%   { transform: translate(0, 0)  skewX(0deg);    filter: none; }
-    18%  { transform: translate(-3px, 1px) skewX(-4deg); filter: hue-rotate(45deg) saturate(1.4); }
-    32%  { transform: translate(2px, -2px) skewX(3deg);  filter: hue-rotate(-30deg) blur(0.5px); }
-    48%  { transform: translate(-2px, 2px) skewX(-2deg); filter: hue-rotate(80deg); }
-    62%  { transform: translate(3px, 0px) skewX(2deg);   filter: invert(0.15); }
-    80%  { transform: translate(-1px, 1px) skewX(0deg);  filter: none; }
-    100% { transform: translate(0, 0); filter: none; }
+    /* Keep translateX(-50%) so hub title stays centered (left: 50%) */
+    0%   { transform: translate(-50%, 0) skewX(0deg);    filter: none; }
+    18%  { transform: translate(calc(-50% - 3px), 1px) skewX(-4deg); filter: hue-rotate(45deg) saturate(1.4); }
+    32%  { transform: translate(calc(-50% + 2px), -2px) skewX(3deg);  filter: hue-rotate(-30deg) blur(0.5px); }
+    48%  { transform: translate(calc(-50% - 2px), 2px) skewX(-2deg); filter: hue-rotate(80deg); }
+    62%  { transform: translate(calc(-50% + 3px), 0px) skewX(2deg);   filter: invert(0.15); }
+    80%  { transform: translate(calc(-50% - 1px), 1px) skewX(0deg);  filter: none; }
+    100% { transform: translate(-50%, 0); filter: none; }
 }
 
 /* În lab ascundem subtitlul + descrierea skin-ului + butonul de acțiune skin +
@@ -3905,6 +3907,7 @@ html.tablet-mode,
 html.tablet-mode body {
     touch-action: manipulation;
     overscroll-behavior: none;
+    overscroll-behavior-y: none;
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
@@ -3914,6 +3917,12 @@ html.tablet-mode body {
 html.tablet-mode #gameCanvas,
 html.tablet-mode body.game-running {
     touch-action: none;
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+}
+
+html.tablet-mode body.game-running {
+    overflow: hidden;
 }
 
 html.tablet-mode body.game-running,

@@ -14,12 +14,15 @@
     let abilityStamp = 0;
 
     function isTabletDevice() {
-        const shortSide = Math.min(global.innerWidth, global.innerHeight);
-        if (shortSide < 600) return false;
         const ua = global.navigator.userAgent || "";
         const iPad = /iPad/.test(ua) || (global.navigator.platform === "MacIntel" && global.navigator.maxTouchPoints > 1);
         const androidTablet = /Android/i.test(ua) && !/Mobile/i.test(ua);
+        // Known tablets first — never gate on innerHeight (landscape Safari chrome on Mini).
         if (iPad || androidTablet) return true;
+        const sw = (global.screen && global.screen.width) || 0;
+        const sh = (global.screen && global.screen.height) || 0;
+        const screenShort = Math.min(sw, sh);
+        if (screenShort > 0 && screenShort < 600) return false;
         if (global.matchMedia("(hover: hover) and (pointer: fine)").matches) return false;
         const coarse = global.matchMedia("(pointer: coarse)").matches;
         const noHover = global.matchMedia("(hover: none)").matches;
@@ -259,6 +262,24 @@
             if (document.hidden) hideStick();
         });
         global.addEventListener("resize", syncMode);
+        global.addEventListener("orientationchange", () => {
+            global.setTimeout(syncMode, 50);
+            global.setTimeout(syncMode, 300);
+        });
+
+        // Reduce Safari pull-from-top / overscroll dumping play (cannot block OS chrome 100%).
+        document.addEventListener(
+            "touchstart",
+            (e) => {
+                if (!tabletOn() || !document.body.classList.contains("game-running")) return;
+                if (!e.touches || !e.touches[0]) return;
+                if (e.target && e.target.closest && e.target.closest("#tabletLeaveBtn, #tabletPad, #tabletAbilityBtn, #tabletStick, button, a, input, textarea")) {
+                    return;
+                }
+                if (e.touches[0].clientY < 22) e.preventDefault();
+            },
+            { passive: false }
+        );
 
         const vv = global.visualViewport;
         if (vv) {
