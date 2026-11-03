@@ -2462,6 +2462,16 @@ body::after {
     height: 31px;
 }
 
+html.tablet-mode #mpLobbyChatToggleBtn {
+    position: relative;
+    left: -8px;
+}
+
+html.tablet-mode .mp-lobby-chat-icon {
+    width: 34px;
+    height: 34px;
+}
+
 .mp-lobby-chat-icon-frame {
     fill: none;
     stroke: currentColor;
@@ -4083,7 +4093,7 @@ html.tablet-mode #tabletPad:not([hidden]) {
     position: fixed;
     z-index: 16;
     right: calc(max(18px, env(safe-area-inset-right)) + 3px);
-    bottom: calc(max(18px, env(safe-area-inset-bottom)) + 78px);
+    bottom: calc(max(18px, env(safe-area-inset-bottom)) + 98px);
     width: 58px;
     height: 58px;
     margin: 0;
