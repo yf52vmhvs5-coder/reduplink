@@ -151,14 +151,24 @@
         const dt = Math.min((currentTime - drawLastTime) / 1000, 0.1);
         drawLastTime = currentTime;
 
+        const skipMirrorArena = mirrorPlayerOutOfArena();
+        const paintArena = (gameActive || isDying) && !skipMirrorArena;
+        if (
+            paintArena &&
+            global.NebulaGameMode &&
+            typeof global.NebulaGameMode.getRunMode === "function" &&
+            global.NebulaGameMode.getRunMode() === "mirror" &&
+            typeof global.tickRemoteDisplayInterpolation === "function"
+        ) {
+            global.tickRemoteDisplayInterpolation(dt);
+        }
+
         if (typeof global.tickMpTaunts === "function") global.tickMpTaunts(dt);
         if (typeof global.tickTabletPad === "function") global.tickTabletPad();
 
         ctx.fillStyle = "#020202";
         ctx.fillRect(0, 0, screenW, screenH);
 
-        const skipMirrorArena = mirrorPlayerOutOfArena();
-        const paintArena = (gameActive || isDying) && !skipMirrorArena;
         if (!paintArena) {
             const hubUp = introScreen && introScreen.style.display !== "none";
             const menuUp = startMenu.style.display !== "none";
@@ -492,12 +502,6 @@
                 global.NebulaGameMode &&
                 typeof global.NebulaGameMode.getRunMode === "function" &&
                 global.NebulaGameMode.getRunMode() === "mirror";
-            if (
-                mirrorRun &&
-                typeof global.tickRemoteDisplayInterpolation === "function"
-            ) {
-                global.tickRemoteDisplayInterpolation(dt);
-            }
             const remoteList =
                 mirrorRun && typeof deps.getRemotePlayers === "function"
                     ? deps.getRemotePlayers()

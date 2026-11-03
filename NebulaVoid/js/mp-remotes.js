@@ -37,6 +37,7 @@
             netVelX: 0,
             netVelY: 0,
             netStateT: 0,
+            netSenderT: 0,
             arenaOut: false,
         };
     }
@@ -76,6 +77,10 @@
         rp.cd = 0;
         rp.cdMax = 0;
         rp.cdAt = 0;
+        rp.netVelX = 0;
+        rp.netVelY = 0;
+        rp.netStateT = 0;
+        rp.netSenderT = 0;
         rp.displayRadius = 0;
         rp.radius = 0;
     }
@@ -84,6 +89,10 @@
         const rp = ensureRemotePeer(peerId);
         if (!rp) return;
         rp.arenaOut = false;
+        rp.netVelX = 0;
+        rp.netVelY = 0;
+        rp.netStateT = 0;
+        rp.netSenderT = 0;
     }
 
     function clearRemotePeers() {

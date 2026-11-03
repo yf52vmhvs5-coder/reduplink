@@ -12,6 +12,7 @@ const PORT = Number(process.env.PORT) || 8080;
 const HOST = process.env.HOST || "0.0.0.0";
 const MAX_PER_ROOM = 6;
 const MAX_WS_MESSAGE_BYTES = 4096;
+const STATE_BUFFERED_LIMIT = 8192;
 const PING_INTERVAL_MS = 15000;
 const MAX_PUBLIC_WAITING = 8;
 const MAX_ROOM_CHAT = 40;
@@ -60,8 +61,20 @@ function broadcastRoom(room, payload, except) {
     } catch {
         return;
     }
+    const isDisposableState =
+        payload &&
+        payload.type === "state" &&
+        typeof payload.glow !== "string" &&
+        typeof payload.entity !== "string";
     for (const client of room.keys()) {
         if (client === except) continue;
+        if (
+            isDisposableState &&
+            typeof client.bufferedAmount === "number" &&
+            client.bufferedAmount > STATE_BUFFERED_LIMIT
+        ) {
+            continue;
+        }
         sendRaw(client, raw);
     }
 }
@@ -328,6 +341,12 @@ function createRelayServer(opts) {
         res.end("NEBULA VOID relay — use WebSocket\n");
     });
 
+    server.on("connection", (socket) => {
+        if (socket && typeof socket.setNoDelay === "function") {
+            socket.setNoDelay(true);
+        }
+    });
+
     /** @type {import('ws').ServerOptions} */
     const wssOptions = {
         server,
@@ -357,6 +376,9 @@ function createRelayServer(opts) {
     };
 
     wss.on("connection", (ws) => {
+        if (ws._socket && typeof ws._socket.setNoDelay === "function") {
+            ws._socket.setNoDelay(true);
+        }
         ws._nebulaLastChatAt = 0;
         ws._nebulaAlive = true;
         ws._nebulaWatch = false;

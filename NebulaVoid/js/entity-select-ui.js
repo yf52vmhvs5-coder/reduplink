@@ -861,7 +861,8 @@ function purchaseEntityMod(tier) {
         if (!entityModsOwned[skin.name]) entityModsOwned[skin.name] = { x1: false, x2: false, x3: false };
         entityModsOwned[skin.name].x1 = true;
         writeEntityMods(entityModsOwned);
-        if (typeof playHoverSound === "function") playHoverSound();
+        if (typeof playModPurchaseSound === "function") playModPurchaseSound(1);
+        else if (typeof playHoverSound === "function") playHoverSound();
         renderEvolutionPanel();
         renderEntityModButtons();
         return;
@@ -897,7 +898,8 @@ function purchaseEntityMod(tier) {
         if (!entityModsOwned[skin.name]) entityModsOwned[skin.name] = { x1: false, x2: false, x3: false };
         entityModsOwned[skin.name].x2 = true;
         writeEntityMods(entityModsOwned);
-        if (typeof playHoverSound === "function") playHoverSound();
+        if (typeof playModPurchaseSound === "function") playModPurchaseSound(2);
+        else if (typeof playHoverSound === "function") playHoverSound();
         renderEvolutionPanel();
         renderEntityModButtons();
         return;
@@ -933,7 +935,8 @@ function purchaseEntityMod(tier) {
         if (!entityModsOwned[skin.name]) entityModsOwned[skin.name] = { x1: false, x2: false, x3: false };
         entityModsOwned[skin.name].x3 = true;
         writeEntityMods(entityModsOwned);
-        if (typeof playHoverSound === "function") playHoverSound();
+        if (typeof playModPurchaseSound === "function") playModPurchaseSound(3);
+        else if (typeof playHoverSound === "function") playHoverSound();
         renderEvolutionPanel();
         renderEntityModButtons();
         return;
@@ -1166,7 +1169,11 @@ function purchaseEvolutionUpgrade(branchKey) {
         lastCell.classList.add("cell-pop");
         setTimeout(() => lastCell && lastCell.classList.remove("cell-pop"), 480);
     }
-    if (typeof playHoverSound === "function") playHoverSound();
+    if (typeof playEvolutionBarUpgradeSound === "function") {
+        playEvolutionBarUpgradeSound(result.newLevel, branchKey);
+    } else if (typeof playHoverSound === "function") {
+        playHoverSound();
+    }
     renderEvolutionPanel();
 }
 

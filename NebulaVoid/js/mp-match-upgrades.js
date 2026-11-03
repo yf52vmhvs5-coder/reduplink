@@ -128,7 +128,11 @@
         });
     }
 
+    const UPGRADE_HUD_HOLD_MS = 2600;
+
     function flash(text) {
+        const root = rootEl();
+        if (root) root.hidden = false;
         const el = document.getElementById("mpMatchFlash");
         if (!el) return;
         el.hidden = false;
@@ -137,8 +141,10 @@
         flashTimer = setTimeout(function () {
             el.hidden = true;
             el.textContent = "";
+            const r = rootEl();
+            if (r) r.hidden = true;
             flashTimer = null;
-        }, 1400);
+        }, UPGRADE_HUD_HOLD_MS);
     }
 
     function levelsForScore(score) {
@@ -151,11 +157,6 @@
         return { bars: bars, mods: mods };
     }
 
-    function showRoot() {
-        const root = rootEl();
-        if (root) root.hidden = false;
-    }
-
     function beginMpMatchUpgradeHud() {
         build();
         barLevel = 0;
@@ -164,13 +165,14 @@
             clearTimeout(flashTimer);
             flashTimer = null;
         }
+        const root = rootEl();
+        if (root) root.hidden = true;
         const flashEl = document.getElementById("mpMatchFlash");
         if (flashEl) {
             flashEl.hidden = true;
             flashEl.textContent = "";
         }
         paint(null);
-        showRoot();
     }
 
     function hideMpMatchUpgradeHud() {
@@ -196,16 +198,26 @@
             return;
         }
         build();
-        showRoot();
         const next = levelsForScore(score);
         const prevBar = barLevel;
         const prevMod = modTier;
         if (next.bars > barLevel) barLevel = next.bars;
         if (next.mods > modTier) modTier = next.mods;
         if (barLevel !== prevBar || modTier !== prevMod) {
+            const root = rootEl();
+            if (root) root.hidden = false;
             paint(prevBar);
-            if (modTier > prevMod) flash("x" + modTier + " AWAKENED");
-            else flash("UPGRADE +1");
+            if (modTier > prevMod) {
+                if (typeof global.playModPurchaseSound === "function") {
+                    global.playModPurchaseSound(modTier);
+                }
+                flash("x" + modTier + " AWAKENED");
+            } else {
+                if (typeof global.playEvolutionBarUpgradeSound === "function") {
+                    global.playEvolutionBarUpgradeSound(barLevel);
+                }
+                flash("UPGRADE +1");
+            }
         }
     }
 

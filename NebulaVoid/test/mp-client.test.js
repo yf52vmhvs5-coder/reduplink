@@ -327,6 +327,63 @@ describe("mp-session state send + remote apply", () => {
         });
         assert.equal(remotes.size, 0);
     });
+
+    it("sends a stop packet when halting and decays stale extrapolation smoothly", () => {
+        const { sandbox, player, sent, remotes } = sessionEnv();
+        sandbox._now = 0;
+        sandbox.pushMirrorStateFromSim();
+        assert.equal(sent.length, 1);
+        assert.equal(sent[0].payload.vx, 0);
+
+        player.x = 14;
+        sandbox._now = 20;
+        sandbox.pushMirrorStateFromSim();
+        assert.equal(sent.length, 2);
+        assert.ok(sent[1].payload.vx > 0);
+
+        // Player stops at x = 14: one stop packet with vx = 0 is sent, then silence
+        sandbox._now = 40;
+        sandbox.pushMirrorStateFromSim();
+        assert.equal(sent.length, 3);
+        assert.equal(sent[2].payload.vx, 0);
+        assert.equal(sent[2].payload.vy, 0);
+
+        sandbox._now = 60;
+        sandbox.pushMirrorStateFromSim();
+        assert.equal(sent.length, 3);
+
+        // Remote side: explicit stop velocity zeroes extrapolation immediately
+        sandbox.handleMpRelayMessage({
+            type: "state",
+            fromPeerId: "pOther",
+            t: 1000,
+            x: 100,
+            y: 100,
+            vx: 200,
+            vy: 0,
+            radius: 20,
+        });
+        const rp = remotes.get("pOther");
+        sandbox._now = 76;
+        sandbox.handleMpRelayMessage({
+            type: "state",
+            fromPeerId: "pOther",
+            t: 1016,
+            x: 103.2,
+            y: 100,
+            vx: 200,
+            vy: 0,
+            radius: 20,
+        });
+        assert.equal(rp.netVelX, 200);
+
+        // When packets stall well past remoteExtrapMaxSec (55ms), extrapolation decays back to rp.x
+        sandbox._now = 76 + 200;
+        sandbox.tickRemoteDisplayInterpolation(0.02);
+        sandbox.tickRemoteDisplayInterpolation(0.02);
+        sandbox.tickRemoteDisplayInterpolation(0.02);
+        assert.ok(Math.abs(rp.displayX - 103.2) < 1.5, `stalled displayX ${rp.displayX}`);
+    });
 });
 
 describe("mirror-match eat relay", () => {

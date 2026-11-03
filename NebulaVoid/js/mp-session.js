@@ -127,22 +127,61 @@
         }
 
         if (wasActive && typeof prevX === "number" && typeof prevY === "number") {
+            const hasExplicitVel =
+                typeof msg.vx === "number" &&
+                Number.isFinite(msg.vx) &&
+                typeof msg.vy === "number" &&
+                Number.isFinite(msg.vy);
             const dtPkt =
                 senderT != null && prevSenderT != null && senderT > prevSenderT
                     ? (senderT - prevSenderT) / 1000
                     : 0;
-            if (dtPkt > 0 && dtPkt <= 0.2) {
-                rp.netVelX = (rp.x - prevX) / dtPkt;
-                rp.netVelY = (rp.y - prevY) / dtPkt;
-                const sp = Math.hypot(rp.netVelX, rp.netVelY);
-                if (sp > MAX_REMOTE_SPEED) {
-                    const scale = MAX_REMOTE_SPEED / sp;
-                    rp.netVelX *= scale;
-                    rp.netVelY *= scale;
+            let instVx = 0;
+            let instVy = 0;
+            let validVel = false;
+
+            if (hasExplicitVel) {
+                instVx = msg.vx;
+                instVy = msg.vy;
+                validVel = true;
+            } else if (dtPkt >= 0.004 && dtPkt <= 0.35) {
+                instVx = (rp.x - prevX) / dtPkt;
+                instVy = (rp.y - prevY) / dtPkt;
+                validVel = true;
+            } else if (dtPkt > 0 && dtPkt < 0.004) {
+                if (rp.x === prevX && rp.y === prevY) {
+                    instVx = 0;
+                    instVy = 0;
+                    validVel = true;
+                } else {
+                    validVel = false;
                 }
             } else {
-                rp.netVelX = 0;
-                rp.netVelY = 0;
+                instVx = 0;
+                instVy = 0;
+                validVel = true;
+            }
+
+            if (validVel) {
+                const sp = Math.hypot(instVx, instVy);
+                if (sp > MAX_REMOTE_SPEED) {
+                    const scale = MAX_REMOTE_SPEED / sp;
+                    instVx *= scale;
+                    instVy *= scale;
+                }
+                const prevVx =
+                    typeof rp.netVelX === "number" && Number.isFinite(rp.netVelX) ? rp.netVelX : 0;
+                const prevVy =
+                    typeof rp.netVelY === "number" && Number.isFinite(rp.netVelY) ? rp.netVelY : 0;
+                const dot = prevVx * instVx + prevVy * instVy;
+                if (dot > 0) {
+                    const blend = 0.75;
+                    rp.netVelX = prevVx + (instVx - prevVx) * blend;
+                    rp.netVelY = prevVy + (instVy - prevVy) * blend;
+                } else {
+                    rp.netVelX = instVx;
+                    rp.netVelY = instVy;
+                }
             }
         } else {
             rp.netVelX = 0;
@@ -191,7 +230,15 @@
 
     function remoteAimPosition(rp) {
         const ageSec = Math.max(0, (performance.now() - (rp.netStateT || performance.now())) / 1000);
-        const extrap = Math.min(remoteExtrapMaxSec, ageSec);
+        let extrap;
+        if (ageSec <= remoteExtrapMaxSec) {
+            extrap = ageSec;
+        } else {
+            const over = ageSec - remoteExtrapMaxSec;
+            const fadeWindow = Math.max(0.08, remoteExtrapMaxSec * 2);
+            const decay = Math.max(0, 1 - over / fadeWindow);
+            extrap = remoteExtrapMaxSec * decay;
+        }
         const vx = typeof rp.netVelX === "number" ? rp.netVelX : 0;
         const vy = typeof rp.netVelY === "number" ? rp.netVelY : 0;
         return {
@@ -208,12 +255,12 @@
         if (step <= 0) return;
 
         const aim = remoteAimPosition(rp);
-        const t = Math.min(1, step * remoteInterpSpeed);
+        const t = Math.min(0.82, step * remoteInterpSpeed);
 
         const dx = aim.x - rp.displayX;
         const dy = aim.y - rp.displayY;
         const distSq = dx * dx + dy * dy;
-        if (distSq < 0.12) {
+        if (distSq < 0.12 || distSq > remoteSnapDistancePx * remoteSnapDistancePx) {
             rp.displayX = aim.x;
             rp.displayY = aim.y;
         } else {
@@ -246,6 +293,12 @@
         const dy = next.y - lastStatePayload.y;
         const posEps = 0.2;
         if (dx * dx + dy * dy > posEps * posEps) return true;
+        const wasMoving =
+            typeof lastStatePayload.vx === "number" &&
+            typeof lastStatePayload.vy === "number" &&
+            (Math.abs(lastStatePayload.vx) > 0.5 || Math.abs(lastStatePayload.vy) > 0.5);
+        const isMoving = Math.abs(next.vx) > 0.5 || Math.abs(next.vy) > 0.5;
+        if (wasMoving && !isMoving) return true;
         if (Math.abs(next.radius - lastStatePayload.radius) > 0.06) return true;
         if (next.ability !== lastStatePayload.ability) return true;
         if (Math.abs(next.cd - lastStatePayload.cd) > 0.03) return true;
@@ -337,6 +390,8 @@
             t: now,
             x: quantize(player.x, 10),
             y: quantize(player.y, 10),
+            vx: 0,
+            vy: 0,
             radius: quantize(player.radius, 100),
             color: typeof player.color === "string" ? player.color : "",
             glow: typeof player.glow === "string" ? player.glow : "",
@@ -345,6 +400,24 @@
             cd: ability && typeof ability.cd === "number" ? quantize(ability.cd, 100) : 0,
             cdMax: ability && typeof ability.cdMax === "number" ? quantize(ability.cdMax, 100) : 0,
         };
+
+        if (lastStatePayload !== null) {
+            const dtSend = (now - lastStateSentAt) / 1000;
+            const moveDx = next.x - lastStatePayload.x;
+            const moveDy = next.y - lastStatePayload.y;
+            if (dtSend >= 0.004 && dtSend <= 0.35 && moveDx * moveDx + moveDy * moveDy > 0.04) {
+                let vx = moveDx / dtSend;
+                let vy = moveDy / dtSend;
+                const sp = Math.hypot(vx, vy);
+                if (sp > MAX_REMOTE_SPEED) {
+                    const scale = MAX_REMOTE_SPEED / sp;
+                    vx *= scale;
+                    vy *= scale;
+                }
+                next.vx = quantize(vx, 10);
+                next.vy = quantize(vy, 10);
+            }
+        }
 
         const looksChanged = appearanceChanged(next);
         const keepalive = lastFullStateSentAt < 0 || now - lastFullStateSentAt >= STATE_KEEPALIVE_MS;
@@ -356,6 +429,8 @@
             t: next.t,
             x: next.x,
             y: next.y,
+            vx: next.vx,
+            vy: next.vy,
             radius: next.radius,
             ability: next.ability,
             cd: next.cd,
@@ -374,6 +449,8 @@
         lastStatePayload = {
             x: next.x,
             y: next.y,
+            vx: next.vx,
+            vy: next.vy,
             radius: next.radius,
             ability: next.ability,
             cd: next.cd,

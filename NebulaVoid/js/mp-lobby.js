@@ -1481,6 +1481,7 @@
             localPeerId: state.localPeerId,
             peerOrder: buildPeerOrder(),
             peerCount: resolvePeerCount(null),
+            peers: Object.assign({}, peerRoster),
         };
     }
 

@@ -106,19 +106,36 @@
         player.y = slots[idx].y;
         deps.setCameraPosition(player.x, player.y);
 
+        const lobbyState =
+            typeof deps.getMultiplayerLobbyState === "function"
+                ? deps.getMultiplayerLobbyState()
+                : null;
+        const roster =
+            lobbyState && lobbyState.peers && typeof lobbyState.peers === "object"
+                ? lobbyState.peers
+                : null;
+
         for (let i = 0; i < order.length; i++) {
             const pid = order[i];
             if (selfId && pid === selfId) continue;
             const rp = api && api.ensureRemotePeer ? api.ensureRemotePeer(pid) : null;
             if (!rp) continue;
+            const meta = roster && roster[pid] ? roster[pid] : null;
             rp.peerId = pid;
             rp.active = false;
             rp.arenaOut = false;
-            rp.entity = "";
-            rp.ability = "";
+            rp.entity = meta && typeof meta.skinName === "string" ? meta.skinName : "";
+            rp.ability = meta && typeof meta.ability === "string" ? meta.ability : "";
+            if (meta && typeof meta.color === "string" && meta.color) {
+                rp.glow = meta.color;
+            }
             rp.cd = 0;
             rp.cdMax = 0;
             rp.cdAt = 0;
+            rp.netVelX = 0;
+            rp.netVelY = 0;
+            rp.netStateT = 0;
+            rp.netSenderT = 0;
             rp.radius = GAME_SETTINGS.START_RADIUS;
             rp.x = slots[i].x;
             rp.y = slots[i].y;
@@ -926,6 +943,10 @@
         if (!rp) return;
         const GAME_SETTINGS = settings();
         rp.active = true;
+        rp.netVelX = 0;
+        rp.netVelY = 0;
+        rp.netStateT = performance.now();
+        rp.netSenderT = 0;
         if (typeof msg.x === "number" && typeof msg.y === "number") {
             rp.x = msg.x;
             rp.y = msg.y;

@@ -22,6 +22,7 @@ const MAX_ROOM_ID_LEN = 6;
 const ID_MAX = 8000000;
 /** Same bound as a relayed cell radius. Kill size and drain cannot exceed it. */
 const MAX_RELAY_RADIUS = 4000;
+const MAX_RELAY_SPEED = 1200;
 
 function finiteNumber(v) {
     return typeof v === "number" && Number.isFinite(v) ? v : null;
@@ -124,6 +125,14 @@ function sanitizeState(msg) {
     const radius = finiteNumber(msg.radius);
     if (radius != null && radius > 0 && radius <= MAX_RELAY_RADIUS) {
         out.radius = quantize(radius, 100);
+    }
+    const vx = finiteNumber(msg.vx);
+    const vy = finiteNumber(msg.vy);
+    if (vx != null && Math.abs(vx) <= MAX_RELAY_SPEED) {
+        out.vx = quantize(vx, 10);
+    }
+    if (vy != null && Math.abs(vy) <= MAX_RELAY_SPEED) {
+        out.vy = quantize(vy, 10);
     }
     if (typeof msg.color === "string" && msg.color) {
         out.color = msg.color.slice(0, MAX_COLOR_LEN);

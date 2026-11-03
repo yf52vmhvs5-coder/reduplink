@@ -37,6 +37,8 @@ describe("sanitizeState", () => {
             t: 12.5,
             x: 100.04,
             y: 200.06,
+            vx: 150.24,
+            vy: -80.06,
             radius: 20.123,
             color: "#0a0a0a",
             glow: "#88ffcc",
@@ -50,6 +52,8 @@ describe("sanitizeState", () => {
         assert.equal(out.type, "state");
         assert.equal(out.x, 100);
         assert.equal(out.y, 200.1);
+        assert.equal(out.vx, 150.2);
+        assert.equal(out.vy, -80.1);
         assert.equal(out.radius, 20.12);
         assert.equal(out.glow, "#88ffcc");
         assert.equal(out.entity, "Ravenous");

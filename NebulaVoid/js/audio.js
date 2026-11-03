@@ -1186,6 +1186,172 @@
         osc.stop(now + 0.15);
     }
 
+    /** Evolution Lab & MP — activare celulă pe barele de upgrade (puls gravitațional + rezonanță în Em/Am). */
+    function playEvolutionBarUpgradeSound(level, branchKey) {
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const lvl = Math.max(1, Math.min(10, Number(level) || 1));
+        const stepMul = 1 + (lvl - 1) * 0.036;
+        const rootBase =
+            branchKey === "core"
+                ? 196.0
+                : branchKey === "signal"
+                  ? 246.94
+                  : 220.0;
+        const f0 = rootBase * stepMul;
+        const f1 = f0 * 1.2;
+        const dur = 0.34;
+
+        const sub = audioCtx.createOscillator();
+        const subGain = audioCtx.createGain();
+        sub.type = "sine";
+        sub.frequency.setValueAtTime(55 * stepMul, now);
+        sub.frequency.exponentialRampToValueAtTime(73.42 * stepMul, now + 0.07);
+        sub.frequency.exponentialRampToValueAtTime(41.2, now + 0.28);
+        subGain.gain.setValueAtTime(0, now);
+        subGain.gain.linearRampToValueAtTime(0.052, now + 0.016);
+        subGain.gain.exponentialRampToValueAtTime(0.0008, now + 0.3);
+        sub.connect(subGain).connect(audioCtx.destination);
+        sub.start(now);
+        sub.stop(now + 0.32);
+
+        const body = audioCtx.createOscillator();
+        const shimmer = audioCtx.createOscillator();
+        const shimmerGain = audioCtx.createGain();
+        const filt = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+
+        body.type = "sine";
+        shimmer.type = "triangle";
+        body.frequency.setValueAtTime(f0, now);
+        body.frequency.exponentialRampToValueAtTime(f1, now + 0.11);
+        body.frequency.exponentialRampToValueAtTime(f1 * 0.985, now + dur);
+
+        shimmer.frequency.setValueAtTime(f0 * 1.5, now);
+        shimmer.frequency.exponentialRampToValueAtTime(f1 * 1.5, now + 0.12);
+        shimmer.detune.setValueAtTime(7, now);
+        shimmerGain.gain.setValueAtTime(0.28, now);
+
+        filt.type = "lowpass";
+        filt.frequency.setValueAtTime(1650, now);
+        filt.frequency.exponentialRampToValueAtTime(620, now + dur);
+        filt.Q.value = 0.65;
+
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.044, now + 0.018);
+        gain.gain.exponentialRampToValueAtTime(0.0008, now + dur);
+
+        body.connect(filt);
+        shimmer.connect(shimmerGain).connect(filt);
+        filt.connect(gain).connect(audioCtx.destination);
+        body.start(now);
+        shimmer.start(now);
+        body.stop(now + dur + 0.02);
+        shimmer.stop(now + dur + 0.02);
+
+        if (lvl >= 10) {
+            const crown = audioCtx.createOscillator();
+            const crownFilt = audioCtx.createBiquadFilter();
+            const crownGain = audioCtx.createGain();
+            crown.type = "sine";
+            crown.frequency.setValueAtTime(f1 * 2, now + 0.05);
+            crown.frequency.exponentialRampToValueAtTime(f1 * 1.97, now + 0.48);
+            crownFilt.type = "lowpass";
+            crownFilt.frequency.setValueAtTime(1900, now + 0.05);
+            crownFilt.frequency.exponentialRampToValueAtTime(760, now + 0.48);
+            crownGain.gain.setValueAtTime(0, now + 0.05);
+            crownGain.gain.linearRampToValueAtTime(0.026, now + 0.09);
+            crownGain.gain.exponentialRampToValueAtTime(0.0008, now + 0.48);
+            crown.connect(crownFilt).connect(crownGain).connect(audioCtx.destination);
+            crown.start(now + 0.05);
+            crown.stop(now + 0.5);
+        }
+    }
+
+    /** Evolution Lab & MP — deblocare mod x1 / x2 / x3 (swell de singularitate + armonice întunecate în Em). */
+    function playModPurchaseSound(tier) {
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const t = tier === 3 ? 3 : tier === 2 ? 2 : 1;
+        const totalDur = 0.58 + t * 0.08;
+
+        const sub = audioCtx.createOscillator();
+        const subGain = audioCtx.createGain();
+        sub.type = "sine";
+        sub.frequency.setValueAtTime(49.0, now);
+        sub.frequency.exponentialRampToValueAtTime(t === 3 ? 82.41 : 73.42, now + 0.16);
+        sub.frequency.exponentialRampToValueAtTime(41.2, now + totalDur);
+        subGain.gain.setValueAtTime(0, now);
+        subGain.gain.linearRampToValueAtTime(0.075, now + 0.03);
+        subGain.gain.exponentialRampToValueAtTime(0.0008, now + totalDur);
+        sub.connect(subGain).connect(audioCtx.destination);
+        sub.start(now);
+        sub.stop(now + totalDur + 0.03);
+
+        const breathDur = 0.42;
+        const breathSamples = Math.ceil(audioCtx.sampleRate * breathDur);
+        const breathBuf = audioCtx.createBuffer(1, breathSamples, audioCtx.sampleRate);
+        const breathData = breathBuf.getChannelData(0);
+        for (let i = 0; i < breathSamples; i++) breathData[i] = Math.random() * 2 - 1;
+        const breath = audioCtx.createBufferSource();
+        breath.buffer = breathBuf;
+        const breathFilt = audioCtx.createBiquadFilter();
+        const breathGain = audioCtx.createGain();
+        breathFilt.type = "bandpass";
+        breathFilt.Q.value = 1.15;
+        breathFilt.frequency.setValueAtTime(360, now);
+        breathFilt.frequency.exponentialRampToValueAtTime(880 + t * 90, now + 0.15);
+        breathFilt.frequency.exponentialRampToValueAtTime(280, now + breathDur);
+        breathGain.gain.setValueAtTime(0, now);
+        breathGain.gain.linearRampToValueAtTime(0.024, now + 0.035);
+        breathGain.gain.exponentialRampToValueAtTime(0.0008, now + breathDur);
+        breath.connect(breathFilt).connect(breathGain).connect(audioCtx.destination);
+        breath.start(now);
+        breath.stop(now + breathDur + 0.03);
+
+        const notes =
+            t === 1
+                ? [196.0, 246.94, 329.63]
+                : t === 2
+                  ? [164.81, 246.94, 329.63, 392.0]
+                  : [164.81, 246.94, 329.63, 392.0, 493.88];
+        notes.forEach(function (freq, i) {
+            const t0 = now + 0.03 + i * 0.055;
+            const dur = 0.54 + i * 0.04;
+            const osc = audioCtx.createOscillator();
+            const shimmer = audioCtx.createOscillator();
+            const shimmerGain = audioCtx.createGain();
+            const filt = audioCtx.createBiquadFilter();
+            const gain = audioCtx.createGain();
+
+            osc.type = "sine";
+            shimmer.type = "triangle";
+            osc.frequency.setValueAtTime(freq, t0);
+            osc.frequency.exponentialRampToValueAtTime(freq * 0.99, t0 + dur);
+            shimmer.frequency.setValueAtTime(freq, t0);
+            shimmer.detune.setValueAtTime(i % 2 === 0 ? 9 : -9, t0);
+            shimmerGain.gain.setValueAtTime(0.24, t0);
+
+            filt.type = "lowpass";
+            filt.frequency.setValueAtTime(1950, t0);
+            filt.frequency.exponentialRampToValueAtTime(640, t0 + dur);
+            filt.Q.value = 0.6;
+
+            const peak = Math.max(0.018, 0.042 - i * 0.004);
+            gain.gain.setValueAtTime(0, t0);
+            gain.gain.linearRampToValueAtTime(peak, t0 + 0.024);
+            gain.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
+
+            osc.connect(filt);
+            shimmer.connect(shimmerGain).connect(filt);
+            filt.connect(gain).connect(audioCtx.destination);
+            osc.start(t0);
+            shimmer.start(t0);
+            osc.stop(t0 + dur + 0.02);
+            shimmer.stop(t0 + dur + 0.02);
+        });
+    }
+
     function playErrorSound() {
         if (!audioCtx) return;
         const now = audioCtx.currentTime;
@@ -1282,6 +1448,8 @@
     global.playDeathSound = playDeathSound;
     global.playAbilitySound = playAbilitySound;
     global.playHoverSound = playHoverSound;
+    global.playEvolutionBarUpgradeSound = playEvolutionBarUpgradeSound;
+    global.playModPurchaseSound = playModPurchaseSound;
     global.playChatReceiveSound = playChatReceiveSound;
     global.playErrorSound = playErrorSound;
 })(typeof window !== "undefined" ? window : globalThis);
