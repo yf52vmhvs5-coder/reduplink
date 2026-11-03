@@ -14,6 +14,7 @@ const MAX_PER_ROOM = 6;
 const MAX_WS_MESSAGE_BYTES = 4096;
 const PING_INTERVAL_MS = 15000;
 const MAX_PUBLIC_WAITING = 8;
+const MAX_ROOM_CHAT = 40;
 
 /** @returns {Set<string> | null} null means any Origin is accepted */
 function originAllowlistFrom(raw) {
@@ -115,6 +116,32 @@ function createRelayServer(opts) {
     /** Peers still in the current round. Room stays hidden until this set is empty. */
     /** @type {Map<string, Set<string>>} */
     const roomMatchPeers = new Map();
+    /** Chat said before a peer connects. Dropped with the room. */
+    /** @type {Map<string, Array<{ type: "chat", text: string, t: number, fromPeerId: string, callsign: string }>>} */
+    const roomChats = new Map();
+
+    function rememberRoomChat(roomId, entry) {
+        if (!roomId || !entry || entry.type !== "chat" || !entry.text) return;
+        let log = roomChats.get(roomId);
+        if (!log) {
+            log = [];
+            roomChats.set(roomId, log);
+        }
+        log.push({
+            type: "chat",
+            text: entry.text,
+            t: entry.t,
+            fromPeerId: entry.fromPeerId,
+            callsign: entry.callsign || "",
+        });
+        if (log.length > MAX_ROOM_CHAT) log.splice(0, log.length - MAX_ROOM_CHAT);
+    }
+
+    function sendRoomChatLog(ws, roomId) {
+        const log = roomChats.get(roomId);
+        if (!log || !log.length) return;
+        send(ws, { type: "chatLog", messages: log.slice() });
+    }
 
     function publicWaitingList() {
         const out = [];
@@ -194,6 +221,7 @@ function createRelayServer(opts) {
             roomHosts.delete(roomId);
             roomFlags.delete(roomId);
             roomMatchPeers.delete(roomId);
+            roomChats.delete(roomId);
         } else if (roomHosts.get(roomId) === leftPeerId) {
             const next = room.values().next().value;
             if (next && next.peerId) roomHosts.set(roomId, next.peerId);
@@ -233,6 +261,11 @@ function createRelayServer(opts) {
             roomFlags.set(roomId, { public: wantPublic, inMatch: false });
         } else if (msg.create === true) {
             send(ws, { type: "error", code: "ROOM_TAKEN" });
+            return;
+        }
+        const liveFlags = roomFlags.get(roomId);
+        if (liveFlags && liveFlags.inMatch) {
+            send(ws, { type: "error", code: "MATCH_LIVE" });
             return;
         }
         const room = rooms.get(roomId);
@@ -277,6 +310,7 @@ function createRelayServer(opts) {
                 ability: profile.ability,
             });
         }
+        sendRoomChatLog(ws, roomId);
         broadcastDirectory();
     }
 
@@ -395,6 +429,7 @@ function createRelayServer(opts) {
                 }
                 markRoomMatchStart(roomId, room);
             }
+            if (out.type === "chat") rememberRoomChat(roomId, out);
             broadcastRoom(room, out, ws);
         });
 

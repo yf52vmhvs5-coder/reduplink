@@ -12,7 +12,7 @@ const MP = {
 };
 
 function loadMirror(location) {
-    const sandbox = { console, setTimeout, clearTimeout };
+    const sandbox = { console, setTimeout, clearTimeout, URL };
     sandbox.global = sandbox;
     sandbox.globalThis = sandbox;
     sandbox.window = sandbox;
@@ -24,21 +24,38 @@ function loadMirror(location) {
 }
 
 describe("relay url selection", () => {
-    it("keeps localhost, loopback, file, and LAN on the local relay", () => {
+    it("keeps localhost, loopback, and file pages on the local relay", () => {
         const pages = [
             null,
             { protocol: "file:", hostname: "" },
             { protocol: "http:", hostname: "localhost" },
             { protocol: "http:", hostname: "127.0.0.1" },
             { protocol: "http:", hostname: "[::1]" },
-            { protocol: "http:", hostname: "192.168.1.20" },
-            { protocol: "http:", hostname: "10.0.0.4" },
         ];
         for (const location of pages) {
             const mirror = loadMirror(location);
             assert.equal(mirror.resolveRelayUrl(MP), MP.relayWsUrl);
             assert.equal(mirror.usesPublicRelay(), false);
         }
+    });
+
+    it("points a LAN page at the relay on that same host", () => {
+        const cases = [
+            ["192.168.1.20", "ws://192.168.1.20:8080"],
+            ["10.0.0.4", "ws://10.0.0.4:8080"],
+            ["172.16.5.8", "ws://172.16.5.8:8080"],
+            ["my-pc.local", "ws://my-pc.local:8080"],
+        ];
+        for (let i = 0; i < cases.length; i++) {
+            const mirror = loadMirror({ protocol: "http:", hostname: cases[i][0] });
+            assert.equal(mirror.usesPublicRelay(), false);
+            assert.equal(mirror.resolveRelayUrl(MP), cases[i][1]);
+        }
+        const customPort = loadMirror({ protocol: "http:", hostname: "192.168.0.12" });
+        assert.equal(
+            customPort.resolveRelayUrl({ relayWsUrl: "ws://127.0.0.1:9090" }),
+            "ws://192.168.0.12:9090"
+        );
     });
 
     it("uses the public relay on GitHub Pages", () => {

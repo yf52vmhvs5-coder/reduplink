@@ -20,12 +20,24 @@
     /** @type {{ onJoined?: Function, onPeerJoined?: Function, onPeerLeft?: Function, onError?: Function, onRelay?: Function, onDisconnected?: Function, onRoomList?: Function }} */
     let handlers = {};
 
-    function isLocalHostname(hostname) {
-        if (!hostname) return true;
-        const host = String(hostname).toLowerCase().replace(/^\[|\]$/g, "");
-        if (host === "localhost" || host === "127.0.0.1" || host === "::1" || host === "0.0.0.0") {
-            return true;
-        }
+    function normalizeHost(hostname) {
+        return String(hostname || "").toLowerCase().replace(/^\[|\]$/g, "");
+    }
+
+    function isLoopbackHost(hostname) {
+        const host = normalizeHost(hostname);
+        return (
+            !host ||
+            host === "localhost" ||
+            host === "127.0.0.1" ||
+            host === "::1" ||
+            host === "0.0.0.0"
+        );
+    }
+
+    function isPrivateLanHost(hostname) {
+        const host = normalizeHost(hostname);
+        if (!host || isLoopbackHost(host)) return false;
         if (host.endsWith(".local")) return true;
         if (/^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host)) return true;
         if (/^192\.168\.\d{1,3}\.\d{1,3}$/.test(host)) return true;
@@ -33,11 +45,36 @@
         return false;
     }
 
-    /** Public pages use relayWsUrlPublic. localhost, file://, and LAN stay on relayWsUrl. */
+    function isLocalHostname(hostname) {
+        return isLoopbackHost(hostname) || isPrivateLanHost(hostname);
+    }
+
+    /** Public pages use relayWsUrlPublic. Loopback and file:// stay on relayWsUrl. */
     function pageUsesPublicRelay() {
         const loc = global.location;
         if (!loc || loc.protocol === "file:") return false;
         return !isLocalHostname(loc.hostname);
+    }
+
+    function pageHost() {
+        const loc = global.location;
+        if (!loc || loc.protocol === "file:") return "";
+        return normalizeHost(loc.hostname);
+    }
+
+    /** A tablet that opened the page via the PC's LAN address must dial that PC, not itself. */
+    function relayUrlOnPageHost(localUrl, hostname) {
+        try {
+            const parsed = new URL(localUrl);
+            parsed.hostname = hostname;
+            const text = parsed.toString();
+            if (parsed.pathname === "/" && !parsed.search && !parsed.hash && text.endsWith("/")) {
+                return text.slice(0, -1);
+            }
+            return text;
+        } catch (err) {
+            return localUrl;
+        }
     }
 
     function resolveRelayUrl(mp) {
@@ -48,6 +85,8 @@
                 : "ws://127.0.0.1:8080";
         const publicUrl = typeof cfg.relayWsUrlPublic === "string" ? cfg.relayWsUrlPublic.trim() : "";
         if (pageUsesPublicRelay() && publicUrl) return publicUrl;
+        const host = pageHost();
+        if (isPrivateLanHost(host)) return relayUrlOnPageHost(localUrl, host);
         return localUrl;
     }
 

@@ -477,7 +477,9 @@
         const pid = String(peerId || "").trim();
         const inline = msg && msg.callsign != null ? msg.callsign : "";
         const tag = resolveCallsignForPeer(pid, inline);
-        if (pid && tag) ensureRosterCallsign(pid, inline || tag);
+        if (pid && tag && (pid === state.localPeerId || peerRoster[pid])) {
+            ensureRosterCallsign(pid, inline || tag);
+        }
         return tag;
     }
 
@@ -647,24 +649,51 @@
         if (!inRoom) setChatOpen(false);
     }
 
-    function handleLobbyChatMessage(msg) {
-        if (!msg || msg.type !== "chat") return;
+    function markChatUnreadSilent() {
+        chatUnread = true;
+        const toggle = deps && deps.dom && deps.dom.mpLobbyChatToggleBtn;
+        if (toggle) toggle.classList.toggle("mp-lobby-chat-toggle--unread", true);
+    }
+
+    function handleLobbyChatMessage(msg, opts) {
+        if (!msg || msg.type !== "chat") return false;
         const text = sanitizeChatText(msg.text);
-        if (!text) return;
+        if (!text) return false;
         const t = typeof msg.t === "number" && Number.isFinite(msg.t) ? msg.t : 0;
         const from =
             typeof msg.fromPeerId === "string" ? msg.fromPeerId : "";
         const dedupKey = from + "\0" + t + "\0" + text;
-        if (dedupKey === lastPeerChatDedupKey) return;
+        if (dedupKey === lastPeerChatDedupKey) return false;
         lastPeerChatDedupKey = dedupKey;
-        appendChatBubble("peer", formatIncomingChatLine(msg, text));
-        if (!chatOpen) {
-            if (chatUnread) {
-                playChatReceive();
-                nudgeChatToggle();
-            }
-            setChatUnread(true);
+        const mine = !!(state.localPeerId && from && from === state.localPeerId);
+        if (mine) {
+            const tag = peerCallsignLabel(state.localPeerId);
+            appendChatBubble("self", tag ? tag + ": " + text : text);
+        } else {
+            appendChatBubble("peer", formatIncomingChatLine(msg, text));
         }
+        const silent = !!(opts && opts.silent);
+        const skipUnread = !!(opts && opts.skipUnread);
+        if (skipUnread || chatOpen) return true;
+        if (silent) {
+            markChatUnreadSilent();
+            return true;
+        }
+        if (chatUnread) {
+            playChatReceive();
+            nudgeChatToggle();
+        }
+        setChatUnread(true);
+        return true;
+    }
+
+    function applyChatLog(messages) {
+        if (!Array.isArray(messages) || !messages.length) return;
+        let shown = 0;
+        for (let i = 0; i < messages.length; i++) {
+            if (handleLobbyChatMessage(messages[i], { skipUnread: true })) shown += 1;
+        }
+        if (shown > 0 && !chatOpen) setChatUnread(true);
     }
 
     function deliverChatSend(text, sentAt) {
@@ -924,6 +953,13 @@
                 else if (code === "BAD_ROOM") abandonFailedJoin("INVALID ROOM CODE");
                 else if (code === "PUBLIC_FULL") abandonFailedJoin("OPEN SIGNAL FULL");
                 else if (code === "MATCH_LIVE") {
+                    const api = mirrorApi();
+                    const sess =
+                        api && typeof api.getMirrorSession === "function" ? api.getMirrorSession() : null;
+                    if (!sess || !sess.peerId) {
+                        abandonFailedJoin("MATCH STILL LIVE");
+                        return;
+                    }
                     if (typeof deps.onMatchLiveRejected === "function") deps.onMatchLiveRejected();
                     setError("MATCH STILL LIVE");
                 } else setError("RELAY ERROR");
@@ -932,16 +968,22 @@
                 applyRoomList(msg);
             },
             onRelay: function (msg) {
+                if (msg && msg.type === "chatLog") {
+                    applyChatLog(msg.messages);
+                    return;
+                }
                 if (msg && msg.type === "chat") {
                     const inMirror =
                         global.NebulaGameMode &&
                         typeof global.NebulaGameMode.getRunMode === "function" &&
                         global.NebulaGameMode.getRunMode() === "mirror";
-                    if (inMirror) {
-                        if (typeof deps.onMirrorRelay === "function") deps.onMirrorRelay(msg);
-                        return;
+                    let taunt = false;
+                    if (inMirror && typeof global.handleMpTauntMessage === "function") {
+                        taunt = global.handleMpTauntMessage(msg) === true;
+                    } else if (inMirror && typeof deps.onMirrorRelay === "function") {
+                        deps.onMirrorRelay(msg);
                     }
-                    handleLobbyChatMessage(msg);
+                    handleLobbyChatMessage(msg, taunt ? { silent: true } : null);
                     return;
                 }
                 if (msg && msg.type === "matchEnd") {

@@ -264,6 +264,98 @@ describe("relay server", () => {
         guest.ws.close();
     });
 
+    it("replays chat spoken before a peer arrives", async () => {
+        const room = "CH02";
+        const host = await joinRoom(url, room, true);
+        host.ws.send(JSON.stringify({ type: "chat", text: "before you", t: 11 }));
+        await wait(30);
+        const guest = await joinRoom(url, room, false);
+        const joinedHost = await host.inbox.take();
+        assert.equal(joinedHost.type, "peerJoined");
+        const log = await guest.inbox.take();
+        assert.equal(log.type, "chatLog");
+        assert.equal(log.messages.length, 1);
+        assert.equal(log.messages[0].text, "before you");
+        assert.equal(log.messages[0].fromPeerId, host.joined.peerId);
+        assert.equal(log.messages[0].callsign, host.joined.callsign);
+
+        await wait(650);
+        host.ws.send(JSON.stringify({ type: "chat", text: "after you", t: 12 }));
+        const live = await guest.inbox.take();
+        assert.equal(live.type, "chat");
+        assert.equal(live.text, "after you");
+        assert.equal(guest.inbox.drain().some((msg) => msg.type === "chatLog"), false);
+
+        host.ws.close();
+        guest.ws.close();
+    });
+
+    it("drops the chat log when the room empties", async () => {
+        const room = "CH03";
+        const host = await joinRoom(url, room, true);
+        host.ws.send(JSON.stringify({ type: "chat", text: "gone soon", t: 1 }));
+        await wait(20);
+        const guest = await joinRoom(url, room, false);
+        await host.inbox.take();
+        const log = await guest.inbox.take();
+        assert.equal(log.type, "chatLog");
+        assert.equal(log.messages[0].text, "gone soon");
+
+        const hostClosed = new Promise((resolve) => host.ws.once("close", resolve));
+        const guestClosed = new Promise((resolve) => guest.ws.once("close", resolve));
+        host.ws.close();
+        guest.ws.close();
+        await Promise.all([hostClosed, guestClosed]);
+
+        const next = await joinRoom(url, room, true);
+        const again = await joinRoom(url, room, false);
+        assert.equal(again.joined.type, "joined");
+        await next.inbox.take();
+        await wait(30);
+        assert.equal(again.inbox.drain().some((msg) => msg.type === "chatLog"), false);
+
+        next.ws.close();
+        again.ws.close();
+    });
+
+    it("rejects a join while a round is live", async () => {
+        const room = "LV02";
+        const host = await joinRoom(url, room, true);
+        const guest = await joinRoom(url, room, false);
+        await host.inbox.take();
+        host.ws.send(
+            JSON.stringify({
+                type: "matchStart",
+                t0: 1,
+                roomId: room,
+                peerOrder: [host.joined.peerId, guest.joined.peerId],
+                dustSeed: 4,
+            })
+        );
+        const started = await guest.inbox.take();
+        assert.equal(started.type, "matchStart");
+
+        const late = await joinRoom(url, room, false);
+        assert.equal(late.joined.type, "error");
+        assert.equal(late.joined.code, "MATCH_LIVE");
+        await wait(30);
+        assert.equal(
+            host.inbox.drain().some((msg) => msg.type === "peerJoined"),
+            false
+        );
+
+        late.ws.close();
+        guest.ws.send(JSON.stringify({ type: "roomIdle" }));
+        host.ws.send(JSON.stringify({ type: "roomIdle" }));
+        await wait(50);
+        const after = await joinRoom(url, room, false);
+        assert.equal(after.joined.type, "joined");
+
+        after.ws.close();
+        host.ws.close();
+        guest.ws.close();
+    });
+
     it("closes oversized frames via maxPayload", async () => {
         const room = "MX01";
         const host = await joinRoom(url, room, true);
