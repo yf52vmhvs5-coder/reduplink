@@ -12,6 +12,7 @@
     const DEFAULT_REMOTE_INTERP_SPEED = 32;
     const DEFAULT_REMOTE_SNAP_DISTANCE_PX = 320;
     const DEFAULT_REMOTE_EXTRAP_MAX_SEC = 0.055;
+    const DEFAULT_REMOTE_VEL_BLEND = 0.75;
     /** Above dash speed (640) so a hitch cannot fling the predicted cell. */
     const MAX_REMOTE_SPEED = 960;
     const STATE_KEEPALIVE_MS = 300;
@@ -21,6 +22,7 @@
     let remoteInterpSpeed = DEFAULT_REMOTE_INTERP_SPEED;
     let remoteSnapDistancePx = DEFAULT_REMOTE_SNAP_DISTANCE_PX;
     let remoteExtrapMaxSec = DEFAULT_REMOTE_EXTRAP_MAX_SEC;
+    let remoteVelBlend = DEFAULT_REMOTE_VEL_BLEND;
 
     let lastStateSentAt = 0;
     let lastFullStateSentAt = -1;
@@ -49,6 +51,10 @@
             const extrap = Number(cfg.remoteExtrapMaxSec);
             if (Number.isFinite(extrap) && extrap >= 0 && extrap <= 0.2) {
                 remoteExtrapMaxSec = extrap;
+            }
+            const velBlend = Number(cfg.remoteVelBlend);
+            if (Number.isFinite(velBlend) && velBlend >= 0.2 && velBlend <= 1) {
+                remoteVelBlend = velBlend;
             }
         }
     }
@@ -175,9 +181,8 @@
                     typeof rp.netVelY === "number" && Number.isFinite(rp.netVelY) ? rp.netVelY : 0;
                 const dot = prevVx * instVx + prevVy * instVy;
                 if (dot > 0) {
-                    const blend = 0.75;
-                    rp.netVelX = prevVx + (instVx - prevVx) * blend;
-                    rp.netVelY = prevVy + (instVy - prevVy) * blend;
+                    rp.netVelX = prevVx + (instVx - prevVx) * remoteVelBlend;
+                    rp.netVelY = prevVy + (instVy - prevVy) * remoteVelBlend;
                 } else {
                     rp.netVelX = instVx;
                     rp.netVelY = instVy;

@@ -503,9 +503,10 @@ window.__GAME_DATA_SOURCE = {
     "minPlayersToStart": 2,
     "allowMockPeerFallback": false,
     "stateSendIntervalMs": 16,
-    "remoteInterpSpeed": 32,
+    "remoteInterpSpeed": 26,
     "remoteSnapDistancePx": 320,
-    "remoteExtrapMaxSec": 0.055,
+    "remoteExtrapMaxSec": 0.08,
+    "remoteVelBlend": 0.55,
     "matchUpgrades": {
       "barCellScore": 50,
       "barMaxLevel": 10,
