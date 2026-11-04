@@ -1104,25 +1104,55 @@
         osc3.stop(now + 1.5);
     }
 
+    /** Void Shriek — clinchet scurt de gheață. Fără cădere de octavă. */
+    function playWarpFreezeSound() {
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+
+        const body = audioCtx.createOscillator();
+        const bodyGain = audioCtx.createGain();
+        body.type = "sine";
+        body.frequency.setValueAtTime(196, now);
+        body.frequency.exponentialRampToValueAtTime(164.81, now + 0.4);
+        bodyGain.gain.setValueAtTime(0, now);
+        bodyGain.gain.linearRampToValueAtTime(0.022, now + 0.05);
+        bodyGain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        body.connect(bodyGain).connect(audioCtx.destination);
+        body.start(now);
+        body.stop(now + 0.44);
+
+        const tones = [
+            { freq: 659.25, delay: 0.02, peak: 0.026, dur: 0.48 },
+            { freq: 987.77, delay: 0.055, peak: 0.012, dur: 0.36 },
+            { freq: 1318.51, delay: 0.012, peak: 0.006, dur: 0.16 }
+        ];
+        tones.forEach((tone) => {
+            const t0 = now + tone.delay;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const filter = audioCtx.createBiquadFilter();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(tone.freq, t0);
+            osc.frequency.exponentialRampToValueAtTime(tone.freq * 0.988, t0 + tone.dur);
+            filter.type = "lowpass";
+            filter.frequency.setValueAtTime(2200, t0);
+            filter.frequency.exponentialRampToValueAtTime(880, t0 + tone.dur);
+            gain.gain.setValueAtTime(0, t0);
+            gain.gain.linearRampToValueAtTime(tone.peak, t0 + 0.028);
+            gain.gain.exponentialRampToValueAtTime(0.001, t0 + tone.dur);
+            osc.connect(filter).connect(gain).connect(audioCtx.destination);
+            osc.start(t0);
+            osc.stop(t0 + tone.dur + 0.02);
+        });
+    }
+
     function playAbilitySound(type) {
         if (!audioCtx) return;
         const now = audioCtx.currentTime;
         if (type === "vampire") {
             /* playBloodRiftCastSound() la spawn reușit în entities.js */
         } else if (type === "warp") {
-            [440, 880, 1320].forEach((f, i) => {
-                const o = audioCtx.createOscillator();
-                const g = audioCtx.createGain();
-                o.type = "sine";
-                o.frequency.setValueAtTime(f, now);
-                o.frequency.exponentialRampToValueAtTime(f * 0.5, now + 0.6);
-                g.gain.setValueAtTime(0, now);
-                g.gain.linearRampToValueAtTime(0.05, now + 0.1);
-                g.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-                o.connect(g).connect(audioCtx.destination);
-                o.start(now + i * 0.03);
-                o.stop(now + 0.6);
-            });
+            playWarpFreezeSound();
         } else if (type === "speed") {
             const n = audioCtx.createBufferSource();
             const b = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.5, audioCtx.sampleRate);

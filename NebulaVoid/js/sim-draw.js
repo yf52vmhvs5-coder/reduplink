@@ -605,12 +605,8 @@
         }
 
         if (!isDying) {
-            const isAtMaxRadius = player.radius >= GAME_SETTINGS.MAX_PLAYER_RADIUS - 0.01;
-            const tremorStrength = isAtMaxRadius ? Math.max(0.8, player.radius * 0.035) : 0;
-            const tremorX = isAtMaxRadius ? Math.sin(timeNow * 0.08) * tremorStrength : 0;
-            const tremorY = isAtMaxRadius ? Math.cos(timeNow * 0.11) * tremorStrength : 0;
-            const renderPlayerX = player.x + tremorX;
-            const renderPlayerY = player.y + tremorY;
+            const renderPlayerX = player.x;
+            const renderPlayerY = player.y;
 
             deps.drawSporeGhostsWorld(ctx, timeNow);
 

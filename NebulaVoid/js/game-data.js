@@ -25,7 +25,7 @@ window.__GAME_DATA_SOURCE = {
     /* ─── 1.1 Lume & limite jucător ─── */
     "WORLD_SIZE": 4000,              // ★ px — latura hărții pătrate (gaura neagră e în centru)
     "START_RADIUS": 20,              // ★ px — raza jucătorului la spawn
-    "MAX_PLAYER_RADIUS": 60,        // ★ px — plafon de creștere; la plafon jucătorul „tremură”
+    "MAX_PLAYER_RADIUS": 60,        // ★ px — plafon de creștere; raza se oprește aici, fără tremur
 
     /* ─── 1.2 Praf stelar (particule de mâncat) ─── */
     "MAX_PARTICLES": 200,            // ★ max particule active simultan (densitatea hranei)
