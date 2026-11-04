@@ -10,14 +10,62 @@
     let drawLoopActive = false;
     let drawLastTime = performance.now();
 
-    const PLAYER_CELL_CORE = "#0a0a0a";
+    const localEyeHost = {
+        blinkTimer: 0.5,
+        isBlinking: false,
+        blinkDuration: 0,
+        cachedIrisGrad: null,
+        lastR: -1,
+        lastCol: "",
+        aimX: null,
+        aimY: null,
+    };
+    const remoteEyeHosts = new WeakMap();
 
-    /** X-ul de cooldown, același desen ca pe celula locală. cdProgress 0 = tocmai folosit, 1 = gata. */
-    function drawAbilityCross(ctx, x, y, radius, cdProgress) {
+    function eyeHostForRemote(rp) {
+        let host = remoteEyeHosts.get(rp);
+        if (!host) {
+            host = {
+                blinkTimer: 0.31 + Math.random() * 0.93,
+                isBlinking: false,
+                blinkDuration: 0,
+                cachedIrisGrad: null,
+                lastR: -1,
+                lastCol: "",
+            };
+            remoteEyeHosts.set(rp, host);
+        }
+        return host;
+    }
+
+    /** Disc plin, ca boții: fără contur, glow discret. Freeze-ul rămâne alb cu umbră mov. */
+    function drawPlayerSkin(ctx, x, y, radius, fillColor, lookX, lookY, eyeHost, dt, frozen) {
+        const r = Math.max(1, radius);
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, 6.28);
+        if (frozen) {
+            ctx.fillStyle = "#ffffff";
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = "#8a2be2";
+        } else {
+            ctx.fillStyle = fillColor;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = fillColor;
+        }
+        ctx.fill();
+        ctx.restore();
+        if (typeof global.drawReactiveEye === "function") {
+            global.drawReactiveEye(ctx, x, y, r, fillColor, lookX, lookY, eyeHost, dt);
+        }
+    }
+
+    /** X-ul de cooldown. cdProgress 0 = tocmai folosit, 1 = gata. Conturul ia culoarea skinului. */
+    function drawAbilityCross(ctx, x, y, radius, cdProgress, outlineColor) {
         const progress = Math.max(0, Math.min(1, cdProgress));
-        const xSize = Math.max(6, radius * 0.35);
-        const outlineW = Math.max(3.6, Math.min(7, xSize * 0.58));
-        const fillW = Math.max(1.5, outlineW * 0.4);
+        const xSize = Math.max(5, radius * 0.35);
+        const outlineW = Math.max(2.2, Math.min(4.2, xSize * 0.5));
+        const fillW = Math.max(1.05, outlineW * 0.42);
         const tipInset = (outlineW - fillW) * 0.65;
         const reach = Math.max(0, xSize - tipInset);
         const inner = reach * (1 - progress);
@@ -27,7 +75,7 @@
         ctx.lineJoin = "round";
         ctx.shadowBlur = 0;
         ctx.globalAlpha = 1;
-        ctx.strokeStyle = ENTITY_TYPES.GRAVITY_WELL.color;
+        ctx.strokeStyle = outlineColor || ENTITY_TYPES.GRAVITY_WELL.color;
         ctx.lineWidth = outlineW;
         ctx.beginPath();
         ctx.moveTo(-xSize, -xSize);
@@ -52,30 +100,30 @@
         ctx.restore();
     }
 
-    function drawNebulaPlayerCell(ctx, x, y, radius, coreColor, glowColor, timeNow, atMaxRadius) {
-        const maxRadiusGlowPulse = atMaxRadius ? Math.sin(timeNow * 0.006) * 1.2 + 1.8 : 0;
-        ctx.save();
-        ctx.shadowBlur = 15 + Math.sin(timeNow * 0.004) * 8 + maxRadiusGlowPulse;
-        ctx.shadowColor = glowColor;
-        ctx.fillStyle = coreColor;
-        ctx.strokeStyle = glowColor;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(x, y, Math.max(1, radius), 0, 6.28);
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-    }
-
-    function drawFrozenCell(ctx, x, y, radius) {
-        ctx.save();
-        ctx.beginPath();
-        ctx.arc(x, y, Math.max(1, radius), 0, 6.28);
-        ctx.fillStyle = "#ffffff";
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = "#8a2be2";
-        ctx.fill();
-        ctx.restore();
+    /** Colț dreapta-jos, în pixeli de ecran. Taunt-ul stă la stânga; X-ul urcă doar peste butonul de abilitate de pe tabletă. */
+    function cooldownHudPoint(screenW, screenH) {
+        const crossRadius = 20;
+        const xSize = Math.max(5, crossRadius * 0.35);
+        const pad = 20;
+        let cx = screenW - pad - xSize;
+        let cy = screenH - pad - xSize;
+        const blockers = ["tabletPad"];
+        for (let i = 0; i < blockers.length; i++) {
+            const el = document.getElementById(blockers[i]);
+            if (!el || el.hidden) continue;
+            const style = window.getComputedStyle(el);
+            if (style.display === "none" || style.visibility === "hidden") continue;
+            const rect = el.getBoundingClientRect();
+            if (rect.width < 2 || rect.height < 2) continue;
+            const half = xSize + 8;
+            const overlaps =
+                cx + half > rect.left &&
+                cx - half < rect.right &&
+                cy + half > rect.top &&
+                cy - half < rect.bottom;
+            if (overlaps) cy = rect.top - 12 - xSize;
+        }
+        return { cx, cy, crossRadius };
     }
 
     function configureSimDraw(nextDeps) {
@@ -525,23 +573,21 @@
                     typeof rp.displayRadius === "number" && Number.isFinite(rp.displayRadius)
                         ? rp.displayRadius
                         : rp.radius;
-                const rpGlow = rp.glow || rp.color || "#888888";
-                const rpCore =
-                    rp.color && rp.color.toLowerCase() !== rpGlow.toLowerCase()
-                        ? rp.color
-                        : PLAYER_CELL_CORE;
-                const rpMax =
-                    typeof drawR === "number" && drawR >= GAME_SETTINGS.MAX_PLAYER_RADIUS - 0.01;
-                drawNebulaPlayerCell(ctx, drawX, drawY, drawR, rpCore, rpGlow, timeNow, rpMax);
-                if (typeof global.mirrorPeerFrozen === "function" && global.mirrorPeerFrozen(rp.peerId)) {
-                    drawFrozenCell(ctx, drawX, drawY, drawR);
-                }
-                if (rp.ability && rp.cdMax > 0) {
-                    const elapsed = rp.cdAt ? (performance.now() - rp.cdAt) / 1000 : 0;
-                    const cdLeft = Math.max(0, (rp.cd || 0) - elapsed);
-                    const remoteProgress = Math.max(0, Math.min(1, 1 - cdLeft / rp.cdMax));
-                    drawAbilityCross(ctx, drawX, drawY, drawR, remoteProgress);
-                }
+                const rpFill = rp.glow || rp.color || "#888888";
+                const rpFrozen =
+                    typeof global.mirrorPeerFrozen === "function" && global.mirrorPeerFrozen(rp.peerId);
+                drawPlayerSkin(
+                    ctx,
+                    drawX,
+                    drawY,
+                    drawR,
+                    rpFill,
+                    player.x,
+                    player.y,
+                    eyeHostForRemote(rp),
+                    dt,
+                    rpFrozen
+                );
             }
         }
 
@@ -611,24 +657,39 @@
             }
             ctx.restore();
 
-            drawNebulaPlayerCell(
+            let lookX = localEyeHost.aimX;
+            let lookY = localEyeHost.aimY;
+            if (useVectorAim && typeof deps.getWasdInputSmoothed === "function") {
+                const aim = deps.getWasdInputSmoothed();
+                const aimLen = Math.hypot(aim.x, aim.y);
+                if (aimLen > 0.12) {
+                    lookX = player.x + (aim.x / aimLen) * 480;
+                    lookY = player.y + (aim.y / aimLen) * 480;
+                }
+            } else {
+                lookX = cameraX + (mouse.x - centerX - screenShake.x) / interpolatedZoom;
+                lookY = cameraY + (mouse.y - centerY - screenShake.y) / interpolatedZoom;
+            }
+            if (!Number.isFinite(lookX) || !Number.isFinite(lookY)) {
+                lookX = player.x + 200;
+                lookY = player.y;
+            }
+            localEyeHost.aimX = lookX;
+            localEyeHost.aimY = lookY;
+            const localFrozen =
+                typeof global.mirrorLocalFrozen === "function" && global.mirrorLocalFrozen();
+            drawPlayerSkin(
                 ctx,
                 renderPlayerX,
                 renderPlayerY,
                 player.radius,
-                player.color,
-                player.glow,
-                timeNow,
-                isAtMaxRadius
+                player.glow || player.color,
+                lookX,
+                lookY,
+                localEyeHost,
+                dt,
+                localFrozen
             );
-            if (typeof global.mirrorLocalFrozen === "function" && global.mirrorLocalFrozen()) {
-                drawFrozenCell(ctx, renderPlayerX, renderPlayerY, player.radius);
-            }
-
-            const maxCd =
-                (GAME_SETTINGS[`CD_${selectedAbility.toUpperCase()}`] || 5.0) * deps.getSignalCooldownMultiplier();
-            const cdProgress = Math.max(0, Math.min(1, 1 - player.cooldown / maxCd));
-            drawAbilityCross(ctx, renderPlayerX, renderPlayerY, player.radius, cdProgress);
         }
         ctx.restore();
 
@@ -708,6 +769,19 @@
                 ctx.fillRect(bX, bY + 6, bBarW * progress, 4);
                 ctx.restore();
             }
+
+            const maxCd =
+                (GAME_SETTINGS[`CD_${selectedAbility.toUpperCase()}`] || 5.0) * deps.getSignalCooldownMultiplier();
+            const cdProgress = Math.max(0, Math.min(1, 1 - player.cooldown / maxCd));
+            const hudCross = cooldownHudPoint(screenW, screenH);
+            drawAbilityCross(
+                ctx,
+                hudCross.cx,
+                hudCross.cy,
+                hudCross.crossRadius,
+                cdProgress,
+                player.glow || player.color
+            );
         }
 
         if ((gameActive || isDying) && typeof global.drawPickupFloats === "function") {

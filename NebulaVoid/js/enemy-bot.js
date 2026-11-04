@@ -57,6 +57,80 @@
         return bot.config && bot.config.growthRate != null ? bot.config.growthRate : 1;
     }
 
+    /**
+     * Ochiul boților: iris în culoarea celulei, pupilă, clipit, privirea spre (lookX, lookY).
+     * `host` păstrează blinkTimer / isBlinking / blinkDuration și cache-ul de iris.
+     */
+    function drawReactiveEye(ctx, x, y, radius, color, lookX, lookY, host, dt) {
+        if (!host) return;
+        const step = typeof dt === "number" && dt > 0 ? dt : 0;
+        if (typeof host.blinkTimer !== "number") host.blinkTimer = 0.31 + Math.random() * 0.93;
+        host.blinkTimer -= step;
+        if (host.blinkTimer <= 0) {
+            host.isBlinking = true;
+            host.blinkDuration = 0.05;
+            host.blinkTimer = 0.31 + Math.random() * 0.93;
+        }
+        ctx.save();
+        const ang = Math.atan2(lookY - y, lookX - x);
+        const eyeR = radius * 0.45;
+        const pupilR = eyeR * 0.4;
+        const lookO = radius * 0.25;
+        ctx.translate(x + Math.cos(ang) * lookO, y + Math.sin(ang) * lookO);
+        if (host.isBlinking && host.blinkDuration > 0) {
+            host.blinkDuration -= step;
+            ctx.beginPath();
+            ctx.moveTo(-eyeR, 0);
+            ctx.lineTo(eyeR, 0);
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = "#050505";
+            ctx.stroke();
+        } else {
+            host.isBlinking = false;
+            ctx.beginPath();
+            ctx.arc(0, 0, eyeR, 0, 6.28);
+            ctx.fillStyle = "#111";
+            ctx.fill();
+            ctx.save();
+            const curR = Math.round(radius);
+            if (!host.cachedIrisGrad || host.lastR !== curR || host.lastCol !== color) {
+                host.cachedIrisGrad = ctx.createRadialGradient(0, 0, pupilR, 0, 0, eyeR);
+                host.cachedIrisGrad.addColorStop(0, color);
+                host.cachedIrisGrad.addColorStop(1, "#000");
+                host.lastR = curR;
+                host.lastCol = color;
+            }
+            ctx.beginPath();
+            ctx.arc(0, 0, eyeR * 0.9, 0, 6.28);
+            ctx.fillStyle = host.cachedIrisGrad;
+            ctx.fill();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = "#fff";
+            ctx.globalAlpha = 0.3;
+            ctx.beginPath();
+            const _ft = window._drawFrameTime || 0;
+            for (let i = 0; i < 30; i++) {
+                ctx.rotate((Math.PI * 2) / 30);
+                ctx.moveTo(pupilR, 0);
+                ctx.lineTo(eyeR * (0.75 + Math.sin(_ft * 0.0022 + i * 0.628) * 0.15), 0);
+            }
+            ctx.stroke();
+            ctx.restore();
+            ctx.beginPath();
+            ctx.arc(0, 0, pupilR, 0, 6.28);
+            ctx.fillStyle = "#000";
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = color;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.beginPath();
+            ctx.arc(-pupilR * 0.4, -pupilR * 0.4, pupilR * 0.3, 0, 6.28);
+            ctx.fillStyle = "rgba(255,255,255,0.8)";
+            ctx.fill();
+        }
+        ctx.restore();
+    }
+
     class EnemyBot {
         constructor() {
             this.active = false;
@@ -466,74 +540,12 @@
             }
             ctx.fill();
             ctx.restore();
-            this.blinkTimer -= dt;
-            if (this.blinkTimer <= 0) {
-                this.isBlinking = true;
-                this.blinkDuration = 0.05;
-                this.blinkTimer = 0.31 + Math.random() * 0.93;
-            }
-            ctx.save();
-            let ang = Math.atan2(pY - this.y, pX - this.x);
-            let eyeR = this.radius * 0.45;
-            let pupilR = eyeR * 0.4;
-            let lookO = this.radius * 0.25;
-            ctx.translate(this.x + Math.cos(ang) * lookO, this.y + Math.sin(ang) * lookO);
-            if (this.isBlinking && this.blinkDuration > 0) {
-                this.blinkDuration -= dt;
-                ctx.beginPath();
-                ctx.moveTo(-eyeR, 0);
-                ctx.lineTo(eyeR, 0);
-                ctx.lineWidth = 4;
-                ctx.strokeStyle = "#050505";
-                ctx.stroke();
-            } else {
-                this.isBlinking = false;
-                ctx.beginPath();
-                ctx.arc(0, 0, eyeR, 0, 6.28);
-                ctx.fillStyle = "#111";
-                ctx.fill();
-                ctx.save();
-                let curR = Math.round(this.radius);
-                if (!this.cachedIrisGrad || this.lastR !== curR || this.lastCol !== drawCol) {
-                    this.cachedIrisGrad = ctx.createRadialGradient(0, 0, pupilR, 0, 0, eyeR);
-                    this.cachedIrisGrad.addColorStop(0, drawCol);
-                    this.cachedIrisGrad.addColorStop(1, "#000");
-                    this.lastR = curR;
-                    this.lastCol = drawCol;
-                }
-                ctx.beginPath();
-                ctx.arc(0, 0, eyeR * 0.9, 0, 6.28);
-                ctx.fillStyle = this.cachedIrisGrad;
-                ctx.fill();
-                ctx.lineWidth = 1;
-                ctx.strokeStyle = "#fff";
-                ctx.globalAlpha = 0.3;
-                ctx.beginPath();
-                const _ft = window._drawFrameTime || 0;
-                for (let i = 0; i < 30; i++) {
-                    ctx.rotate((Math.PI * 2) / 30);
-                    ctx.moveTo(pupilR, 0);
-                    ctx.lineTo(eyeR * (0.75 + Math.sin(_ft * 0.0022 + i * 0.628) * 0.15), 0);
-                }
-                ctx.stroke();
-                ctx.restore();
-                ctx.beginPath();
-                ctx.arc(0, 0, pupilR, 0, 6.28);
-                ctx.fillStyle = "#000";
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = drawCol;
-                ctx.fill();
-                ctx.shadowBlur = 0;
-                ctx.beginPath();
-                ctx.arc(-pupilR * 0.4, -pupilR * 0.4, pupilR * 0.3, 0, 6.28);
-                ctx.fillStyle = "rgba(255,255,255,0.8)";
-                ctx.fill();
-            }
-            ctx.restore();
+            drawReactiveEye(ctx, this.x, this.y, this.radius, drawCol, pX, pY, this, dt);
         }
     }
 
     global.EnemyBot = EnemyBot;
     global.configureEnemyBot = configureEnemyBot;
     global.clampBotRadius = clampBotRadius;
+    global.drawReactiveEye = drawReactiveEye;
 })(typeof window !== "undefined" ? window : globalThis);

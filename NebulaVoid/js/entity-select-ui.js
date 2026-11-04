@@ -170,15 +170,113 @@ skinTriadSlots = skins.map((skin, index) => {
     lock.hidden = true;
     lock.setAttribute("aria-hidden", "true");
 
+    const eyeCanvas = document.createElement("canvas");
+    eyeCanvas.className = "skin-orb-eye";
+    eyeCanvas.setAttribute("aria-hidden", "true");
+
     const label = document.createElement("div");
     label.className = "skin-triad-label";
 
     orb.appendChild(lock);
+    orb.appendChild(eyeCanvas);
     slot.appendChild(orb);
     slot.appendChild(label);
 
-    return { slot, orb, label, lock };
+    return {
+        slot,
+        orb,
+        label,
+        lock,
+        eyeCanvas,
+        eyeHost: {
+            blinkTimer: 0.31 + Math.random() * 0.93,
+            isBlinking: false,
+            blinkDuration: 0,
+            cachedIrisGrad: null,
+            lastR: -1,
+            lastCol: "",
+        },
+    };
 });
+
+let orbEyeMouseX = window.innerWidth * 0.5;
+let orbEyeMouseY = window.innerHeight * 0.5;
+let orbEyeLoopOn = false;
+let orbEyeLastTs = 0;
+window.addEventListener("pointermove", (e) => {
+    orbEyeMouseX = e.clientX;
+    orbEyeMouseY = e.clientY;
+}, { passive: true });
+
+function orbEyesMenuOpen() {
+    if (!startMenu || startMenu.style.display === "none") return false;
+    if (deps && typeof deps.getGameActive === "function" && deps.getGameActive()) return false;
+    return true;
+}
+
+function orbEyesShouldRun() {
+    if (!orbEyesMenuOpen()) return false;
+    const intro = document.getElementById("introScreen");
+    if (intro && intro.style.display !== "none") return false;
+    return true;
+}
+
+function paintSkinOrbEyes(dt) {
+    if (typeof global.drawReactiveEye !== "function") return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    for (let i = 0; i < skinTriadSlots.length; i++) {
+        const ref = skinTriadSlots[i];
+        const skin = skins[i];
+        const canvas = ref.eyeCanvas;
+        if (!canvas || !skin || !ref.orb) continue;
+        const rect = ref.orb.getBoundingClientRect();
+        if (rect.width < 2 || rect.height < 2) continue;
+        const w = Math.max(1, Math.round(rect.width * dpr));
+        const h = Math.max(1, Math.round(rect.height * dpr));
+        if (canvas.width !== w || canvas.height !== h) {
+            canvas.width = w;
+            canvas.height = h;
+            ref.eyeHost.cachedIrisGrad = null;
+        }
+        const ctx = canvas.getContext("2d");
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, rect.width, rect.height);
+        const radius = Math.min(rect.width, rect.height) / 2;
+        global.drawReactiveEye(
+            ctx,
+            rect.width / 2,
+            rect.height / 2,
+            radius,
+            skin.color,
+            orbEyeMouseX - rect.left,
+            orbEyeMouseY - rect.top,
+            ref.eyeHost,
+            dt
+        );
+    }
+}
+
+function tickOrbEyes(ts) {
+    if (!orbEyesMenuOpen()) {
+        orbEyeLoopOn = false;
+        return;
+    }
+    if (!orbEyesShouldRun()) {
+        requestAnimationFrame(tickOrbEyes);
+        return;
+    }
+    const dt = orbEyeLastTs ? Math.min(0.05, (ts - orbEyeLastTs) / 1000) : 0.016;
+    orbEyeLastTs = ts;
+    paintSkinOrbEyes(dt);
+    requestAnimationFrame(tickOrbEyes);
+}
+
+function ensureOrbEyeLoop() {
+    if (orbEyeLoopOn || !orbEyesMenuOpen()) return;
+    orbEyeLoopOn = true;
+    orbEyeLastTs = 0;
+    requestAnimationFrame(tickOrbEyes);
+}
 
 function syncSkinOrbPlacement() {
     if (!evoEntityStack) return;
@@ -278,10 +376,8 @@ function renderSelectedSkin(playSound = false) {
 
         ref.orb.style.backgroundColor = s.color;
         ref.orb.style.color = s.color;
-        const outerGlow = isSelected ? 26 : (isHovered ? 18 : 11);
-        const innerGlow = isSelected ? 20 : (isHovered ? 12 : 8);
-        ref.orb.style.boxShadow =
-            `0 0 ${outerGlow}px ${g}, inset 0 0 ${innerGlow}px ${g}`;
+        ref.orb.style.border = "none";
+        ref.orb.style.boxShadow = `0 0 ${isSelected ? 16 : 12}px ${s.color}`;
 
         ref.orb.classList.toggle("active-skin-option", isSelected);
         ref.orb.classList.toggle("skin-triad-option-idle", !isSelected);
@@ -296,6 +392,7 @@ function renderSelectedSkin(playSound = false) {
     updateSkinActionBtn();
     syncEvolutionLabBtnAccess();
     syncSkinOrbPlacement();
+    ensureOrbEyeLoop();
     if (playSound) playHoverSound();
     if (evolutionLabActive) renderEntityModButtons();
 }

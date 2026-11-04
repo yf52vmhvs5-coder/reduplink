@@ -116,7 +116,7 @@ body.game-running #ui #score {
 /* Taunt HUD — doar mirror, dreapta-jos. Pointer-events on, ca #ui e none. */
 #mpTauntBtn {
     position: fixed;
-    right: 22px;
+    right: 50px;
     bottom: 22px;
     z-index: 12;
     display: inline-flex;
@@ -2798,11 +2798,19 @@ html.tablet-mode .mp-lobby-chat-icon {
 
 .skin-triad-option {
     position: relative;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: none;
     width: 62px;
     height: 62px;
-    transition: box-shadow 0.22s ease, border-color 0.22s ease, opacity 0.22s ease, filter 0.22s ease;
+    transition: box-shadow 0.22s ease, opacity 0.22s ease, filter 0.22s ease;
     will-change: box-shadow, opacity;
+}
+
+.skin-orb-eye {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
 }
 
 .skin-triad-option-idle {
@@ -2813,8 +2821,7 @@ html.tablet-mode .mp-lobby-chat-icon {
     width: 62px;
     height: 62px;
     opacity: 1;
-    border-width: 2px;
-    border-color: color-mix(in srgb, var(--slot-glow, #fff) 55%, rgba(255, 255, 255, 0.35));
+    border: none;
 }
 
 .skin-triad-slot.is-hovered:not(.is-selected) .skin-triad-option-idle {
@@ -2913,10 +2920,12 @@ html.tablet-mode .mp-lobby-chat-icon {
 }
 
 .skin-triad-row .skin-option.skin-triad-option,
-.skin-triad-row .skin-option.skin-triad-option.active-skin-option {
+.skin-triad-row .skin-option.skin-triad-option.active-skin-option,
+#startMenu.lab-mode .evo-entity-stack .skin-option.skin-triad-option {
     width: 62px;
     height: 62px;
-    transition: box-shadow 0.22s ease, border-color 0.22s ease, opacity 0.22s ease, filter 0.22s ease;
+    border: none;
+    transition: box-shadow 0.22s ease, opacity 0.22s ease, filter 0.22s ease;
     will-change: box-shadow, opacity;
     transform: none;
 }
