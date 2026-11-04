@@ -204,6 +204,12 @@
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.28);
 }
 
+.key--space {
+    color: var(--signal);
+    border-color: color-mix(in srgb, var(--signal) 70%, transparent);
+    text-shadow: 0 0 8px var(--signal-soft);
+}
+
 .key--cast {
     color: #00e5ff;
     border-color: color-mix(in srgb, #00e5ff 70%, transparent);
