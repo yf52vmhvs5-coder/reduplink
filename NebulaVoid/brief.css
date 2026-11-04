@@ -1,0 +1,354 @@
+/* Signal brief — layout only. Type, tint, and the starfield come from the studio sheet. */
+
+.bar {
+    flex-wrap: wrap;
+    row-gap: 10px;
+}
+
+.brief-nav {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 14px 18px;
+}
+
+.spec {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 28px 0 0;
+}
+
+.spec div {
+    min-width: 9.5rem;
+    padding: 12px 14px 11px;
+    border: 1px solid var(--line);
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.spec-k {
+    margin: 0 0 6px;
+    color: var(--dim);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+}
+
+.spec-v {
+    margin: 0;
+    font-size: 15px;
+    letter-spacing: 0.06em;
+    color: var(--ink);
+}
+
+.dossier-lead {
+    margin: 0 0 16px;
+    max-width: 40rem;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 14px;
+    line-height: 1.55;
+    letter-spacing: 0.03em;
+}
+
+.strain-list,
+.rival-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.strain-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.strain {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: 100%;
+    padding: 16px;
+    border: 1px solid var(--line);
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.orb {
+    --cell: #ff2d2d;
+    position: relative;
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    background: var(--cell);
+    box-shadow: 0 0 14px var(--cell);
+    flex-shrink: 0;
+}
+
+.orb canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.strain h3,
+.rival h3 {
+    margin: 0 0 6px;
+    font-size: 14px;
+    letter-spacing: 0.14em;
+    line-height: 1.25;
+}
+
+.strain-tag {
+    margin: 0 0 8px;
+    color: var(--dim);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+}
+
+.strain p,
+.rival p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.74);
+    font-size: 13px;
+    line-height: 1.5;
+    letter-spacing: 0.03em;
+}
+
+.strain p.strain-up,
+.strain p.strain-down {
+    margin-top: 6px;
+}
+
+.strain p.strain-up { color: rgba(255, 255, 255, 0.82); }
+
+.strain p.strain-down {
+    margin-top: 4px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.strain-up .strain-mark { color: #39ff14; }
+
+.strain-down .strain-mark { color: #ff5a5a; }
+
+.rival-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 28px;
+}
+
+.rival {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    column-gap: 14px;
+    align-items: center;
+    padding: 16px 0;
+    border-top: 1px solid var(--line);
+}
+
+.rival .orb {
+    width: 48px;
+    height: 48px;
+    box-shadow: 0 0 12px var(--cell);
+}
+
+.notes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px 32px;
+}
+
+.note h3 {
+    margin: 0 0 8px;
+    color: var(--signal);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-shadow: 0 0 10px var(--signal-soft);
+}
+
+.tint-word {
+    color: var(--signal);
+    font-weight: 700;
+    text-shadow: 0 0 8px var(--signal-soft);
+}
+
+.note p {
+    margin: 0;
+    max-width: 38rem;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 14px;
+    line-height: 1.7;
+    letter-spacing: 0.03em;
+}
+
+.key {
+    display: inline-block;
+    margin: 0 1px;
+    padding: 0 6px 1px;
+    border: 1px solid currentColor;
+    font-family: inherit;
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    line-height: 1.65;
+    vertical-align: 1px;
+    white-space: nowrap;
+}
+
+.key--move {
+    color: #f2f2f2;
+    border-color: rgba(255, 255, 255, 0.55);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.28);
+}
+
+.key--cast {
+    color: #00e5ff;
+    border-color: color-mix(in srgb, #00e5ff 70%, transparent);
+    text-shadow: 0 0 8px rgba(0, 229, 255, 0.45);
+}
+
+.key--pad {
+    color: #f2f2f2;
+    border-color: rgba(255, 255, 255, 0.55);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.28);
+}
+
+.key--leave {
+    color: #ff3b3b;
+    border-color: color-mix(in srgb, #ff3b3b 70%, transparent);
+    text-shadow: 0 0 8px rgba(255, 59, 59, 0.45);
+}
+
+.note p.bounty-rule {
+    margin-top: 12px;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+}
+
+.mod-tier { font-weight: 700; }
+
+.mod-tier--1 {
+    color: #00e5ff;
+    text-shadow: 0 0 8px rgba(0, 229, 255, 0.55);
+}
+
+.mod-tier--2 {
+    color: #c86bff;
+    text-shadow: 0 0 8px rgba(200, 107, 255, 0.55);
+}
+
+.mod-tier--3 {
+    color: #ffbe76;
+    text-shadow: 0 0 8px rgba(255, 190, 118, 0.55);
+}
+
+.bounty-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.bounty-tier {
+    min-width: 7.5rem;
+    padding: 10px 12px 9px;
+    border: 1px solid currentColor;
+    background: rgba(0, 0, 0, 0.35);
+}
+
+.bounty-tier strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 16px;
+    letter-spacing: 0.14em;
+    text-shadow: 0 0 8px currentColor;
+}
+
+.bounty-tier span {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+}
+
+.note--lab,
+.note--mods {
+    grid-column: 1 / -1;
+}
+
+.note--lab .lab-tier strong {
+    font-size: 15px;
+    letter-spacing: 0.12em;
+    line-height: 1.25;
+}
+
+.lab-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.lab-tier {
+    padding: 16px 16px 15px;
+    border: 1px solid currentColor;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.lab-tier strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    text-shadow: 0 0 12px currentColor;
+}
+
+.lab-kicker {
+    display: block;
+    margin-bottom: 8px;
+    color: currentColor;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    opacity: 0.85;
+}
+
+.lab-tier p {
+    max-width: none;
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 13px;
+    line-height: 1.45;
+    letter-spacing: 0.02em;
+}
+
+.thanks {
+    margin: 56px 0 0;
+    max-width: 28rem;
+    color: rgba(255, 255, 255, 0.46);
+    font-size: 14px;
+    line-height: 1.6;
+    letter-spacing: 0.03em;
+}
+
+.brief-empty {
+    margin: 0;
+    color: var(--dim);
+}
+
+@media (max-width: 860px) {
+    .strain-list,
+    .rival-list,
+    .notes {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .brief-nav { gap: 14px; }
+    .lab-row { grid-template-columns: 1fr; }
+}

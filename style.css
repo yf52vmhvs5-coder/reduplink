@@ -484,6 +484,13 @@ h2 {
     padding-top: 4px;
 }
 
+.card-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
 .card--live {
     border-color: color-mix(in srgb, var(--signal) 55%, var(--line));
     cursor: pointer;
@@ -538,6 +545,17 @@ h2 {
 
 .open:hover,
 .open:focus-visible { color: var(--signal); }
+
+.open.open--info {
+    color: rgba(255, 255, 255, 0.46);
+    text-shadow: none;
+}
+
+.open.open--info:hover,
+.open.open--info:focus-visible {
+    color: var(--signal);
+    text-shadow: 0 0 8px var(--signal-soft);
+}
 
 .sealed { color: var(--mute); }
 

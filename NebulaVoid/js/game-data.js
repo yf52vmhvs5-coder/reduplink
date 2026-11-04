@@ -142,7 +142,7 @@ window.__GAME_DATA_SOURCE = {
     /* ─── 3.2 Abilități per tip de bot (cheie = typeKey din entityTypes) ─── */
     // Distanțe în px, durate/cooldown-uri în sec.
     "GLITCH":       { "teleportDist": 180, "triggerDist": 220, "cooldown": 3 },      // teleport aleator când ești aproape
-    "WORMHOLE":     { "jumpForce": 120, "triggerDist": 280, "cooldown": 3.5 },       // salt spre tine
+    "WORMHOLE":     { "jumpForce": 120, "triggerDist": 280, "cooldown": 3.5 },       // salt pe direcția ta: spre tine dacă te poate mânca, altfel fugă
     "PULSAR":       { "sizeBoost": 15, "duration": 4, "cooldown": 5 },               // +px rază temporar
     "GRAVITY_WELL": { "pullForce": 140, "range": 300 },                              // px/sec la centru, falloff spre margine (ține-l sub MIN_SPEED)
     "TITAN":        { "invulnerableDuration": 8, "cooldown": 10 },                   // invulnerabil periodic; cooldown-ul pornește după scut
@@ -221,7 +221,7 @@ window.__GAME_DATA_SOURCE = {
       "growthRate": 1,
       "vision": 550,
       "aggression": 0.6,
-      "aboutDesc": "Orange ambusher. When you enter its range, it warps along your bearing in a sudden hop — distance closes before you react."
+      "aboutDesc": "Orange ambusher. In range, it hops along your bearing — toward you when it is large enough to eat you, and away when you are larger."
     },
     "CHRONOS": {
       "name": "CHRONOS",
@@ -277,12 +277,12 @@ window.__GAME_DATA_SOURCE = {
   "about": {
     "intrudersLead": "Three intruder strains are cleared for deployment. Each trades power for a weakness — [SPACE] casts their signature ability.",
     "singularity": "The map revolves around a hungry Singularity at its center. It pulls stardust, nutrients, and cells across the void. Skirt the pull field or lose radius; touch the core and mass vanishes fast. Even rivals steer away from the abyss.",
-    "bounty": "Hunt smaller entities in rhythm to stack combo and climb bounty tiers — higher multipliers on score from feeds and bot kills. Let the chain cool and your bonus fades; aggression pays while hesitation resets you.",
+    "bounty": "Bot kills in rhythm stack a combo and climb bounty tiers. The multiplier then raises score from feeds and from bot kills. Breaking the chain restarts the kill count. It does not wipe a multiplier that is already running.",
     "systemsLead": "Meta progression, scoring, and interface systems that persist between intrusions.",
-    "voidMatter": "Void Matter is the archive currency. Mass you secure during a run is tallied when the intrusion ends and credited to your permanent reserve — spend it to unlock intruders and upgrade systems in the Evolution Lab.",
+    "voidMatter": "Void Matter is the archive currency. When a solo intrusion ends, the point score — not your radius — is credited to the permanent reserve. Spend it to unlock intruders and upgrade systems in the Evolution Lab. A multiplayer match does not bank that score.",
     "evolution": "The Evolution Lab advances your deployed intruder between runs. Three branches per skin: Velocity Drive (base speed), Growth Core (nutrient yield and Ravenous decay), and Ability Sync (cooldown relief). Each branch levels independently with Void Matter.",
     "entityMods": "Entity Mods are exclusive x1, x2, and x3 kits bound to a single intruder. Purchased in the lab with Void Matter; each mod alters combat behavior for that strain only. Review a mod's briefing before purchase — only one path per tier.",
-    "entityScore": "ENTITY_SCORE is the live readout of mass consumed during an intrusion. It resets every run. Your end-of-run payout converts that total into Void Matter for the hub tally.",
+    "entityScore": "ENTITY_SCORE is the point score of this intrusion — feeds and bot kills, bounty included. It is not your radius, and it resets every run. A solo ending credits that total as Void Matter. A multiplayer match does not.",
     "controls": "In the arena, move with the mouse (chase the cursor) or WASD (fixed heading). Press [SPACE] to trigger your intruder's signature ability. Cooldown and cost depend on the active strain. On a tablet, the stick sets heading, the round button casts, and tapping the red mark twice ends the run.",
     "options": "From the hub, open Options to choose movement scheme, toggle sound, and switch fullscreen. Settings apply immediately and persist between sessions. A tablet uses the on-screen stick instead of the mouse or WASD picker.",
     "rivalsLead": "Ten rival cell types patrol the arena. Hue signals temperament; study the pattern or become salvage."

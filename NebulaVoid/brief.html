@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="NEBULA VOID — signal brief. Intruders, rival cells, and how a run is played.">
+    <title>NEBULA VOID — Signal brief</title>
+    <script>
+        (function () {
+            try {
+                var tint = localStorage.getItem("spacejunkStudioTint");
+                if (tint && /^#[0-9a-f]{6}$/i.test(tint)) {
+                    document.documentElement.style.setProperty("--signal", tint.toLowerCase());
+                }
+            } catch (err) { /* private mode */ }
+        })();
+    </script>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="brief.css">
+</head>
+<body>
+    <a class="skip" href="#brief">Skip to brief</a>
+    <canvas id="field" aria-hidden="true"></canvas>
+
+    <header class="bar">
+        <a class="mark" href="../index.html#signals">
+            <svg class="mark-alien" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <g class="mark-alien-body">
+                    <g class="mark-alien-antenna-wrap">
+                        <path class="mark-alien-antenna" fill="var(--signal)" d="M11.2 3.1 12 1.2 12.8 3.1 12 3.6Z"/>
+                    </g>
+                    <path class="mark-alien-head" fill="var(--signal)" d="M12 4.2c-4.8 0-7.2 4.6-7.2 8.4 0 4.2 3.1 6.8 7.2 6.8s7.2-2.6 7.2-6.8c0-3.8-2.4-8.4-7.2-8.4Z"/>
+                    <ellipse class="mark-alien-eye mark-alien-eye--l" cx="9.15" cy="12.1" rx="1.55" ry="2.35" fill="#060606"/>
+                    <ellipse class="mark-alien-eye mark-alien-eye--r" cx="14.85" cy="12.1" rx="1.55" ry="2.35" fill="#060606"/>
+                </g>
+            </svg>
+            <span class="mark-name">REDUPLINK</span>
+        </a>
+        <nav class="brief-nav" aria-label="Brief">
+            <a class="open" href="../index.html#signals">[ BACK ]</a>
+            <a class="open" href="index.html">[ OPEN ]</a>
+        </nav>
+    </header>
+
+    <main id="brief">
+        <section class="hero" aria-labelledby="briefTitle">
+            <p class="kicker">[ SIGNAL BRIEF ]</p>
+            <h1 id="briefTitle">NEBULA VOID</h1>
+            <p class="lede">A survival arena in a drifting starfield. You are one cell. Radius decides who consumes whom. The point score is separate: bounty multiplies it, and a solo run banks it as Void Matter. The center of the map is hungry.</p>
+            <div class="spec" id="spec"></div>
+        </section>
+
+        <section class="band" aria-labelledby="intrudersTitle">
+            <div class="band-head">
+                <h2 id="intrudersTitle">INTRUDERS</h2>
+                <p class="band-meta" id="intrudersMeta">—</p>
+            </div>
+            <p class="dossier-lead" id="intrudersLead"></p>
+            <ul class="strain-list" id="strains"></ul>
+        </section>
+
+        <section class="band" aria-labelledby="rivalsTitle">
+            <div class="band-head">
+                <h2 id="rivalsTitle">RIVALS</h2>
+                <p class="band-meta" id="rivalsMeta">—</p>
+            </div>
+            <p class="dossier-lead" id="rivalsLead"></p>
+            <ul class="rival-list" id="rivals"></ul>
+        </section>
+
+        <section class="band" aria-labelledby="arenaTitle">
+            <div class="band-head">
+                <h2 id="arenaTitle">THE ARENA</h2>
+            </div>
+            <div class="notes" id="notes"></div>
+            <p class="thanks">If you read this far, thank you. The void is quieter with someone else in it.</p>
+        </section>
+    </main>
+
+    <footer class="colophon">
+        <p>NEBULA VOID · <span>SIGNAL BRIEF</span></p>
+        <p id="year">2026</p>
+    </footer>
+
+    <script src="js/game-data.js"></script>
+    <script src="brief.js"></script>
+</body>
+</html>

@@ -9,6 +9,7 @@
  *   status: "live",          // "live" or "hold"
  *   line: "One sentence.",
  *   href: "NebulaVoid/index.html",   // omit or leave "" while the build is sealed
+ *   info: "NebulaVoid/brief.html",      // optional dossier; does not replace [ OPEN ]
  *   web: true                           // browser badge (optional; defaults from href)
  *   tablet: true                        // tablet badge (optional)
  * }
@@ -26,6 +27,7 @@
             status: "live",
             line: "Survival arena in a drifting starfield. Consume, chain kills, and beat the pull — solo or multiplayer, with a tablet pad.",
             href: "NebulaVoid/index.html",
+            info: "NebulaVoid/brief.html",
             web: true,
             tablet: true
         },
@@ -352,6 +354,8 @@
 
         if (live) {
             var target = gameHref(game.href);
+            var actions = document.createElement("div");
+            actions.className = "card-actions";
             var link = document.createElement("a");
             link.className = "open";
             link.href = target;
@@ -360,7 +364,15 @@
                 link.target = "_blank";
                 link.rel = "noopener noreferrer";
             }
-            foot.appendChild(link);
+            actions.appendChild(link);
+            if (game.info) {
+                var info = document.createElement("a");
+                info.className = "open open--info";
+                info.href = gameHref(game.info);
+                info.textContent = "[ INFO ]";
+                actions.appendChild(info);
+            }
+            foot.appendChild(actions);
             var pressX = 0;
             var pressY = 0;
             function openBeside() {
