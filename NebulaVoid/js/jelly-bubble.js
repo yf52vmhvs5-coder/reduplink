@@ -32,30 +32,6 @@
         "#C4B5FD",
     ];
 
-    const EGG_CORE = 0xe8f6ff;
-    const EGG_RIM = 0x071018;
-    const eggTones = Object.create(null);
-
-    function mixHex(hex, toward, amount) {
-        const n = parseInt(hex.slice(1), 16);
-        const tr = (toward >> 16) & 255;
-        const tg = (toward >> 8) & 255;
-        const tb = toward & 255;
-        const r = Math.round(((n >> 16) & 255) + (tr - ((n >> 16) & 255)) * amount);
-        const g = Math.round(((n >> 8) & 255) + (tg - ((n >> 8) & 255)) * amount);
-        const b = Math.round((n & 255) + (tb - (n & 255)) * amount);
-        return "rgb(" + r + "," + g + "," + b + ")";
-    }
-
-    function eggTone(hex) {
-        let tone = eggTones[hex];
-        if (!tone) {
-            tone = { core: mixHex(hex, EGG_CORE, 0.62), rim: mixHex(hex, EGG_RIM, 0.58) };
-            eggTones[hex] = tone;
-        }
-        return tone;
-    }
-
     /** @type {null | (() => { poolJellyBubbles: unknown[]; player: object })} */
     let getSpawnContextFn = null;
 
@@ -373,24 +349,19 @@ class JellyBubble {
         ctx.shadowBlur = 6;
         ctx.shadowColor = this.color;
         ctx.stroke();
-        ctx.shadowBlur = 0;
 
-        // Ouă: miez deschis, margine trasă spre vid. Fără shadowBlur.
+        // --- NOU: Randare Ouă în interiorul jeleului ---
         let timePulse = Date.now() * 0.002;
         this.eggs.forEach((egg, index) => {
-            const eggRadius = 10 + Math.sin(timePulse + index) * 6.5;
-            const tone = eggTone(egg.color);
-            const fill = ctx.createRadialGradient(
-                egg.offsetX, egg.offsetY, eggRadius * 0.12,
-                egg.offsetX, egg.offsetY, eggRadius
-            );
-            fill.addColorStop(0, tone.core);
-            fill.addColorStop(0.55, egg.color);
-            fill.addColorStop(1, tone.rim);
             ctx.beginPath();
+            // Ouăle pulsează ușor în dimensiune (efect biologic)
+            let eggRadius = 10 + Math.sin(timePulse + index) * 6.5;
             ctx.arc(egg.offsetX, egg.offsetY, eggRadius, 0, Math.PI * 2);
-            ctx.fillStyle = fill;
+            ctx.fillStyle = egg.color;
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = egg.color;
             ctx.fill();
+            ctx.shadowBlur = 0;
         });
 
         ctx.restore();

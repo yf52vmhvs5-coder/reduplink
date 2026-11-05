@@ -210,24 +210,6 @@
     text-shadow: 0 0 8px var(--signal-soft);
 }
 
-.key--cast {
-    color: #00e5ff;
-    border-color: color-mix(in srgb, #00e5ff 70%, transparent);
-    text-shadow: 0 0 8px rgba(0, 229, 255, 0.45);
-}
-
-.key--pad {
-    color: #f2f2f2;
-    border-color: rgba(255, 255, 255, 0.55);
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.28);
-}
-
-.key--leave {
-    color: #ff3b3b;
-    border-color: color-mix(in srgb, #ff3b3b 70%, transparent);
-    text-shadow: 0 0 8px rgba(255, 59, 59, 0.45);
-}
-
 .note p.bounty-rule {
     margin-top: 12px;
     color: rgba(255, 255, 255, 0.55);

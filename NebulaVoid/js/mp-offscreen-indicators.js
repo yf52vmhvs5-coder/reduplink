@@ -27,15 +27,10 @@
     }
 
     function insets(screenW, screenH) {
-        const tablet =
-            typeof document !== "undefined" &&
-            document.documentElement.classList.contains("tablet-mode");
-        const rightInset = tablet ? 100 : SIDE_INSET;
-        const bottomInset = tablet ? 168 : BOTTOM_INSET;
         let left = Math.min(SIDE_INSET, screenW * 0.08);
-        let right = screenW - Math.min(rightInset, screenW * 0.16);
+        let right = screenW - Math.min(SIDE_INSET, screenW * 0.16);
         let top = Math.min(TOP_INSET, screenH * 0.22);
-        let bottom = screenH - Math.min(bottomInset, screenH * 0.28);
+        let bottom = screenH - Math.min(BOTTOM_INSET, screenH * 0.28);
         if (right - left < 40) {
             const mid = screenW * 0.5;
             left = mid - 20;

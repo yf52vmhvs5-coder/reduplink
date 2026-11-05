@@ -849,20 +849,10 @@ evoModDescPanel.className = "evo-mod-desc-panel is-empty";
 evoModDescPanel.setAttribute("aria-live", "polite");
 evoModDescPanel.hidden = true;
 
-let tabletModArmedTier = null;
-let tabletModArmedAt = 0;
-
 function clearEntityModDescription() {
-    if (performance.now() - tabletModArmedAt < 500) return;
-    tabletModArmedTier = null;
     if (!evoModDescPanel) return;
     delete evoModDescPanel.dataset.modTier;
-    const tablet =
-        typeof document !== "undefined" &&
-        document.documentElement.classList.contains("tablet-mode");
-    evoModDescPanel.innerHTML = tablet
-        ? `<span class="evo-mod-desc-muted">TAP x1 · x2 · x3 — TAP AGAIN TO INSTALL</span>`
-        : `<span class="evo-mod-desc-muted">HOVER x1 · x2 · x3 FOR DETAILS</span>`;
+    evoModDescPanel.innerHTML = `<span class="evo-mod-desc-muted">HOVER x1 · x2 · x3 FOR DETAILS</span>`;
     evoModDescPanel.classList.add("is-empty");
 }
 
@@ -897,15 +887,6 @@ EVO_MOD_SLOTS.forEach((slot) => {
     btn.innerHTML = `<span class="evo-mod-x">x</span><span class="evo-mod-num">${slot.tier}</span>`;
     btn.addEventListener("click", (e) => {
         e.stopPropagation();
-        const tablet =
-            typeof document !== "undefined" &&
-            document.documentElement.classList.contains("tablet-mode");
-        if (tablet && tabletModArmedTier !== slot.tier) {
-            tabletModArmedTier = slot.tier;
-            tabletModArmedAt = performance.now();
-            showEntityModDescription(slot.tier);
-            return;
-        }
         purchaseEntityMod(slot.tier);
     });
     btn.addEventListener("mouseenter", () => showEntityModDescription(slot.tier));
@@ -1287,8 +1268,6 @@ function triggerTitleGlitch(newText) {
 function setEvolutionLabActive(active) {
     if (active && isMultiplayerSelect()) return;
     evolutionLabActive = !!active;
-    tabletModArmedTier = null;
-    tabletModArmedAt = 0;
     if (!startMenu) return;
 
     startMenu.classList.toggle("lab-mode", evolutionLabActive);

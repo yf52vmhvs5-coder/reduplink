@@ -18,38 +18,9 @@
 
     let smoothX = 0;
     let smoothY = 0;
-    let tabletAimHeld = false;
-    let tabletAimX = 0;
-    let tabletAimY = 0;
-
-    function setTabletAim(x, y, held) {
-        tabletAimHeld = !!held;
-        const nx = Number(x);
-        const ny = Number(y);
-        tabletAimX = Number.isFinite(nx) ? nx : 0;
-        tabletAimY = Number.isFinite(ny) ? ny : 0;
-        if (!tabletAimHeld) {
-            tabletAimX = 0;
-            tabletAimY = 0;
-        }
-    }
 
     function usesVectorAim() {
-        if (scheme === "wasd") return true;
-        return (
-            typeof document !== "undefined" &&
-            !!document.documentElement &&
-            document.documentElement.classList.contains("tablet-mode")
-        );
-    }
-
-    function tabletStickEngaged() {
-        return (
-            tabletAimHeld &&
-            typeof document !== "undefined" &&
-            !!document.documentElement &&
-            document.documentElement.classList.contains("tablet-mode")
-        );
+        return scheme === "wasd";
     }
 
     function readScheme() {
@@ -123,23 +94,10 @@
         keys.a = false;
         keys.s = false;
         keys.d = false;
-        tabletAimHeld = false;
-        tabletAimX = 0;
-        tabletAimY = 0;
         resetWasdInputSmoothing();
     }
 
     function getWasdInputRaw() {
-        if (tabletStickEngaged()) {
-            let sx = tabletAimX;
-            let sy = tabletAimY;
-            const slen = Math.hypot(sx, sy);
-            if (slen > 1) {
-                sx /= slen;
-                sy /= slen;
-            }
-            return { x: sx, y: sy };
-        }
         let x = 0;
         let y = 0;
         if (keys.w) y -= 1;
@@ -158,30 +116,8 @@
         return getWasdInputRaw();
     }
 
-    function isTabletMode() {
-        return (
-            typeof document !== "undefined" &&
-            !!document.documentElement &&
-            document.documentElement.classList.contains("tablet-mode")
-        );
-    }
-
     function tickWasdInputSmoothing(dt) {
         if (!usesVectorAim()) return;
-        if (tabletStickEngaged()) {
-            const aim = getWasdInputRaw();
-            smoothX = aim.x;
-            smoothY = aim.y;
-            return;
-        }
-        if (isTabletMode()) {
-            const idle = getWasdInputRaw();
-            if (Math.hypot(idle.x, idle.y) < 1e-6) {
-                smoothX = 0;
-                smoothY = 0;
-                return;
-            }
-        }
         const step = Math.max(0, Number(dt) || 0);
         if (step <= 0) return;
 
@@ -256,9 +192,7 @@
     global.tickWasdInputSmoothing = tickWasdInputSmoothing;
     global.resetWasdInputSmoothing = resetWasdInputSmoothing;
     global.clearWasdKeysState = clearWasdKeysState;
-    global.setTabletAim = setTabletAim;
     global.usesVectorAim = usesVectorAim;
-    global.isTabletStickEngaged = tabletStickEngaged;
     global.syncControlSchemePickerUi = syncControlSchemePickerUi;
     global.initControlSettings = initControlSettings;
 })(typeof window !== "undefined" ? window : globalThis);

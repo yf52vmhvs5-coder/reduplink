@@ -323,10 +323,7 @@
         return escapeHtml(text)
             .replace(/\[SPACE\]/g, keycap("[ SPACE ]", "space"))
             .replace(/\bWASD\b/g, keycap("WASD", "move"))
-            .replace(/\bmouse\b/gi, keycap("MOUSE", "move"))
-            .replace(/\bthe stick\b/gi, "the " + keycap("STICK", "pad"))
-            .replace(/\bround button\b/gi, keycap("ROUND", "cast"))
-            .replace(/\bred mark\b/gi, keycap("RED MARK", "leave"));
+            .replace(/\bmouse\b/gi, keycap("MOUSE", "move"));
     }
 
     var TINT_TERMS = ["Evolution Lab", "Void Matter", "Singularity", "Bounty", "Controls"];

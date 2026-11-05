@@ -1357,7 +1357,6 @@
             d.mpStartMatchBtn.onclick = () => {
                 playHover();
                 if (state.status !== "ready" || !lobbySkin || !state.isHost) return;
-                if (typeof global.restoreTabletScreen === "function") global.restoreTabletScreen();
                 if (typeof deps.onMirrorMatchRequested === "function") {
                     deps.onMirrorMatchRequested({
                         roomId: state.roomId,

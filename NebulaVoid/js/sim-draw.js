@@ -100,29 +100,13 @@
         ctx.restore();
     }
 
-    /** Colț dreapta-jos, în pixeli de ecran. Taunt-ul stă la stânga; X-ul urcă doar peste butonul de abilitate de pe tabletă. */
+    /** Colț dreapta-jos, în pixeli de ecran. */
     function cooldownHudPoint(screenW, screenH) {
         const crossRadius = 20;
         const xSize = Math.max(5, crossRadius * 0.35);
         const pad = 20;
-        let cx = screenW - pad - xSize;
-        let cy = screenH - pad - xSize;
-        const blockers = ["tabletPad"];
-        for (let i = 0; i < blockers.length; i++) {
-            const el = document.getElementById(blockers[i]);
-            if (!el || el.hidden) continue;
-            const style = window.getComputedStyle(el);
-            if (style.display === "none" || style.visibility === "hidden") continue;
-            const rect = el.getBoundingClientRect();
-            if (rect.width < 2 || rect.height < 2) continue;
-            const half = xSize + 8;
-            const overlaps =
-                cx + half > rect.left &&
-                cx - half < rect.right &&
-                cy + half > rect.top &&
-                cy - half < rect.bottom;
-            if (overlaps) cy = rect.top - 12 - xSize;
-        }
+        const cx = screenW - pad - xSize;
+        const cy = screenH - pad - xSize;
         return { cx, cy, crossRadius };
     }
 
@@ -212,7 +196,6 @@
         }
 
         if (typeof global.tickMpTaunts === "function") global.tickMpTaunts(dt);
-        if (typeof global.tickTabletPad === "function") global.tickTabletPad();
 
         ctx.fillStyle = "#020202";
         ctx.fillRect(0, 0, screenW, screenH);
@@ -268,10 +251,7 @@
             desiredLookAheadX = (mouseOffsetX / mouseOffsetLen) * lookAheadDist;
             desiredLookAheadY = (mouseOffsetY / mouseOffsetLen) * lookAheadDist;
         }
-        const lookAheadLerp =
-            typeof global.isTabletStickEngaged === "function" && global.isTabletStickEngaged()
-                ? 1
-                : Math.min(1, dt * 7.5);
+        const lookAheadLerp = Math.min(1, dt * 7.5);
         cam.cameraLookAheadX += (desiredLookAheadX - cam.cameraLookAheadX) * lookAheadLerp;
         cam.cameraLookAheadY += (desiredLookAheadY - cam.cameraLookAheadY) * lookAheadLerp;
         const targetCameraX = player.x + cam.cameraLookAheadX;

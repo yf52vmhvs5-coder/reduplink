@@ -62,7 +62,7 @@
         return normalizeHost(loc.hostname);
     }
 
-    /** A tablet that opened the page via the PC's LAN address must dial that PC, not itself. */
+    /** A client that opened the page via the PC's LAN address must dial that PC, not itself. */
     function relayUrlOnPageHost(localUrl, hostname) {
         try {
             const parsed = new URL(localUrl);

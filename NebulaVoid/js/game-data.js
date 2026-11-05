@@ -30,7 +30,7 @@ window.__GAME_DATA_SOURCE = {
     /* ─── 1.2 Praf stelar (particule de mâncat) ─── */
     "MAX_PARTICLES": 200,            // ★ max particule active simultan (densitatea hranei)
     "PARTICLE_POOL_EXTRA": 40,       // sloturi extra inactive în pool (doar memorie)
-    "PARTICLE_SHADOW": true,        // true = glow GPU pe particule (mai frumos, mai greu)
+    "PARTICLE_SHADOW": false,        // true = glow GPU pe particule (mai frumos, mai greu)
 
     /* ─── 1.3 Jeleuri (incubatoare / ouă) ─── */
     "JELLY_EGG_SPAWN_RATE": 1.5,     // sec — interval între ouă într-un jeleu
@@ -283,8 +283,8 @@ window.__GAME_DATA_SOURCE = {
     "evolution": "The Evolution Lab advances your deployed intruder between runs. Three branches per skin: Velocity Drive (base speed), Growth Core (nutrient yield and Ravenous decay), and Ability Sync (cooldown relief). Each branch levels independently with Void Matter.",
     "entityMods": "Entity Mods are exclusive x1, x2, and x3 kits bound to a single intruder. Purchased in the lab with Void Matter; each mod alters combat behavior for that strain only. Review a mod's briefing before purchase — only one path per tier.",
     "entityScore": "ENTITY_SCORE is the point score of this intrusion — feeds and bot kills, bounty included. It is not your radius, and it resets every run. A solo ending credits that total as Void Matter. A multiplayer match does not.",
-    "controls": "In the arena, move with the mouse (chase the cursor) or WASD (fixed heading). Press [SPACE] to trigger your intruder's signature ability. Cooldown and cost depend on the active strain. On a tablet, the stick sets heading, the round button casts, and tapping the red mark twice ends the run.",
-    "options": "From the hub, open Options to choose movement scheme, toggle sound, and switch fullscreen. Settings apply immediately and persist between sessions. A tablet uses the on-screen stick instead of the mouse or WASD picker.",
+    "controls": "In the arena, move with the mouse (chase the cursor) or WASD (fixed heading). Press [SPACE] to trigger your intruder's signature ability. Cooldown and cost depend on the active strain.",
+    "options": "From the hub, open Options to choose movement scheme, toggle sound, and switch fullscreen. Settings apply immediately and persist between sessions.",
     "rivalsLead": "Ten rival cell types patrol the arena. Hue signals temperament; study the pattern or become salvage."
   },
 

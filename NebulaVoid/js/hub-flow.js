@@ -50,17 +50,6 @@
         } catch (e) {}
     }
 
-    /** Safari grants fullscreen only inside a tap/click handler. */
-    function restoreTabletScreen() {
-        if (!document.documentElement.classList.contains("tablet-mode") || isScreenOn()) return;
-        try {
-            if (localStorage.getItem(SCREEN_WANTED_KEY) !== "1") return;
-        } catch (e) {
-            return;
-        }
-        setScreen(true);
-    }
-
     function getEntitySelectActive() {
         return entitySelectActive;
     }
@@ -181,7 +170,6 @@
 
     function enterMultiplayerLobby(skin) {
         if (!skin || !skin.unlocked) return;
-        restoreTabletScreen();
         const d = deps.dom;
         const player = deps.getPlayer();
         if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
@@ -422,6 +410,5 @@
     global.initMainHub = initMainHub;
     global.initMenuState = initMenuState;
     global.wireMenuSystemButtons = wireMenuSystemButtons;
-    global.restoreTabletScreen = restoreTabletScreen;
     global.isStandaloneApp = isStandaloneApp;
 })(typeof window !== "undefined" ? window : globalThis);

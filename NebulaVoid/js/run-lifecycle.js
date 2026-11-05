@@ -207,7 +207,6 @@
     }
 
     function onGameOverRetry() {
-        if (typeof global.restoreTabletScreen === "function") global.restoreTabletScreen();
         if (typeof global.tryMirrorGameOverRetry === "function" && global.tryMirrorGameOverRetry()) {
             return;
         }
@@ -243,7 +242,6 @@
 
     function startGameWithSkin(skin) {
         if (!skin || !skin.unlocked) return;
-        if (typeof global.restoreTabletScreen === "function") global.restoreTabletScreen();
         if (global.NebulaGameMode && typeof global.NebulaGameMode.setRunMode === "function") {
             global.NebulaGameMode.setRunMode("single");
         }
