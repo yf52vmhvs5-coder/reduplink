@@ -168,17 +168,24 @@ class JellyBubble {
             let edy = ey - player.y;
             let edSq = edx * edx + edy * edy;
 
-            if (edSq < playerEggCollisionRangeSq) {
-                const ed = Math.sqrt(edSq) || 0.001;
+            if (edSq < playerEggCollisionRangeSq && edSq > 0.000001) {
+                const ed = Math.sqrt(edSq);
                 const overlap = playerEggCollisionRange - ed;
                 const nx = edx / ed;
                 const ny = edy / ed;
 
-                // Împingem oul în afara corpului player-ului + puțin impuls pentru efect natural
+                // Separare de poziție, o dată. Impulsul se aplică doar dacă oul încă intră în celulă,
+                // ca arcul de revenire să nu-l bage la loc în aceeași lovitură.
                 egg.offsetX += nx * overlap;
                 egg.offsetY += ny * overlap;
-                egg.vx += nx * (overlap * 3.2); // IMPULS ÎMPINGERE: mai mic = împingere mai lină
-                egg.vy += ny * (overlap * 3.2); // Crește dacă vrei reacție mai "tare"
+                const closing = egg.vx * nx + egg.vy * ny;
+                if (closing < 0) {
+                    egg.vx -= nx * closing;
+                    egg.vy -= ny * closing;
+                    const push = Math.min(2.4, overlap * 0.45);
+                    egg.vx += nx * push;
+                    egg.vy += ny * push;
+                }
             }
 
             // Soft-body: oul revine lent la poziția lui proprie (home), nu la centrul jeleului
@@ -198,8 +205,13 @@ class JellyBubble {
                 const scale = maxDist / od;
                 egg.offsetX *= scale;
                 egg.offsetY *= scale;
-                egg.vx *= 0.5;
-                egg.vy *= 0.5;
+                const rx = egg.offsetX / maxDist;
+                const ry = egg.offsetY / maxDist;
+                const outward = egg.vx * rx + egg.vy * ry;
+                if (outward > 0) {
+                    egg.vx -= rx * outward;
+                    egg.vy -= ry * outward;
+                }
             }
         }
 
@@ -225,44 +237,78 @@ class JellyBubble {
             }
         }
 
-        for (let i = 0; i < this.numPoints; i++) {
+        const nPts = this.numPoints;
+        if (!this._skinFx || this._skinFx.length !== nPts) {
+            this._skinFx = new Float64Array(nPts);
+            this._skinFy = new Float64Array(nPts);
+            this._botPx = new Float64Array(nPts);
+            this._botPy = new Float64Array(nPts);
+        }
+        const skinFx = this._skinFx;
+        const skinFy = this._skinFy;
+        const botPx = this._botPx;
+        const botPy = this._botPy;
+        const body = typeof player.radius === "number" ? player.radius : 0;
+        const skinMargin = 22;
+
+        for (let i = 0; i < nPts; i++) {
             const p = this.points[i];
             let pX = 0, pY = 0;
+            skinFx[i] = 0;
+            skinFy[i] = 0;
 
-            // Deformare de la Player
-            if (!skipPlayer) {
+            // Contact de la suprafața celulei. Centrul unei celule mici nu mai intră singur în zonă.
+            if (!skipPlayer && body > 0) {
                 const dx = (this.x + p.x) - player.x;
                 const dy = (this.y + p.y) - player.y;
-                const d = Math.sqrt(dx*dx + dy*dy);
-                if (d > 0.001 && d < 70) {
-                    const f = (70 - d) * 0.3;
-                    pX += (dx/d)*f; pY += (dy/d)*f; 
+                const d = Math.sqrt(dx * dx + dy * dy);
+                const reach = body + skinMargin;
+                if (d > 0.001 && d < reach) {
+                    const skin = Math.min(1, (reach - d) / skinMargin);
+                    const falloff = skin * skin * (3 - 2 * skin);
+                    const pressed = Math.min(1, Math.max(0, body - d) / body);
+                    const f = falloff * (0.85 + pressed * 0.7);
+                    const inv = f / d;
+                    skinFx[i] = dx * inv;
+                    skinFy[i] = dy * inv;
                 }
             }
 
-            // Deformare de la Boți
-            for(let j = 0; j < nearbyBots.length; j++) {
+            // Deformare de la Boți — neschimbată
+            for (let j = 0; j < nearbyBots.length; j++) {
                 let b = nearbyBots[j];
                 let bdx = (this.x + p.x) - b.x;
                 let bdy = (this.y + p.y) - b.y;
-                let bd = Math.sqrt(bdx*bdx + bdy*bdy);
-                let botRepulseRange = b.radius + 20; 
-                
+                let bd = Math.sqrt(bdx * bdx + bdy * bdy);
+                let botRepulseRange = b.radius + 20;
+
                 if (bd > 0.001 && bd < botRepulseRange) {
                     const f = (botRepulseRange - bd) * 0.8;
-                    pX += (bdx/bd)*f; 
-                    pY += (bdy/bd)*f;
+                    pX += (bdx / bd) * f;
+                    pY += (bdy / bd) * f;
                 }
             }
+
+            botPx[i] = pX;
+            botPy[i] = pY;
+        }
+
+        for (let i = 0; i < nPts; i++) {
+            const p = this.points[i];
+            const prev = (i + nPts - 1) % nPts;
+            const next = (i + 1) % nPts;
+            // Arcul ia dâra, nu un singur vârf care se schimbă de-a lungul conturului.
+            const fx = skinFx[i] * 0.5 + (skinFx[prev] + skinFx[next]) * 0.25;
+            const fy = skinFy[i] * 0.5 + (skinFy[prev] + skinFy[next]) * 0.25;
 
             const tx = p.origX + Math.cos(t + i) * 4;
             const ty = p.origY + Math.sin(t + i) * 4;
 
-            p.vx += (tx - p.x) * 0.1;
-            p.vy += (ty - p.y) * 0.1;
+            p.vx += (tx - p.x) * 0.1 + fx;
+            p.vy += (ty - p.y) * 0.1 + fy;
 
-            p.x += (p.vx + pX) * dt * 60;
-            p.y += (p.vy + pY) * dt * 60;
+            p.x += (p.vx + botPx[i]) * dt * 60;
+            p.y += (p.vy + botPy[i]) * dt * 60;
 
             p.vx *= 0.8;
             p.vy *= 0.8;
@@ -277,12 +323,15 @@ class JellyBubble {
 
         ctx.beginPath();
         const pts = this.points;
-        ctx.moveTo(pts[0].x, pts[0].y);
+        const nPts = this.numPoints;
+        const seamA = pts[nPts - 1];
+        const seamB = pts[0];
+        ctx.moveTo((seamA.x + seamB.x) * 0.5, (seamA.y + seamB.y) * 0.5);
 
-        for (let i = 0; i < this.numPoints; i++) {
+        for (let i = 0; i < nPts; i++) {
             const p1 = pts[i];
-            const p2 = pts[(i + 1) % this.numPoints];
-            ctx.quadraticCurveTo(p1.x, p1.y, (p1.x+p2.x)*0.5, (p1.y+p2.y)*0.5);
+            const p2 = pts[(i + 1) % nPts];
+            ctx.quadraticCurveTo(p1.x, p1.y, (p1.x + p2.x) * 0.5, (p1.y + p2.y) * 0.5);
         }
 
         ctx.closePath();
