@@ -30,7 +30,7 @@ window.__GAME_DATA_SOURCE = {
     /* ─── 1.2 Praf stelar (particule de mâncat) ─── */
     "MAX_PARTICLES": 200,            // ★ max particule active simultan (densitatea hranei)
     "PARTICLE_POOL_EXTRA": 40,       // sloturi extra inactive în pool (doar memorie)
-    "PARTICLE_SHADOW": false,        // true = glow GPU pe particule (mai frumos, mai greu)
+    "PARTICLE_SHADOW": true,        // true = glow GPU pe particule (mai frumos, mai greu)
 
     /* ─── 1.3 Jeleuri (incubatoare / ouă) ─── */
     "JELLY_EGG_SPAWN_RATE": 1.5,     // sec — interval între ouă într-un jeleu
