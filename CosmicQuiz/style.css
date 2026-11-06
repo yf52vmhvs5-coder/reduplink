@@ -215,62 +215,34 @@ body {
     100% { transform: scale(1); }
 }
 
-.mark-alien {
+.mark-ru {
     display: block;
     width: 54px;
     height: 54px;
     overflow: visible;
     filter: drop-shadow(0 0 7px color-mix(in srgb, var(--signal) 52%, transparent));
-    animation: hubAlienGlow 5.5s ease-in-out infinite;
+    animation: cqMarkRuGlow 5.5s ease-in-out infinite;
 }
 
-.mark-alien-body {
-    transform-origin: 12px 13px;
+.mark-ru-hud {
+    transform-origin: 12px 12px;
     transform-box: view-box;
-    animation: hubAlienFloat 4.8s ease-in-out infinite;
+    animation: cqMarkRuFloat 4.8s ease-in-out infinite;
 }
 
-.mark-alien-antenna-wrap {
-    transform-origin: 12px 3.4px;
-    transform-box: view-box;
-    animation: hubAlienAntenna 3.6s ease-in-out infinite;
+.mark-ru-frame,
+.mark-ru-letters {
+    transition: stroke 0.28s ease, fill 0.28s ease;
 }
 
-.mark-alien-eye {
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: hubAlienBlink 8.5s ease-in-out infinite;
-}
-
-.mark-alien-eye--r { animation-delay: 0.04s; }
-
-.mark-alien-head,
-.mark-alien-antenna { transition: fill 0.28s ease; }
-
-@keyframes hubAlienFloat {
+@keyframes cqMarkRuFloat {
     0%, 100% { transform: translateY(0); }
     50%      { transform: translateY(-1.5px); }
 }
 
-@keyframes hubAlienAntenna {
-    0%, 100% { transform: rotate(0deg); }
-    35%      { transform: rotate(-3.5deg); }
-    65%      { transform: rotate(3deg); }
-}
-
-@keyframes hubAlienGlow {
+@keyframes cqMarkRuGlow {
     0%, 100% { filter: drop-shadow(0 0 6px color-mix(in srgb, var(--signal) 44%, transparent)); }
     50%      { filter: drop-shadow(0 0 9px color-mix(in srgb, var(--signal) 58%, transparent)); }
-}
-
-@keyframes hubAlienBlink {
-    0%, 36%, 100% { transform: scaleY(1); }
-    37%           { transform: scaleY(0.07); }
-    38%           { transform: scaleY(1); }
-    39%           { transform: scaleY(0.07); }
-    40%, 76%      { transform: scaleY(1); }
-    77%           { transform: scaleY(0.07); }
-    78%           { transform: scaleY(1); }
 }
 
 .mega-title {
@@ -1414,10 +1386,8 @@ body:has(#about-screen.is-open) #start-screen {
 a, button, input { cursor: inherit; }
 
 @media (prefers-reduced-motion: reduce) {
-    .mark-alien,
-    .mark-alien-body,
-    .mark-alien-antenna-wrap,
-    .mark-alien-eye,
+    .mark-ru,
+    .mark-ru-hud,
     .stars,
     .quiz-stars,
     .quiz-void::before {
@@ -1622,7 +1592,7 @@ html.tablet-mode .screen:not(#quiz-screen) {
     justify-content: safe center;
 }
 
-html.tablet-mode .signal-logo .mark-alien {
+html.tablet-mode .signal-logo .mark-ru {
     width: var(--cq-logo);
     height: var(--cq-logo);
 }

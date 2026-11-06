@@ -853,7 +853,7 @@ body.tablet-mode #tablet-pad:not(.hidden) {
 
 
 /* ───────────────────────────────────────────────────────────────────────────
- *  SPACEJUNK MARK — same alien + signature as the studio, retro plate
+ *  SPACEJUNK MARK — RU + signature as the studio, retro plate
  * ─────────────────────────────────────────────────────────────────────────── */
 
 .sj-mark {
@@ -866,35 +866,26 @@ body.tablet-mode #tablet-pad:not(.hidden) {
     user-select: none;
 }
 
-.sj-mark-alien {
+.sj-mark-ru {
     display: block;
     width: 30px;
     height: 30px;
     overflow: visible;
     image-rendering: auto;
     filter: drop-shadow(0 0 7px color-mix(in srgb, var(--sj-signal) 52%, transparent));
-    animation: sjAlienGlow 5.5s ease-in-out infinite;
+    animation: sjMarkRuGlow 5.5s ease-in-out infinite;
 }
 
-.sj-mark-body {
-    transform-origin: 12px 13px;
+.sj-mark-ru-hud {
+    transform-origin: 12px 12px;
     transform-box: view-box;
-    animation: sjAlienFloat 4.8s ease-in-out infinite;
+    animation: sjMarkRuFloat 4.8s ease-in-out infinite;
 }
 
-.sj-mark-antenna-wrap {
-    transform-origin: 12px 3.4px;
-    transform-box: view-box;
-    animation: sjAlienAntenna 3.6s ease-in-out infinite;
+.sj-mark-ru-frame,
+.sj-mark-ru-letters {
+    transition: stroke 0.28s ease, fill 0.28s ease;
 }
-
-.sj-mark-eye {
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: sjAlienBlink 8.5s ease-in-out infinite;
-}
-
-.sj-mark-eye--r { animation-delay: 0.04s; }
 
 .sj-mark-name {
     margin: 0;
@@ -912,39 +903,21 @@ body.tablet-mode #tablet-pad:not(.hidden) {
 
 .sj-mark--menu { margin-top: -6px; gap: 4px; }
 
-.sj-mark--menu .sj-mark-alien { width: 28px; height: 28px; }
+.sj-mark--menu .sj-mark-ru { width: 28px; height: 28px; }
 
-@keyframes sjAlienFloat {
+@keyframes sjMarkRuFloat {
     0%, 100% { transform: translateY(0); }
     50%      { transform: translateY(-1.5px); }
 }
 
-@keyframes sjAlienAntenna {
-    0%, 100% { transform: rotate(0deg); }
-    35%      { transform: rotate(-3.5deg); }
-    65%      { transform: rotate(3deg); }
-}
-
-@keyframes sjAlienGlow {
+@keyframes sjMarkRuGlow {
     0%, 100% { filter: drop-shadow(0 0 6px color-mix(in srgb, var(--sj-signal) 44%, transparent)); }
     50%      { filter: drop-shadow(0 0 9px color-mix(in srgb, var(--sj-signal) 58%, transparent)); }
 }
 
-@keyframes sjAlienBlink {
-    0%, 36%, 100% { transform: scaleY(1); }
-    37%           { transform: scaleY(0.07); }
-    38%           { transform: scaleY(1); }
-    39%           { transform: scaleY(0.07); }
-    40%, 76%      { transform: scaleY(1); }
-    77%           { transform: scaleY(0.07); }
-    78%           { transform: scaleY(1); }
-}
-
 @media (prefers-reduced-motion: reduce) {
-    .sj-mark-alien,
-    .sj-mark-body,
-    .sj-mark-antenna-wrap,
-    .sj-mark-eye { animation: none; }
+    .sj-mark-ru,
+    .sj-mark-ru-hud { animation: none; }
 }
 
 /* ───────────────────────────────────────────────────────────────────────────

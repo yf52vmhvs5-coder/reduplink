@@ -314,9 +314,9 @@
             } catch (e) {
                 return;
             }
-            alienBtn.classList.add("hub-brand-alien-btn--beckon");
+            alienBtn.classList.add("hub-brand-ru-btn--beckon");
             global.setTimeout(() => {
-                alienBtn.classList.remove("hub-brand-alien-btn--beckon");
+                alienBtn.classList.remove("hub-brand-ru-btn--beckon");
             }, 2800);
         }, 2200);
     }

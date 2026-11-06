@@ -707,7 +707,7 @@ body::after {
     margin-top: 6px;
 }
 
-.hub-brand-alien-btn {
+.hub-brand-ru-btn {
     margin: 0;
     padding: 2px 6px;
     border: none;
@@ -720,37 +720,28 @@ body::after {
 }
 
 @media (hover: hover) {
-    .hub-brand-alien-btn:hover {
+    .hub-brand-ru-btn:hover {
         transform: translateY(-1px);
     }
 }
 
-.hub-brand-alien-btn:active {
+.hub-brand-ru-btn:active {
     transform: translateY(0) scale(0.97);
 }
 
 @media (hover: hover) {
-    .hub-brand-alien-btn:hover .hub-brand-alien {
+    .hub-brand-ru-btn:hover .hub-brand-ru {
         filter: drop-shadow(0 0 10px color-mix(in srgb, var(--hub-signal-tint, #ff2d2d) 68%, transparent));
     }
 }
 
-.hub-brand-alien-btn--beckon .hub-brand-alien-body {
-    animation: hubAlienFloat 4.8s ease-in-out infinite, hubAlienBeckonBob 0.85s ease-in-out 3;
+.hub-brand-ru-btn--beckon .hub-brand-ru-hud {
+    animation: hubBrandRuBeckonNudge 0.85s ease-in-out 3;
 }
 
-.hub-brand-alien-btn--beckon .hub-brand-alien-eye {
-    animation: hubAlienBlink 8.5s ease-in-out infinite, hubAlienBeckonBlink 0.85s ease-in-out 3;
-}
-
-@keyframes hubAlienBeckonBob {
+@keyframes hubBrandRuBeckonNudge {
     0%, 100% { transform: translateY(0); }
     50%      { transform: translateY(-2.5px); }
-}
-
-@keyframes hubAlienBeckonBlink {
-    0%, 40%, 100% { transform: scaleY(1); }
-    20%           { transform: scaleY(0.08); }
 }
 
 .hub-brand-calibrate-hint {
@@ -770,54 +761,32 @@ body::after {
     display: block;
 }
 
-.hub-brand-alien {
+.hub-brand-ru {
     display: block;
     width: 34px;
     height: 34px;
     overflow: visible;
     filter: drop-shadow(0 0 7px color-mix(in srgb, var(--hub-signal-tint, #ff2d2d) 52%, transparent));
-    animation: hubAlienGlow 5.5s ease-in-out infinite;
+    animation: hubBrandRuGlow 5.5s ease-in-out infinite;
 }
 
-.hub-brand-alien-body {
-    transform-origin: 12px 13px;
+.hub-brand-ru-hud {
+    transform-origin: 12px 12px;
     transform-box: view-box;
-    animation: hubAlienFloat 4.8s ease-in-out infinite;
+    animation: hubBrandRuFloat 4.8s ease-in-out infinite;
 }
 
-.hub-brand-alien-antenna-wrap {
-    transform-origin: 12px 3.4px;
-    transform-box: view-box;
-    animation: hubAlienAntenna 3.6s ease-in-out infinite;
+.hub-brand-ru-frame,
+.hub-brand-ru-letters {
+    transition: stroke 0.28s ease, fill 0.28s ease;
 }
 
-.hub-brand-alien-eye {
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: hubAlienBlink 8.5s ease-in-out infinite;
-}
-
-.hub-brand-alien-eye--r {
-    animation-delay: 0.04s;
-}
-
-.hub-brand-alien-head,
-.hub-brand-alien-antenna {
-    transition: fill 0.28s ease;
-}
-
-@keyframes hubAlienFloat {
+@keyframes hubBrandRuFloat {
     0%, 100% { transform: translateY(0); }
     50%      { transform: translateY(-1.5px); }
 }
 
-@keyframes hubAlienAntenna {
-    0%, 100% { transform: rotate(0deg); }
-    35%      { transform: rotate(-3.5deg); }
-    65%      { transform: rotate(3deg); }
-}
-
-@keyframes hubAlienGlow {
+@keyframes hubBrandRuGlow {
     0%, 100% {
         filter: drop-shadow(0 0 6px color-mix(in srgb, var(--hub-signal-tint, #ff2d2d) 44%, transparent));
     }
@@ -826,22 +795,9 @@ body::after {
     }
 }
 
-/* Clipit rar: o dată ~la 8.5s, uneori dublu scurt */
-@keyframes hubAlienBlink {
-    0%, 36%, 100% { transform: scaleY(1); }
-    37%           { transform: scaleY(0.07); }
-    38%           { transform: scaleY(1); }
-    39%           { transform: scaleY(0.07); }
-    40%, 76%      { transform: scaleY(1); }
-    77%           { transform: scaleY(0.07); }
-    78%           { transform: scaleY(1); }
-}
-
 @media (prefers-reduced-motion: reduce) {
-    .hub-brand-alien,
-    .hub-brand-alien-body,
-    .hub-brand-alien-antenna-wrap,
-    .hub-brand-alien-eye {
+    .hub-brand-ru,
+    .hub-brand-ru-hud {
         animation: none;
     }
 
