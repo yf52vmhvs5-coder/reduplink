@@ -18,6 +18,11 @@
     const STATE_KEEPALIVE_MS = 300;
     const STATE_SEND_OPTS = { dropIfBuffered: true };
 
+    function knownPlayerAbility(kind) {
+        if (typeof global.playerAbilityKnown === "function") return global.playerAbilityKnown(kind);
+        return kind === "vampire" || kind === "warp" || kind === "speed";
+    }
+
     let stateSendIntervalMs = DEFAULT_STATE_SEND_INTERVAL_MS;
     let remoteInterpSpeed = DEFAULT_REMOTE_INTERP_SPEED;
     let remoteSnapDistancePx = DEFAULT_REMOTE_SNAP_DISTANCE_PX;
@@ -205,7 +210,7 @@
             const name = msg.entity.replace(/\s+/g, " ").trim().slice(0, 32);
             if (name) rp.entity = name;
         }
-        if (msg.ability === "vampire" || msg.ability === "warp" || msg.ability === "speed") {
+        if (knownPlayerAbility(msg.ability)) {
             rp.ability = msg.ability;
         }
         if (typeof msg.cdMax === "number" && msg.cdMax > 0 && msg.cdMax < 30) {

@@ -13,6 +13,11 @@
 
     const MIRROR_CLAIM_WINDOW_MS = 100;
 
+    function knownPlayerAbility(kind) {
+        if (typeof global.playerAbilityKnown === "function") return global.playerAbilityKnown(kind);
+        return kind === "vampire" || kind === "warp" || kind === "speed";
+    }
+
     let mirrorClaimSentAt = 0;
     /** @type {{ t: number, targetPeerId: string }[]} */
     let mirrorOpenClaims = [];
@@ -538,10 +543,7 @@
         const player = deps.getPlayer();
         const selectedAbility = deps.getSelectedAbility();
         const GAME_SETTINGS = settings();
-        const ability =
-            selectedAbility === "vampire" || selectedAbility === "warp" || selectedAbility === "speed"
-                ? selectedAbility
-                : "";
+        const ability = knownPlayerAbility(selectedAbility) ? selectedAbility : "";
         const base = ability ? Number(GAME_SETTINGS[`CD_${ability.toUpperCase()}`]) || 0 : 0;
         const mul =
             typeof deps.getSignalCooldownMultiplier === "function"

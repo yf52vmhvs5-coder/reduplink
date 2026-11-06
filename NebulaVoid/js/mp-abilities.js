@@ -10,6 +10,11 @@
     /** @type {null | Record<string, Function>} */
     let deps = null;
 
+    function knownPlayerAbility(kind) {
+        if (typeof global.playerAbilityKnown === "function") return global.playerAbilityKnown(kind);
+        return kind === "vampire" || kind === "warp" || kind === "speed";
+    }
+
     const RIFT_ACK_INTERVAL_MS = 100;
     const RIFT_ACK_MAX = 20;
     const RIFT_VALIDATE_SLACK = 160;
@@ -146,7 +151,7 @@
 
     function notifyMirrorAbilityCast(kind, x, y) {
         if (!mirrorLive()) return false;
-        if (kind !== "vampire" && kind !== "warp" && kind !== "speed") return false;
+        if (!knownPlayerAbility(kind)) return false;
         if (typeof x !== "number" || typeof y !== "number") return false;
         const settings = abilitySettings();
         if (!settings) return false;
@@ -204,7 +209,7 @@
         const self = localPeerId();
         if (!id || (self && id === self)) return;
         const kind = msg.kind;
-        if (kind !== "vampire" && kind !== "warp" && kind !== "speed") return;
+        if (!knownPlayerAbility(kind)) return;
         if (!Number.isInteger(msg.seq) || msg.seq < 1) return;
         const rp = ensureRemote(id);
         if (!rp || rp.arenaOut) return;

@@ -131,6 +131,136 @@
         ctx.restore();
     }
 
+    const BOT_ABILITY_CAST = {
+        GLITCH(player, dist, _dt, cfg) {
+            if (dist < cfg.GLITCH.triggerDist) {
+                this.x += (Math.random() - 0.5) * cfg.GLITCH.teleportDist;
+                this.y += (Math.random() - 0.5) * cfg.GLITCH.teleportDist;
+                this.abilityTimer = cfg.GLITCH.cooldown;
+            }
+        },
+        WORMHOLE(player, dist, _dt, cfg) {
+            if (dist < cfg.WORMHOLE.triggerDist) {
+                let a = Math.atan2(player.y - this.y, player.x - this.x);
+                // Mai mic decât jucătorul → saltul devine evadare, nu sinucidere.
+                const dir =
+                    this.radius > player.radius * GAME_SETTINGS.BOT_EAT_THRESHOLD ? 1 : -1;
+                this.x += Math.cos(a) * cfg.WORMHOLE.jumpForce * dir;
+                this.y += Math.sin(a) * cfg.WORMHOLE.jumpForce * dir;
+                this.abilityTimer = cfg.WORMHOLE.cooldown;
+            }
+        },
+        PULSAR(_player, _dist, _dt, cfg) {
+            const before = this.radius;
+            this.radius += cfg.PULSAR.sizeBoost;
+            this._pulsarApplied = (this._pulsarApplied || 0) + (this.radius - before);
+            this.pulsarEffectTimer = cfg.PULSAR.duration;
+            this.abilityTimer = cfg.PULSAR.cooldown;
+        },
+        GRAVITY_WELL(player, dist, dt, cfg) {
+            const g = cfg.GRAVITY_WELL;
+            if (dist < g.range && dist > 1) {
+                // pullForce = px/sec la centru; trebuie să rămână sub MIN_SPEED ca să se poată scăpa.
+                const step = g.pullForce * (1 - dist / g.range) * dt;
+                player.x += ((this.x - player.x) / dist) * step;
+                player.y += ((this.y - player.y) / dist) * step;
+            }
+        },
+        TITAN(_player, _dist, _dt, cfg) {
+            this.isInvulnerable = true;
+            this.invulnTimer = cfg.TITAN.invulnerableDuration;
+            this.oldColor = this.color;
+            this.color = "#FFFFFF";
+            // Cooldown-ul curge după ce scutul expiră, nu în paralel cu el.
+            this.abilityTimer = cfg.TITAN.invulnerableDuration + cfg.TITAN.cooldown;
+        },
+        CHRONOS(player, dist, _dt, cfg) {
+            if (dist < cfg.CHRONOS.range && player.radius > 5) {
+                // Puterea e cea de la 60fps. Un singur += 0.06 lăsa timer-ul negativ după un
+                // cadru lung, iar cadrele următoare mai dădeau câte un tick până se recupera.
+                const tickDt = 1 / 60;
+                const shrink = Math.pow(cfg.CHRONOS.shrinkPower, tickDt * 160);
+                let ticks = 0;
+                while (this.abilityTimer <= 0 && ticks < 4) {
+                    player.radius *= shrink;
+                    this.abilityTimer += 0.06;
+                    ticks++;
+                }
+                if (this.abilityTimer < 0) this.abilityTimer = 0.06;
+            }
+        },
+        ARCHITECT(_player, _dist, _dt, cfg, poolNutrients) {
+            // dropChance e procent (0–100) — nutrienți ca la jeleu / explode bot, nu stardust.
+            if (Math.random() * 100 < cfg.ARCHITECT.dropChance) {
+                const trailAng =
+                    this.wanderAngle + Math.PI + (Math.random() - 0.5) * 0.45;
+                const crumbOff = this.radius + 9 + Math.random() * 4;
+                const cx = this.x + Math.cos(trailAng) * crumbOff;
+                const cy = this.y + Math.sin(trailAng) * crumbOff;
+                let n = global.getFromPool(poolNutrients);
+                if (n) {
+                    n.spawn(cx, cy, this.color);
+                    const spit = 380 + Math.random() * 220;
+                    n.vx = Math.cos(trailAng) * spit + (Math.random() - 0.5) * 90;
+                    n.vy = Math.sin(trailAng) * spit + (Math.random() - 0.5) * 90;
+                    n.radius = 2.2 + Math.random() * 1.3;
+                    n.life = 6.5 + Math.random() * 2.5;
+                    n.botEatDelay = 0.45;
+                }
+            }
+            this.abilityTimer = cfg.ARCHITECT.cooldown;
+        },
+        NECROMANCER(_player, _dist, dt, cfg, poolNutrients) {
+            const nec = cfg.NECROMANCER;
+            const range = nec.pullFoodRange;
+            const rSq = range * range;
+            const maxPullSec = nec.pullFoodForce;
+            const applyNecroPull = (item) => {
+                const dnx = item.x - this.x;
+                const dny = item.y - this.y;
+                const dSq = dnx * dnx + dny * dny;
+                if (dSq >= rSq || dSq <= 0.25) return;
+                const dist = Math.sqrt(dSq);
+                const falloff = 1 - dist / range;
+                const step = maxPullSec * falloff * dt;
+                item.x -= (dnx / dist) * step;
+                item.y -= (dny / dist) * step;
+            };
+            poolNutrients.forEach((n) => {
+                if (n.active) applyNecroPull(n);
+            });
+            const poolParticles = botWorld().poolParticles;
+            if (poolParticles) {
+                for (let pi = 0; pi < poolParticles.length; pi++) {
+                    const p = poolParticles[pi];
+                    if (p.active) applyNecroPull(p);
+                }
+            }
+        },
+        NEBULA(player, dist, _dt, cfg) {
+            if (
+                dist < (cfg.NEBULA.triggerDist ?? 400) &&
+                player.radius > this.radius * GAME_SETTINGS.BOT_EAT_THRESHOLD
+            ) {
+                this.nebulaTimer = cfg.NEBULA.duration;
+                this.abilityTimer = cfg.NEBULA.cooldown;
+            }
+        },
+        MIMIC(player, dist, _dt, cfg) {
+            if (dist < cfg.MIMIC.triggerDist) {
+                this.mimicTimer = cfg.MIMIC.copyDuration;
+                this.mimicColor = player.glow;
+                this.abilityTimer = cfg.MIMIC.cooldown;
+            }
+        },
+    };
+
+    function registerBotAbility(typeKey, cast) {
+        if (typeof typeKey === "string" && typeKey && typeof cast === "function") {
+            BOT_ABILITY_CAST[typeKey] = cast;
+        }
+    }
+
     class EnemyBot {
         constructor() {
             this.active = false;
@@ -232,134 +362,9 @@
 
         useAbility(player, dist, dt = 0.016) {
             if (this.abilityTimer > 0 || this.frozen > 0) return;
-            const cfg = ENEMY_BOT_SETTINGS;
-            const poolNutrients = botWorld().poolNutrients;
-            switch (this.typeKey) {
-                case "GLITCH":
-                    if (dist < cfg.GLITCH.triggerDist) {
-                        this.x += (Math.random() - 0.5) * cfg.GLITCH.teleportDist;
-                        this.y += (Math.random() - 0.5) * cfg.GLITCH.teleportDist;
-                        this.abilityTimer = cfg.GLITCH.cooldown;
-                    }
-                    break;
-                case "WORMHOLE":
-                    if (dist < cfg.WORMHOLE.triggerDist) {
-                        let a = Math.atan2(player.y - this.y, player.x - this.x);
-                        // Mai mic decât jucătorul → saltul devine evadare, nu sinucidere.
-                        const dir =
-                            this.radius > player.radius * GAME_SETTINGS.BOT_EAT_THRESHOLD ? 1 : -1;
-                        this.x += Math.cos(a) * cfg.WORMHOLE.jumpForce * dir;
-                        this.y += Math.sin(a) * cfg.WORMHOLE.jumpForce * dir;
-                        this.abilityTimer = cfg.WORMHOLE.cooldown;
-                    }
-                    break;
-                case "PULSAR": {
-                    const before = this.radius;
-                    this.radius += cfg.PULSAR.sizeBoost;
-                    this._pulsarApplied = (this._pulsarApplied || 0) + (this.radius - before);
-                    this.pulsarEffectTimer = cfg.PULSAR.duration;
-                    this.abilityTimer = cfg.PULSAR.cooldown;
-                    break;
-                }
-                case "GRAVITY_WELL": {
-                    const g = cfg.GRAVITY_WELL;
-                    if (dist < g.range && dist > 1) {
-                        // pullForce = px/sec la centru; trebuie să rămână sub MIN_SPEED ca să se poată scăpa.
-                        const step = g.pullForce * (1 - dist / g.range) * dt;
-                        player.x += ((this.x - player.x) / dist) * step;
-                        player.y += ((this.y - player.y) / dist) * step;
-                    }
-                    break;
-                }
-                case "TITAN":
-                    this.isInvulnerable = true;
-                    this.invulnTimer = cfg.TITAN.invulnerableDuration;
-                    this.oldColor = this.color;
-                    this.color = "#FFFFFF";
-                    // Cooldown-ul curge după ce scutul expiră, nu în paralel cu el.
-                    this.abilityTimer = cfg.TITAN.invulnerableDuration + cfg.TITAN.cooldown;
-                    break;
-                case "CHRONOS":
-                    if (dist < cfg.CHRONOS.range && player.radius > 5) {
-                        // Puterea e cea de la 60fps. Un singur += 0.06 lăsa timer-ul negativ după un
-                        // cadru lung, iar cadrele următoare mai dădeau câte un tick până se recupera.
-                        const tickDt = 1 / 60;
-                        const shrink = Math.pow(cfg.CHRONOS.shrinkPower, tickDt * 160);
-                        let ticks = 0;
-                        while (this.abilityTimer <= 0 && ticks < 4) {
-                            player.radius *= shrink;
-                            this.abilityTimer += 0.06;
-                            ticks++;
-                        }
-                        if (this.abilityTimer < 0) this.abilityTimer = 0.06;
-                    }
-                    break;
-                case "ARCHITECT":
-                    // dropChance e procent (0–100) — nutrienți ca la jeleu / explode bot, nu stardust.
-                    if (Math.random() * 100 < cfg.ARCHITECT.dropChance) {
-                        const trailAng =
-                            this.wanderAngle + Math.PI + (Math.random() - 0.5) * 0.45;
-                        const crumbOff = this.radius + 9 + Math.random() * 4;
-                        const cx = this.x + Math.cos(trailAng) * crumbOff;
-                        const cy = this.y + Math.sin(trailAng) * crumbOff;
-                        let n = global.getFromPool(poolNutrients);
-                        if (n) {
-                            n.spawn(cx, cy, this.color);
-                            const spit = 380 + Math.random() * 220;
-                            n.vx = Math.cos(trailAng) * spit + (Math.random() - 0.5) * 90;
-                            n.vy = Math.sin(trailAng) * spit + (Math.random() - 0.5) * 90;
-                            n.radius = 2.2 + Math.random() * 1.3;
-                            n.life = 6.5 + Math.random() * 2.5;
-                            n.botEatDelay = 0.45;
-                        }
-                    }
-                    this.abilityTimer = cfg.ARCHITECT.cooldown;
-                    break;
-                case "NECROMANCER": {
-                    const nec = cfg.NECROMANCER;
-                    const range = nec.pullFoodRange;
-                    const rSq = range * range;
-                    const maxPullSec = nec.pullFoodForce;
-                    const applyNecroPull = (item) => {
-                        const dnx = item.x - this.x;
-                        const dny = item.y - this.y;
-                        const dSq = dnx * dnx + dny * dny;
-                        if (dSq >= rSq || dSq <= 0.25) return;
-                        const dist = Math.sqrt(dSq);
-                        const falloff = 1 - dist / range;
-                        const step = maxPullSec * falloff * dt;
-                        item.x -= (dnx / dist) * step;
-                        item.y -= (dny / dist) * step;
-                    };
-                    poolNutrients.forEach((n) => {
-                        if (n.active) applyNecroPull(n);
-                    });
-                    const poolParticles = botWorld().poolParticles;
-                    if (poolParticles) {
-                        for (let pi = 0; pi < poolParticles.length; pi++) {
-                            const p = poolParticles[pi];
-                            if (p.active) applyNecroPull(p);
-                        }
-                    }
-                    break;
-                }
-                case "NEBULA":
-                    if (
-                        dist < (cfg.NEBULA.triggerDist ?? 400) &&
-                        player.radius > this.radius * GAME_SETTINGS.BOT_EAT_THRESHOLD
-                    ) {
-                        this.nebulaTimer = cfg.NEBULA.duration;
-                        this.abilityTimer = cfg.NEBULA.cooldown;
-                    }
-                    break;
-                case "MIMIC":
-                    if (dist < cfg.MIMIC.triggerDist) {
-                        this.mimicTimer = cfg.MIMIC.copyDuration;
-                        this.mimicColor = player.glow;
-                        this.abilityTimer = cfg.MIMIC.cooldown;
-                    }
-                    break;
-            }
+            const cast = BOT_ABILITY_CAST[this.typeKey];
+            if (!cast) return;
+            cast.call(this, player, dist, dt, ENEMY_BOT_SETTINGS, botWorld().poolNutrients);
         }
 
         update(player, allParticles, dt = 0.016) {
@@ -563,4 +568,5 @@
     global.configureEnemyBot = configureEnemyBot;
     global.clampBotRadius = clampBotRadius;
     global.drawReactiveEye = drawReactiveEye;
+    global.registerBotAbility = registerBotAbility;
 })(typeof window !== "undefined" ? window : globalThis);

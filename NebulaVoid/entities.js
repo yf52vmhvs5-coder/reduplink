@@ -880,19 +880,12 @@ function mirrorBaseCombat() {
     );
 }
 
-// --- FUNCTIE: DECLANȘARE ABILITATE JUCATOR ---
-function declanseazaAbilitatea() {
-    if (!gameActive || isDying || player.cooldown > 0) return;
-
-    if (typeof playAbilitySound === 'function') playAbilitySound(selectedAbility);
-
-    // Multiplicator de cooldown din ramura ABILITY SYNC (max -25%)
-    const _signalMul = getSignalCooldownMultiplier();
-
-    // Diferite abilități în funcție de skin (Timpi ajustati la secunde)
-    if (selectedAbility === "vampire" && player.radius > ABILITY_SETTINGS.VAMPIRE_MIN_RADIUS) {
+// --- ABILITĂȚI JUCĂTOR: cast-ul stă aici, tick-ul în js/sim-update.js (ABILITY_SIM) ---
+const PLAYER_ABILITY_CAST = {
+    vampire(signalMul) {
+        if (!(player.radius > ABILITY_SETTINGS.VAMPIRE_MIN_RADIUS)) return;
         player.radius -= ABILITY_SETTINGS.VAMPIRE_COST_SIZE;
-        player.cooldown = GAME_SETTINGS.CD_VAMPIRE * _signalMul;
+        player.cooldown = GAME_SETTINGS.CD_VAMPIRE * signalMul;
         const mirrorBase = mirrorBaseCombat();
         const huntActive = !mirrorBase && playerHasRavenousHuntMod();
         if (!mirrorBase && playerHasRavenousTwinAfterglowMod()) {
@@ -914,7 +907,8 @@ function declanseazaAbilitatea() {
         if (mirrorBase && typeof notifyMirrorAbilityCast === "function") {
             notifyMirrorAbilityCast("vampire", player.x, player.y);
         }
-    } else if (selectedAbility === "warp") {
+    },
+    warp(signalMul) {
         activeEffects.shriekPulse = 1;
         const mirrorBase = mirrorBaseCombat();
         if (!mirrorBase && playerHasPhaseCageMod() && typeof spawnPhaseCageFromWarp === "function") {
@@ -935,20 +929,44 @@ function declanseazaAbilitatea() {
                 }
             }
         }
-        player.cooldown = GAME_SETTINGS.CD_WARP * _signalMul;
+        player.cooldown = GAME_SETTINGS.CD_WARP * signalMul;
         if (mirrorBase && typeof notifyMirrorAbilityCast === "function") {
             notifyMirrorAbilityCast("warp", player.x, player.y);
         }
-    } else if (selectedAbility === "speed") {
+    },
+    speed(signalMul) {
         activeEffects.dashTime = ABILITY_SETTINGS.SPEED_DASH_DURATION;
-        player.cooldown = GAME_SETTINGS.CD_SPEED * _signalMul;
+        player.cooldown = GAME_SETTINGS.CD_SPEED * signalMul;
         const mirrorBase = mirrorBaseCombat();
         if (!mirrorBase && playerHasToxicSporeLatchMod()) sporeDashBurstSerial += 1;
         if (mirrorBase && typeof notifyMirrorAbilityCast === "function") {
             notifyMirrorAbilityCast("speed", player.x, player.y);
         }
+    },
+};
+
+function playerAbilityKnown(id) {
+    return typeof id === "string" && Object.prototype.hasOwnProperty.call(PLAYER_ABILITY_CAST, id);
+}
+
+function registerPlayerAbility(id, cast) {
+    if (typeof id === "string" && id && typeof cast === "function") {
+        PLAYER_ABILITY_CAST[id] = cast;
     }
 }
+
+function declanseazaAbilitatea() {
+    if (!gameActive || isDying || player.cooldown > 0) return;
+
+    if (typeof playAbilitySound === "function") playAbilitySound(selectedAbility);
+
+    const signalMul = getSignalCooldownMultiplier();
+    const cast = PLAYER_ABILITY_CAST[selectedAbility];
+    if (cast) cast(signalMul);
+}
+
+window.playerAbilityKnown = playerAbilityKnown;
+window.registerPlayerAbility = registerPlayerAbility;
 
 // --- CONTROL DESKTOP (TASTATURA) ---
 window.addEventListener("keydown", (e) => {

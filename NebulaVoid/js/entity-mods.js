@@ -91,49 +91,51 @@
         return skinName === ravenous || skinName === phase || skinName === toxic;
     }
 
-    function playerHasRavenousHuntMod() {
+    function modOwned(tier, skinName) {
+        if (tier === "x1") return hasEntityModX1(skinName);
+        if (tier === "x2") return hasEntityModX2(skinName);
+        return hasEntityModX3(skinName);
+    }
+
+    function playerHasMod(cfg, tier) {
         const name = getActiveRunSkinName();
-        return name === global.RAVENOUS_X1_CFG.skinName && hasEntityModX1(name);
+        return !!(cfg && name === cfg.skinName && modOwned(tier, name));
+    }
+
+    function playerHasRavenousHuntMod() {
+        return playerHasMod(global.RAVENOUS_X1_CFG, "x1");
     }
 
     function playerHasRavenousSiphonMod() {
-        const name = getActiveRunSkinName();
-        return name === global.RAVENOUS_X2_CFG.skinName && hasEntityModX2(name);
+        return playerHasMod(global.RAVENOUS_X2_CFG, "x2");
     }
 
     function playerHasRavenousTwinAfterglowMod() {
-        const name = getActiveRunSkinName();
-        return name === global.RAVENOUS_X3_CFG.skinName && hasEntityModX3(name);
+        return playerHasMod(global.RAVENOUS_X3_CFG, "x3");
     }
 
     function playerHasPhaseCageMod() {
-        const name = getActiveRunSkinName();
-        return name === global.PHASE_SHIFTER_X1_CFG.skinName && hasEntityModX1(name);
+        return playerHasMod(global.PHASE_SHIFTER_X1_CFG, "x1");
     }
 
     function playerHasPhaseResonanceMod() {
-        const name = getActiveRunSkinName();
-        return name === global.PHASE_SHIFTER_X2_CFG.skinName && hasEntityModX2(name);
+        return playerHasMod(global.PHASE_SHIFTER_X2_CFG, "x2");
     }
 
     function playerHasPhaseAscendMod() {
-        const name = getActiveRunSkinName();
-        return name === global.PHASE_SHIFTER_X3_CFG.skinName && hasEntityModX3(name);
+        return playerHasMod(global.PHASE_SHIFTER_X3_CFG, "x3");
     }
 
     function playerHasToxicSporeLatchMod() {
-        const name = getActiveRunSkinName();
-        return name === global.TOXIC_SPORE_X1_CFG.skinName && hasEntityModX1(name);
+        return playerHasMod(global.TOXIC_SPORE_X1_CFG, "x1");
     }
 
     function playerHasToxicSporeSplitMod() {
-        const name = getActiveRunSkinName();
-        return name === global.TOXIC_SPORE_X2_CFG.skinName && hasEntityModX2(name);
+        return playerHasMod(global.TOXIC_SPORE_X2_CFG, "x2");
     }
 
     function playerHasToxicSporeVisionMod() {
-        const name = getActiveRunSkinName();
-        return name === global.TOXIC_SPORE_X3_CFG.skinName && hasEntityModX3(name);
+        return playerHasMod(global.TOXIC_SPORE_X3_CFG, "x3");
     }
 
     global.configureEntityMods = configureEntityMods;
@@ -153,4 +155,5 @@
     global.playerHasToxicSporeLatchMod = playerHasToxicSporeLatchMod;
     global.playerHasToxicSporeSplitMod = playerHasToxicSporeSplitMod;
     global.playerHasToxicSporeVisionMod = playerHasToxicSporeVisionMod;
+    global.playerHasMod = playerHasMod;
 })(typeof window !== "undefined" ? window : globalThis);
