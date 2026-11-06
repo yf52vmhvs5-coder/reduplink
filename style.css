@@ -146,10 +146,10 @@ main,
 .bar-nav a {
     color: rgba(255, 255, 255, 0.72);
     text-decoration: none;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: none;
 }
 
 .bar-nav a:hover,
@@ -215,8 +215,8 @@ main,
 
 .bar-nav .fuel-icon {
     display: block;
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     flex-shrink: 0;
     color: var(--signal);
     filter: drop-shadow(0 0 6px color-mix(in srgb, var(--signal) 32%, transparent));
@@ -532,9 +532,11 @@ h2 {
 .sealed { color: var(--mute); }
 
 .card-platforms {
+    --platform-icon: 18px;
+    --platform-gap: 6px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--platform-gap);
     flex-shrink: 0;
 }
 
@@ -557,6 +559,10 @@ h2 {
     width: 15rem;
     max-width: min(15rem, calc(100vw - var(--pad) * 2));
     transform: translateY(-4px);
+}
+
+.card-platform:nth-last-child(2) .platform-tip {
+    right: calc(-1 * (var(--platform-icon) + var(--platform-gap)));
 }
 
 .card-platform.is-tip-open .platform-tip {
@@ -582,8 +588,8 @@ h2 {
 
 .card-platform svg {
     display: block;
-    width: 18px;
-    height: 18px;
+    width: var(--platform-icon);
+    height: var(--platform-icon);
 }
 
 .card-platform__label {

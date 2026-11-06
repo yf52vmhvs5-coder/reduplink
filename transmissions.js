@@ -1,5 +1,5 @@
 /**
- * SPACEJUNK transmissions guestbook.
+ * REDUPLINK transmissions guestbook.
  * Isolated from the studio deck: a failure here must not touch tint, cards, or the field.
  */
 (function () {

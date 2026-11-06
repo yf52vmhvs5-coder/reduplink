@@ -145,10 +145,14 @@
     // Black Hole Physics (Forte convertite px/sec)
     const bhX=GAME_SETTINGS.WORLD_SIZE/2,bhY=GAME_SETTINGS.WORLD_SIZE/2,bhPullRange=GAME_SETTINGS.BH_PULL_RANGE,bhCoreRadius=GAME_SETTINGS.BH_CORE_RADIUS;
     let dxPlayerBH=bhX-player.x,dyPlayerBH=bhY-player.y,distPlayerBH=Math.hypot(dxPlayerBH,dyPlayerBH);
-    if(distPlayerBH<bhPullRange && distPlayerBH>1){
-        let pullForce=(1-(distPlayerBH/bhPullRange))*GAME_SETTINGS.BH_PULL_FORCE;
-        player.x+=(dxPlayerBH/distPlayerBH)*pullForce*dt;
-        player.y+=(dyPlayerBH/distPlayerBH)*pullForce*dt;
+    // dist <= 1 sărea peste damage: la refresh mare pasul de atracție încape în pixelul din centru.
+    if (distPlayerBH < bhPullRange) {
+        let pullForce = 0;
+        if (distPlayerBH > 1) {
+            pullForce = (1 - distPlayerBH / bhPullRange) * GAME_SETTINGS.BH_PULL_FORCE;
+            player.x += (dxPlayerBH / distPlayerBH) * pullForce * dt;
+            player.y += (dyPlayerBH / distPlayerBH) * pullForce * dt;
+        }
 
         // Efect "siphon" în raza de atracție (în afara miezului): micșorare fină + particule elegante
         const coreEdge = bhCoreRadius + player.radius * 0.5;
@@ -212,17 +216,18 @@
             bot._bhSiphonCarry = 0;
         }
 
-        if(distBotBH<bhPullRange && distBotBH>1){
-            let pullForce=(1-(distBotBH/bhPullRange))*GAME_SETTINGS.BH_PULL_FORCE;
-            const dirX = (bhX-bot.x)/distBotBH;
-            const dirY = (bhY-bot.y)/distBotBH;
-            bot.x+=dirX*pullForce*dt;
-            bot.y+=dirY*pullForce*dt;
-
-            if(distBotBH<bhCoreRadius) bot.explode(poolNutrients);
+        if (distBotBH < bhPullRange) {
+            if (distBotBH > 1) {
+                let pullForce=(1-(distBotBH/bhPullRange))*GAME_SETTINGS.BH_PULL_FORCE;
+                const dirX = (bhX-bot.x)/distBotBH;
+                const dirY = (bhY-bot.y)/distBotBH;
+                bot.x+=dirX*pullForce*dt;
+                bot.y+=dirY*pullForce*dt;
+            }
+            if (distBotBH < bhCoreRadius) bot.explode(poolNutrients);
         }
     });
-    poolNutrients.forEach(n=>{ if(!n.active) return; let distNBH=Math.hypot(bhX-n.x,bhY-n.y); if(distNBH<bhPullRange && distNBH>1){ n.x+=((bhX-n.x)/distNBH)*((1-(distNBH/bhPullRange))*GAME_SETTINGS.BH_NUTRIENT_PULL_FORCE)*dt; n.y+=((bhY-n.y)/distNBH)*((1-(distNBH/bhPullRange))*GAME_SETTINGS.BH_NUTRIENT_PULL_FORCE)*dt; if(distNBH<bhCoreRadius) n.active=false; } });
+    poolNutrients.forEach(n=>{ if(!n.active) return; let distNBH=Math.hypot(bhX-n.x,bhY-n.y); if(distNBH<bhPullRange){ if(distNBH>1){ n.x+=((bhX-n.x)/distNBH)*((1-(distNBH/bhPullRange))*GAME_SETTINGS.BH_NUTRIENT_PULL_FORCE)*dt; n.y+=((bhY-n.y)/distNBH)*((1-(distNBH/bhPullRange))*GAME_SETTINGS.BH_NUTRIENT_PULL_FORCE)*dt; } if(distNBH<bhCoreRadius) n.active=false; } });
 
     // Player Movement (px/sec)
     const controlScheme =

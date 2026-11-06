@@ -1116,7 +1116,7 @@ function actionAim(origin) {
 
 
 /* ───────────────────────────────────────────────────────────────────────────
- *  SPACEJUNK SIGNAL — shared tint with studio deck (RU mark)
+ *  REDUPLINK SIGNAL — shared tint with studio deck (RU mark)
  * ─────────────────────────────────────────────────────────────────────────── */
 
 const SJ_SIGNAL_KEY = 'spacejunkStudioTint';

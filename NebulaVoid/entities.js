@@ -496,6 +496,7 @@ configureRunLifecycle({
     incrementRunId: () => {
         runId++;
     },
+    getRunId: () => runId,
     setCameraPosition: (x, y) => {
         cameraX = x;
         cameraY = y;

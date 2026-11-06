@@ -161,6 +161,7 @@
         const getFromPool = deps.getFromPool;
         const matterEarnedSnapshot = Math.floor(player.score);
         const survivedSecondsSnapshot = (performance.now() - deps.getRoundStartTime()) / 1000;
+        const deathRunId = typeof deps.getRunId === "function" ? deps.getRunId() : null;
 
         deps.addScreenShake(4.5, 0.3);
         if (typeof deps.playDeathSound === "function") deps.playDeathSound();
@@ -180,6 +181,13 @@
         }
 
         setTimeout(() => {
+            if (
+                deathRunId != null &&
+                typeof deps.getRunId === "function" &&
+                deps.getRunId() !== deathRunId
+            ) {
+                return;
+            }
             deps.setIsDying(false);
             document.body.classList.remove("game-running");
             resetRunState();

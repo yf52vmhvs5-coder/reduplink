@@ -1,18 +1,8 @@
 /**
- * SPACEJUNK studio deck.
- * Add a game by appending one object, and mirror that card in the
- * noscript block in index.html so it still appears with JavaScript off.
- *
- * {
- *   title: "NEBULA VOID",
- *   kind: "ARENA",
- *   status: "live",          // "live" or "hold"
- *   line: "One sentence.",
- *   href: "NebulaVoid/index.html",   // omit or leave "" while the build is sealed
- *   info: "NebulaVoid/brief.html",      // optional dossier; does not replace [ OPEN ]
- *   web: true                           // browser badge (optional; defaults from href)
- *   tablet: true                        // tablet badge (optional)
- * }
+ * REDUPLINK studio deck.
+ * Games live in studio/catalog.js. Add one object there, then run:
+ *   node studio/stamp.js
+ * That refreshes the no-JS cards in index.html and the table in README.md.
  */
 (function () {
     "use strict";
@@ -20,36 +10,13 @@
     /** Set your Ko-fi page when ready, e.g. "https://ko-fi.com/yourname" */
     var KO_FI_URL = "";
 
-    var GAMES = [
-        {
-            title: "NEBULA VOID",
-            kind: "ARENA",
-            status: "live",
-            line: "Survival arena in a drifting starfield. Consume, chain kills, and beat the pull — solo or multiplayer.",
-            href: "NebulaVoid/index.html",
-            info: "NebulaVoid/brief.html",
-            web: true
-        },
-        {
-            title: "COSMIC QUIZ",
-            kind: "TRIVIA",
-            status: "live",
-            line: "Fifty questions on space, tech, and in-between facts. Classic, Survival, or Blitz — solo or a shared room code.",
-            href: "CosmicQuiz/index.html",
-            web: true,
-            tablet: true,
-            tabletLine: "Touch layout sized for the tablet. Same modes and room code — not a shrunk desktop page."
-        },
-        {
-            title: "CELL WARS",
-            kind: "ARENA",
-            status: "live",
-            line: "Mass-and-split arena on phosphor and scanlines. Outgrow the bots with mouse and keys, or the tablet pad.",
-            href: "Cell War/index.html",
-            web: true,
-            tablet: true
+    function studioGames() {
+        if (!Array.isArray(window.STUDIO_GAMES)) {
+            console.error("REDUPLINK: studio/catalog.js did not load.");
+            return [];
         }
-    ];
+        return window.STUDIO_GAMES;
+    }
 
     var TINTS = [
         { color: "#ff2d2d", label: "Blood rift" },
@@ -422,13 +389,14 @@
         var deck = document.getElementById("deck");
         var count = document.getElementById("signalCount");
         if (!deck) return;
+        var games = studioGames();
         var live = 0;
-        GAMES.forEach(function (game) {
+        games.forEach(function (game) {
             if (game.status === "live" && game.href) live += 1;
             deck.appendChild(card(game));
         });
         if (count) {
-            count.textContent = live + " LIVE / " + GAMES.length;
+            count.textContent = live + " LIVE / " + games.length;
         }
     }
 

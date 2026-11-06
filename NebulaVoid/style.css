@@ -986,12 +986,29 @@ body::after {
     gap: clamp(12px, 2vh, 18px);
 }
 
+.about-signoff {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
 .about-footer .about-body-signoff {
     margin: 0 !important;
     font-size: 10px;
     letter-spacing: 1.75px;
     line-height: 1.45;
     color: color-mix(in srgb, var(--about-accent) 42%, rgba(255, 255, 255, 0.38));
+}
+
+.about-version {
+    margin: 0;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.32);
 }
 
 .about-footer .menu-overlay-back {

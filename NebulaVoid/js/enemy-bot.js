@@ -198,6 +198,12 @@
             this.blinkDuration = 0;
             this.scanTimer = 0.09;
             this.closestFood = null;
+            this.closestFoodId = 0;
+            this._sporeDrainGlow = 0;
+            this._sporeSplitGlow = 0;
+            this.phaseCageBleedGlow = 0;
+            this._bhSiphonCarry = 0;
+            this._phaseCageWallBleedSfxPlayed = false;
         }
 
         explode(poolNutrients) {
@@ -275,12 +281,17 @@
                     break;
                 case "CHRONOS":
                     if (dist < cfg.CHRONOS.range && player.radius > 5) {
-                        // Puterea e cea de la 60fps. Fiecare tick de 0.06s folosea dt-ul cadrului,
-                        // deci la 120fps Chronos era mai slab, iar la un cadru lung mult mai tare.
+                        // Puterea e cea de la 60fps. Un singur += 0.06 lăsa timer-ul negativ după un
+                        // cadru lung, iar cadrele următoare mai dădeau câte un tick până se recupera.
                         const tickDt = 1 / 60;
-                        player.radius *= Math.pow(cfg.CHRONOS.shrinkPower, tickDt * 160);
-                        // += păstrează restul de timp, ca rata de tick să nu depindă de FPS.
-                        this.abilityTimer += 0.06;
+                        const shrink = Math.pow(cfg.CHRONOS.shrinkPower, tickDt * 160);
+                        let ticks = 0;
+                        while (this.abilityTimer <= 0 && ticks < 4) {
+                            player.radius *= shrink;
+                            this.abilityTimer += 0.06;
+                            ticks++;
+                        }
+                        if (this.abilityTimer < 0) this.abilityTimer = 0.06;
                     }
                     break;
                 case "ARCHITECT":
@@ -500,15 +511,19 @@
                     this.y += (dyJB / distJB) * overlap;
                 }
             }
+            this.x = Math.max(edgeLo, Math.min(edgeHi, this.x));
+            this.y = Math.max(edgeLo, Math.min(edgeHi, this.y));
 
             applyBotPassiveShrink(this, dt);
         }
 
-        draw(ctx, pX, pY, scrW, scrH, dt = 0.016, zoom = 1) {
+        draw(ctx, pX, pY, scrW, scrH, dt = 0.016, zoom = 1, viewX, viewY) {
             if (!this.active) return;
-            const _hw = scrW / 2 / zoom + 150;
-            const _hh = scrH / 2 / zoom + 150;
-            if (Math.abs(this.x - pX) > _hw || Math.abs(this.y - pY) > _hh) return;
+            const cullX = typeof viewX === "number" ? viewX : pX;
+            const cullY = typeof viewY === "number" ? viewY : pY;
+            const _hw = scrW / 2 / zoom + 160;
+            const _hh = scrH / 2 / zoom + 160;
+            if (Math.abs(this.x - cullX) > _hw || Math.abs(this.y - cullY) > _hh) return;
             ctx.save();
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, 6.28);

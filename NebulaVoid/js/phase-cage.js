@@ -847,7 +847,8 @@
     }
 
     function clampBotToPhaseCage(bot) {
-        if (!cages.length || bot.frozen > 0) return;
+        // Freeze oprește AI-ul, nu cușca. Altfel gaura neagră îi scoate în primele 0.75s.
+        if (!cages.length) return;
         for (let i = 0; i < cages.length; i++) {
             const cage = cages[i];
             if (!isBotTrappedInCage(bot, cage)) continue;

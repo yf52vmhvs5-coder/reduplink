@@ -51,12 +51,9 @@
         <nav class="bar-nav" aria-label="Studio">
             <a class="nav-ico" href="#signals">
                 <svg class="nav-ico-svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <g fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M5 16.5v2"/>
-                        <path d="M9.5 13v5.5"/>
-                        <path d="M14 9.5v9"/>
-                        <path d="M18.5 5.5v13"/>
-                    </g>
+                    <circle cx="12" cy="12" r="2.65" fill="currentColor"/>
+                    <circle cx="12" cy="12" r="5.6" fill="none" stroke="currentColor" stroke-width="1.7"/>
+                    <circle cx="12" cy="12" r="8.7" fill="none" stroke="currentColor" stroke-width="1"/>
                 </svg>
                 <span>Signals</span>
             </a>
@@ -117,10 +114,11 @@
         <section id="signals" class="band" aria-labelledby="signalsTitle">
             <div class="band-head">
                 <h2 id="signalsTitle">SIGNALS</h2>
-                <p id="signalCount" class="band-meta">3 LIVE / 3</p>
+                <p id="signalCount" class="band-meta"><!-- count:start -->3 LIVE / 3<!-- count:end --></p>
             </div>
             <ul id="deck" class="deck">
                 <noscript>
+                    <!-- games:start -->
                     <li class="card card--live">
                         <p class="card-kicker"><span>ARENA</span><span>LIVE</span></p>
                         <h3>NEBULA VOID</h3>
@@ -139,6 +137,7 @@
                         <p class="blurb">Mass-and-split arena on phosphor and scanlines. Outgrow the bots with mouse and keys, or the tablet pad.</p>
                         <div class="card-foot"><a class="open" href="Cell War/index.html">[ OPEN ]</a></div>
                     </li>
+                    <!-- games:end -->
                 </noscript>
             </ul>
         </section>
@@ -206,6 +205,7 @@
         <p id="year">2026</p>
     </footer>
 
+    <script src="studio/catalog.js"></script>
     <script src="script.js"></script>
     <script src="transmissions.js"></script>
 </body>

@@ -504,21 +504,19 @@
         }
         ctx.globalAlpha = 1.0;
 
-        // Match EnemyBot.draw() frustum (player-centered) — skip draw() call only; pixels unchanged.
-        const botDrawHalfW = screenW / 2 / interpolatedZoom + 150;
-        const botDrawHalfH = screenH / 2 / interpolatedZoom + 150;
-        const botCullPx = player.x;
-        const botCullPy = player.y;
+        // Aceeași tăiere ca EnemyBot.draw: camera, nu jucătorul. Ochii rămân spre player.
+        const botDrawHalfW = screenW / 2 / interpolatedZoom + 160;
+        const botDrawHalfH = screenH / 2 / interpolatedZoom + 160;
         for (let bi = 0; bi < poolBots.length; bi++) {
             const b = poolBots[bi];
             if (!b.active) continue;
             if (
-                Math.abs(b.x - botCullPx) > botDrawHalfW ||
-                Math.abs(b.y - botCullPy) > botDrawHalfH
+                Math.abs(b.x - cameraX) > botDrawHalfW ||
+                Math.abs(b.y - cameraY) > botDrawHalfH
             ) {
                 continue;
             }
-            b.draw(ctx, botCullPx, botCullPy, screenW, screenH, dt, interpolatedZoom);
+            b.draw(ctx, player.x, player.y, screenW, screenH, dt, interpolatedZoom, cameraX, cameraY);
         }
 
         if (typeof global.drawMirrorAbilityFx === "function") {
