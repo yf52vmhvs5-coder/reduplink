@@ -895,6 +895,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const brandZone = startScreen?.querySelector('.brand-zone');
     const signalTintBtn = document.getElementById('signal-tint-btn');
     const SIGNAL_TINTS = [
+        { color: '#3dffb0', label: 'Lumen' },
         { color: '#ff2d2d', label: 'Blood rift' },
         { color: '#ff2ed1', label: 'Void signal' },
         { color: '#c86bff', label: 'Phase glow' },
@@ -922,7 +923,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const _signalCursorCache = {};
 
     function makeSignalCursor(color) {
-        const key = color || '#ff2d2d';
+        const key = color || '#3dffb0';
         if (_signalCursorCache[key]) return _signalCursorCache[key];
         const svg =
             '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">' +
@@ -942,7 +943,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateSignalCursor(color) {
         const hex = typeof color === 'string' && /^#[0-9a-f]{6}$/i.test(color)
             ? color.toLowerCase()
-            : '#ff2d2d';
+            : '#3dffb0';
         document.documentElement.style.setProperty('--app-cursor', makeSignalCursor(hex));
     }
 

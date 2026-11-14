@@ -39,7 +39,8 @@
     <title>COSMIC QUIZ</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@600&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#0A0610">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Tiny5&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script>
         (function () {
@@ -57,7 +58,11 @@
     </script>
 </head>
 <body>
-    <div class="stars"></div>
+    <div class="night" aria-hidden="true">
+        <div class="stars far"></div>
+        <div class="stars mid"></div>
+        <div class="stars near"></div>
+    </div>
 
     <section id="start-screen" class="screen active">
         <div class="start-stack">
@@ -66,10 +71,10 @@
                     <svg class="mark-ru" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                         <g class="mark-ru-hud">
                             <rect class="mark-ru-frame" x="2.25" y="2.25" width="19.5" height="19.5" rx="4.5" ry="4.5"
-                                  fill="none" stroke="var(--signal, #ff2d2d)" stroke-width="1.2" stroke-linejoin="round"/>
+                                  fill="none" stroke="var(--signal, #3dffb0)" stroke-width="1.2" stroke-linejoin="round"/>
                             <text class="mark-ru-letters" x="12" y="15.65" text-anchor="middle"
-                                  font-family="'Courier New', Courier, monospace" font-size="10.2" font-weight="700"
-                                  letter-spacing="-0.04em" fill="var(--signal, #ff2d2d)">RU</text>
+                                  font-family="'Share Tech Mono', monospace" font-size="10.2" font-weight="700"
+                                  letter-spacing="-0.04em" fill="var(--signal, #3dffb0)">RU</text>
                         </g>
                     </svg>
                 </button>
@@ -117,10 +122,10 @@
             <svg class="mark-ru about-mark" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                 <g class="mark-ru-hud">
                     <rect class="mark-ru-frame" x="2.25" y="2.25" width="19.5" height="19.5" rx="4.5" ry="4.5"
-                          fill="none" stroke="var(--signal, #ff2d2d)" stroke-width="1.2" stroke-linejoin="round"/>
+                          fill="none" stroke="var(--signal, #3dffb0)" stroke-width="1.2" stroke-linejoin="round"/>
                     <text class="mark-ru-letters" x="12" y="15.65" text-anchor="middle"
-                          font-family="'Courier New', Courier, monospace" font-size="10.2" font-weight="700"
-                          letter-spacing="-0.04em" fill="var(--signal, #ff2d2d)">RU</text>
+                          font-family="'Share Tech Mono', monospace" font-size="10.2" font-weight="700"
+                          letter-spacing="-0.04em" fill="var(--signal, #3dffb0)">RU</text>
                 </g>
             </svg>
             <div class="about-body">
@@ -133,7 +138,10 @@
             </div>
         </div>
         <footer class="about-footer">
-            <p class="about-signoff">STAY CURIOUS. THE VOID KEEPS THE SCORE.</p>
+            <div class="about-colophon">
+                <p class="about-signoff">STAY CURIOUS. THE VOID KEEPS THE SCORE.</p>
+                <p class="about-version">v0.9.0</p>
+            </div>
             <button type="button" id="about-back-btn" class="about-back">BACK</button>
         </footer>
     </div>
@@ -210,10 +218,10 @@
                     <svg class="mark-ru question-mark" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" focusable="false">
                         <g class="mark-ru-hud">
                             <rect class="mark-ru-frame" x="2.25" y="2.25" width="19.5" height="19.5" rx="4.5" ry="4.5"
-                                  fill="none" stroke="var(--signal, #ff2d2d)" stroke-width="1.2" stroke-linejoin="round"/>
+                                  fill="none" stroke="var(--signal, #3dffb0)" stroke-width="1.2" stroke-linejoin="round"/>
                             <text class="mark-ru-letters" x="12" y="15.65" text-anchor="middle"
-                                  font-family="'Courier New', Courier, monospace" font-size="10.2" font-weight="700"
-                                  letter-spacing="-0.04em" fill="var(--signal, #ff2d2d)">RU</text>
+                                  font-family="'Share Tech Mono', monospace" font-size="10.2" font-weight="700"
+                                  letter-spacing="-0.04em" fill="var(--signal, #3dffb0)">RU</text>
                         </g>
                     </svg>
                 </div>
