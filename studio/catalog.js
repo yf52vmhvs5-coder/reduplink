@@ -32,6 +32,7 @@
             status: "live",
             line: "Fifty questions on space, tech, and in-between facts. Classic, Survival, or Blitz — solo or a shared room code.",
             href: "CosmicQuiz/index.html",
+            info: "CosmicQuiz/brief.html",
             summary: "Trivia",
             web: true,
             tablet: true,
@@ -44,9 +45,11 @@
             status: "live",
             line: "Mass-and-split arena on phosphor and scanlines. Outgrow the bots with mouse and keys, or the tablet pad.",
             href: "Cell War/index.html",
+            info: "Cell War/brief.html",
             summary: "Mass-and-split arena",
             web: true,
-            tablet: true
+            tablet: true,
+            tabletLine: "A stick to aim and four buttons: split, merge, eject, map. Same mass rules — not a shrunk desktop page."
         }
     ];
 

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="COSMIC QUIZ — signal brief. Modes, Stardust power-ups, and two-player room play.">
+    <title>COSMIC QUIZ — Signal brief</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Tiny5&display=swap" rel="stylesheet">
+    <script>
+        (function () {
+            var tint = "#3dffb0";
+            try {
+                var keys = ["spacejunkStudioTint", "cosmic-quiz-signal"];
+                for (var i = 0; i < keys.length; i++) {
+                    var saved = localStorage.getItem(keys[i]);
+                    if (saved && /^#[0-9a-f]{6}$/i.test(saved)) {
+                        tint = saved.toLowerCase();
+                        break;
+                    }
+                }
+            } catch (err) { /* private mode */ }
+            document.documentElement.style.setProperty("--signal", tint);
+        })();
+    </script>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="brief.css">
+</head>
+<body class="cosmic-brief">
+    <a class="skip" href="#brief">Skip to brief</a>
+    <div class="brief-night" aria-hidden="true">
+        <div class="brief-stars far"></div>
+        <div class="brief-stars mid"></div>
+    </div>
+    <canvas id="field" aria-hidden="true"></canvas>
+
+    <header class="bar">
+        <a class="mark" href="../index.html#signals">
+            <svg class="mark-ru" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                <g class="mark-ru-hud">
+                    <rect class="mark-ru-frame" x="2.25" y="2.25" width="19.5" height="19.5" rx="4.5" ry="4.5"
+                          fill="none" stroke="var(--signal)" stroke-width="1.2" stroke-linejoin="round"/>
+                    <text class="mark-ru-letters" x="12" y="15.65" text-anchor="middle"
+                          font-family="'Courier New', Courier, monospace" font-size="10.2" font-weight="700"
+                          letter-spacing="-0.04em" fill="var(--signal)">RU</text>
+                </g>
+            </svg>
+            <span class="mark-name">REDUPLINK</span>
+        </a>
+        <nav class="brief-nav" aria-label="Brief">
+            <a class="open" href="../index.html#signals">[ BACK ]</a>
+            <a class="open" href="index.html">[ OPEN ]</a>
+        </nav>
+    </header>
+
+    <main id="brief">
+        <section class="hero" aria-labelledby="briefTitle">
+            <p class="kicker">[ SIGNAL BRIEF ]</p>
+            <h1 id="briefTitle" class="cosmic-title">COSMIC<span>QUIZ</span></h1>
+            <p class="lede">A fifty-question run through space, technology, and the strange facts in between. Play alone or share a six-character room code with one friend. Three modes change how mistakes stick — and correct answers feed Stardust you can spend mid-run.</p>
+            <div class="spec" role="list">
+                <div role="listitem">
+                    <p class="spec-k">SESSION</p>
+                    <p class="spec-v">50 QUESTIONS</p>
+                </div>
+                <div role="listitem">
+                    <p class="spec-k">MODES</p>
+                    <p class="spec-v">3</p>
+                </div>
+                <div role="listitem">
+                    <p class="spec-k">PLAYERS</p>
+                    <p class="spec-v">1–2</p>
+                </div>
+                <div role="listitem">
+                    <p class="spec-k">LIVES</p>
+                    <p class="spec-v">3 (MAX 4)</p>
+                </div>
+                <div role="listitem">
+                    <p class="spec-k">BLITZ CLOCK</p>
+                    <p class="spec-v">15 SEC</p>
+                </div>
+                <div role="listitem">
+                    <p class="spec-k">PLATFORM</p>
+                    <p class="spec-v">WEB + TABLET</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="band" aria-labelledby="transmissionTitle">
+            <div class="band-head">
+                <h2 id="transmissionTitle">TRANSMISSION</h2>
+                <p class="band-meta">HOW A RUN WORKS</p>
+            </div>
+            <p class="dossier-lead">Each session draws from a curated deck, shuffled into a fixed-length run. The HUD tracks question index, score, and remaining lives. After you lock an answer, a short fact may appear — trivia as a signal, not filler.</p>
+            <div class="notes notes--single">
+                <article class="note">
+                    <h3>DECK</h3>
+                    <p>Solo play skips questions already shown since this page was opened, and only repeats them when the fresh pool runs short. A reload clears that memory. Online, both sides build from the host's seed, so that local memory stays out.</p>
+                </article>
+                <article class="note">
+                    <h3>SCORE</h3>
+                    <p>Every correct answer adds ten points. In Blitz, each second still on the clock adds half a point, rounded down. The end screen keeps a best for that mode in this browser; an online best is your own score, stored apart from solo.</p>
+                </article>
+                <article class="note">
+                    <h3>SIGNAL TINT</h3>
+                    <p>In the game menu, the RU frame cycles accent color. That tint is saved here too — the same phosphor thread as Nebula Void and the studio deck.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="band" aria-labelledby="modesTitle">
+            <div class="band-head">
+                <h2 id="modesTitle">MODES</h2>
+                <p class="band-meta">CLASSIC · SURVIVAL · BLITZ</p>
+            </div>
+            <ul class="mode-list">
+                <li class="mode-card mode-card--classic">
+                    <p class="mode-tag">CLASSIC</p>
+                    <h3>Move on</h3>
+                    <p>A wrong answer costs one life. If any lives remain, the next question comes up either way. Zero lives ends the run short of fifty.</p>
+                </li>
+                <li class="mode-card mode-card--survival">
+                    <p class="mode-tag">SURVIVAL</p>
+                    <h3>Hold the line</h3>
+                    <p>Miss and you lose a life, but the same question stays until you answer it — or until you are out of lives. In a room it stays until every player who still has lives has answered it.</p>
+                </li>
+                <li class="mode-card mode-card--blitz">
+                    <p class="mode-tag">BLITZ</p>
+                    <h3>Fifteen seconds</h3>
+                    <p>Each question gets a fifteen-second clock. Time out counts as a miss and costs a life, unless a shield is up. A correct answer scores 10 plus half a point per second left, rounded down — a full clock is +7.</p>
+                </li>
+            </ul>
+        </section>
+
+        <section class="band" aria-labelledby="stardustTitle">
+            <div class="band-head">
+                <h2 id="stardustTitle">STARDUST</h2>
+                <p class="band-meta"><span class="stardust-glyph" aria-hidden="true">✦</span> POWER-UPS</p>
+            </div>
+            <p class="dossier-lead">Correct answers grant Stardust. Spend it from the bar below the question — each player tracks their own balance in a two-player room.</p>
+            <ul class="power-list">
+                <li class="power-row">
+                    <div class="power-name">
+                        <span class="power-label">50-50</span>
+                        <span class="power-detail">Quantum 50 — removes two wrong choices</span>
+                    </div>
+                    <span class="power-cost"><span aria-hidden="true">✦</span> 5</span>
+                </li>
+                <li class="power-row">
+                    <div class="power-name">
+                        <span class="power-label">+8s</span>
+                        <span class="power-detail">Time Warp — adds eight seconds to the Blitz clock. In a room that clock is shared.</span>
+                    </div>
+                    <span class="power-cost"><span aria-hidden="true">✦</span> 6</span>
+                </li>
+                <li class="power-row">
+                    <div class="power-name">
+                        <span class="power-label">SHIELD</span>
+                        <span class="power-detail">Gravity Shield — blocks the next wrong answer, including a Blitz timeout.</span>
+                    </div>
+                    <span class="power-cost"><span aria-hidden="true">✦</span> 7</span>
+                </li>
+                <li class="power-row">
+                    <div class="power-name">
+                        <span class="power-label">LIFE</span>
+                        <span class="power-detail">Life Pod — one extra life, up to four total</span>
+                    </div>
+                    <span class="power-cost"><span aria-hidden="true">✦</span> 8</span>
+                </li>
+            </ul>
+            <p class="power-foot">+2 Stardust per correct answer. Fifty-fifty can be used once per question.</p>
+        </section>
+
+        <section class="band" aria-labelledby="relayTitle">
+            <div class="band-head">
+                <h2 id="relayTitle">RELAY</h2>
+                <p class="band-meta">2-PLAYER ROOM</p>
+            </div>
+            <p class="dossier-lead">Create a room or join with a six-character code — two players maximum. The host picks the mode; both run the same question order. Peer relay handles sync; you stay in the browser.</p>
+            <div class="notes">
+                <article class="note">
+                    <h3>HOST</h3>
+                    <p>Creates the room, shares the code, and chooses Classic, Survival, or Blitz before the run starts.</p>
+                </article>
+                <article class="note">
+                    <h3>GUEST</h3>
+                    <p>Joins with the code and waits for the host to start. Same deck, separate scores, lives, and Stardust. Classic and Survival wait until both living players have answered. Blitz can close the question on the clock.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="band" aria-labelledby="spectrumTitle">
+            <div class="band-head">
+                <h2 id="spectrumTitle">SPECTRUM</h2>
+                <p class="band-meta" id="categoryMeta">8 TOPICS</p>
+            </div>
+            <p class="dossier-lead">Questions pull from space science, worlds, physics, technology, and the odd corner cases in between. Wrong answers are built to look plausible, not random.</p>
+            <ul class="topic-pills" id="topics"></ul>
+            <p class="power-note" role="note">
+                <span class="power-note-kicker">[ TABLET ]</span>
+                On a touch tablet, Cosmic Quiz switches to a layout sized for the screen — same modes and room code, not a shrunk desktop view.
+            </p>
+            <p class="thanks">Stay curious. The void keeps the score.</p>
+        </section>
+    </main>
+
+    <footer class="colophon">
+        <p>COSMIC QUIZ · v0.9.0 · <span>SIGNAL BRIEF</span></p>
+        <p id="year">2026</p>
+    </footer>
+
+    <script src="questions.js"></script>
+    <script src="brief.js"></script>
+</body>
+</html>

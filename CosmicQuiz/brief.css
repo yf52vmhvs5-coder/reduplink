@@ -1,0 +1,388 @@
+/* Cosmic Quiz signal brief — plum void + phosphor signal on studio scaffold */
+
+/* Studio :root is blood rift. The game default is lumen, and the head
+   script overrides this with the saved tint. Body must not set --signal
+   or it would hide that inline value. */
+:root {
+    --signal: #3dffb0;
+}
+
+body.cosmic-brief {
+    --cq-ink: #eeefe8;
+    --cq-mid: #c9a6ff;
+    --cq-soft: #9a86c4;
+    --cq-line: rgba(74, 14, 107, 0.65);
+    --cq-frame: #4a0e6b;
+    --cq-void: #0a0610;
+    --line: var(--cq-line);
+    --font-display: "Tiny5", "Share Tech Mono", monospace;
+    --font-data: "Share Tech Mono", ui-monospace, "Courier New", monospace;
+    font-family: var(--font-data);
+    background-color: #020202;
+    background-image: linear-gradient(
+        180deg,
+        #140810 0%,
+        #140810 38%,
+        #050308 58%,
+        #020202 100%
+    );
+    color: var(--cq-ink);
+}
+
+body.cosmic-brief .lede,
+body.cosmic-brief .dossier-lead,
+body.cosmic-brief .note p,
+body.cosmic-brief .thanks {
+    color: rgba(238, 239, 232, 0.78);
+}
+
+body.cosmic-brief .kicker,
+body.cosmic-brief .band-meta,
+body.cosmic-brief .spec-k {
+    color: var(--cq-soft);
+}
+
+body.cosmic-brief h2 {
+    color: var(--cq-ink);
+    letter-spacing: 0.24em;
+}
+
+body.cosmic-brief .open {
+    color: var(--signal);
+    text-shadow: 0 0 12px color-mix(in srgb, var(--signal) 35%, transparent);
+}
+
+body.cosmic-brief .open:hover {
+    color: color-mix(in srgb, var(--signal) 85%, white);
+}
+
+/* Layered star drift (CSS) under canvas */
+.brief-night {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.brief-stars {
+    position: absolute;
+    inset: -15%;
+    background-repeat: repeat;
+    animation: briefDrift 200s linear infinite;
+    opacity: 0.85;
+}
+
+.brief-stars.far {
+    background-size: 320px 420px;
+    background-image:
+        radial-gradient(1px 1px at 8% 14%, rgba(255, 255, 255, 0.5), transparent),
+        radial-gradient(1.2px 1.2px at 22% 38%, rgba(201, 166, 255, 0.45), transparent),
+        radial-gradient(1px 1px at 44% 8%, rgba(255, 255, 255, 0.4), transparent),
+        radial-gradient(1px 1px at 67% 52%, rgba(61, 255, 176, 0.35), transparent),
+        radial-gradient(1.2px 1.2px at 88% 22%, rgba(255, 255, 255, 0.42), transparent);
+}
+
+.brief-stars.mid {
+    animation-duration: 140s;
+    animation-direction: reverse;
+    opacity: 0.55;
+    background-size: 240px 300px;
+    background-image:
+        radial-gradient(1.4px 1.4px at 12% 62%, rgba(255, 255, 255, 0.55), transparent),
+        radial-gradient(1px 1px at 55% 28%, rgba(154, 134, 196, 0.5), transparent),
+        radial-gradient(1.2px 1.2px at 78% 74%, rgba(61, 255, 176, 0.4), transparent);
+}
+
+@keyframes briefDrift {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(-4%, -6%, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .brief-stars { animation: none; }
+}
+
+.brief-nav {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 14px 18px;
+}
+
+.bar {
+    flex-wrap: wrap;
+    row-gap: 10px;
+}
+
+/* Title — match game wordmark */
+.cosmic-title {
+    margin: 10px 0 14px;
+    max-width: none;
+    font-family: var(--font-display);
+    font-size: clamp(44px, 8vw, 72px);
+    font-weight: 400;
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    color: var(--cq-ink);
+    text-shadow:
+        0 0 24px color-mix(in srgb, var(--signal) 22%, transparent),
+        0 0 48px rgba(74, 14, 107, 0.45);
+}
+
+.cosmic-title span {
+    display: block;
+    color: var(--signal);
+    text-shadow: 0 0 18px color-mix(in srgb, var(--signal) 45%, transparent);
+}
+
+.spec {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 28px 0 0;
+}
+
+.spec > div {
+    min-width: 9rem;
+    padding: 12px 14px 11px;
+    border: 1px solid var(--cq-line);
+    background: rgba(10, 6, 16, 0.55);
+    box-shadow: inset 0 0 24px rgba(74, 14, 107, 0.12);
+}
+
+.spec-k {
+    margin: 0 0 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+}
+
+.spec-v {
+    margin: 0;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    color: var(--cq-ink);
+}
+
+.dossier-lead {
+    margin: 0 0 16px;
+    max-width: 42rem;
+    font-size: 14px;
+    line-height: 1.6;
+    letter-spacing: 0.03em;
+}
+
+.notes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px 32px;
+}
+
+.notes--single {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.note h3 {
+    margin: 0 0 8px;
+    color: var(--signal);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-shadow: 0 0 10px color-mix(in srgb, var(--signal) 40%, transparent);
+}
+
+.note p {
+    margin: 0;
+    max-width: 38rem;
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+/* Modes */
+.mode-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.mode-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 100%;
+    padding: 18px 16px 16px;
+    border: 1px solid var(--cq-line);
+    background: rgba(10, 6, 16, 0.5);
+    border-top-width: 3px;
+}
+
+.mode-card--classic { border-top-color: #5cefff; }
+.mode-card--survival { border-top-color: #ff5ce1; }
+.mode-card--blitz { border-top-color: var(--signal); }
+
+.mode-tag {
+    margin: 0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--cq-soft);
+}
+
+.mode-card h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: var(--cq-ink);
+    text-transform: lowercase;
+}
+
+.mode-card p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.55;
+    color: rgba(238, 239, 232, 0.74);
+}
+
+/* Stardust */
+.stardust-glyph {
+    color: var(--signal);
+    text-shadow: 0 0 10px color-mix(in srgb, var(--signal) 50%, transparent);
+}
+
+.power-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--cq-line);
+    background: rgba(10, 6, 16, 0.45);
+}
+
+.power-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 16px;
+    border-top: 1px solid var(--cq-line);
+}
+
+.power-row:first-child {
+    border-top: none;
+}
+
+.power-name {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.power-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    color: var(--cq-ink);
+}
+
+.power-detail {
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--cq-mid);
+    letter-spacing: 0.03em;
+}
+
+.power-cost {
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--signal);
+    text-shadow: 0 0 8px color-mix(in srgb, var(--signal) 35%, transparent);
+}
+
+.power-foot {
+    margin: 14px 0 0;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--cq-soft);
+}
+
+/* Topics */
+.topic-pills {
+    list-style: none;
+    margin: 0 0 8px;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+}
+
+.topic-pills li {
+    padding: 8px 12px;
+    border: 1px solid var(--cq-line);
+    background: rgba(30, 10, 46, 0.35);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: rgba(238, 239, 232, 0.88);
+}
+
+.power-note {
+    margin: 28px 0 0;
+    max-width: 42rem;
+    padding: 14px 16px;
+    border-left: 3px solid var(--signal);
+    background: rgba(10, 6, 16, 0.55);
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(238, 239, 232, 0.72);
+}
+
+.power-note-kicker {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--signal);
+}
+
+.thanks {
+    margin: 22px 0 0;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    font-style: italic;
+    color: var(--cq-mid);
+}
+
+body.cosmic-brief .colophon {
+    color: var(--cq-soft);
+}
+
+body.cosmic-brief .colophon span {
+    color: var(--signal);
+}
+
+@media (max-width: 900px) {
+    .notes,
+    .notes--single {
+        grid-template-columns: 1fr;
+    }
+
+    .mode-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+  .power-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

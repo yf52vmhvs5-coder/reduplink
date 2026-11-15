@@ -13,6 +13,16 @@
     gap: 14px 18px;
 }
 
+.brief-nav .open {
+    color: var(--signal);
+    text-shadow: 0 0 12px color-mix(in srgb, var(--signal) 35%, transparent);
+}
+
+.brief-nav .open:hover,
+.brief-nav .open:focus-visible {
+    color: color-mix(in srgb, var(--signal) 82%, white);
+}
+
 .spec {
     display: flex;
     flex-wrap: wrap;
