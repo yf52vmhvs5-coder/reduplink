@@ -2167,7 +2167,6 @@ const engine = {
         ctx.scale(zoom * this.pixelScale, zoom * this.pixelScale);
         ctx.translate(-cam.x, -cam.y);
 
-        this.drawGrid(ctx);
         this.drawBorder(ctx);
         state.food.forEach(f => this.drawFood(ctx, f));
         state.powerups.forEach(p => this.drawPowerup(ctx, p));
@@ -2188,7 +2187,64 @@ const engine = {
             this.canvas.width,
             this.canvas.height
         );
+        this.drawNames(out, shake);
         this.drawMinimap(out);
+    },
+
+    drawNames(ctx, shake) {
+        const zoom = getZoom();
+        if (!(zoom > 0)) return;
+        const cam = state.camera;
+        const best = new Map();
+        for (const c of state.cells) {
+            if (!c.alive || !c.name) continue;
+            const key = getOwnerKey(c);
+            const prev = best.get(key);
+            if (!prev || c.mass > prev.mass) best.set(key, c);
+        }
+        if (!best.size) return;
+
+        const hw = this.canvas.width / 2;
+        const hh = this.canvas.height / 2;
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.lineJoin = 'round';
+        for (const c of best.values()) {
+            const screenR = massToRadius(c.mass) * zoom;
+            if (screenR < 16) continue;
+            let covered = false;
+            for (let i = 0; i < state.cells.length; i++) {
+                const other = state.cells[i];
+                if (!other.alive || other === c || other.mass <= c.mass) continue;
+                const dx = other.x - c.x;
+                const dy = other.y - c.y;
+                const reach = massToRadius(other.mass);
+                if (dx * dx + dy * dy < reach * reach) {
+                    covered = true;
+                    break;
+                }
+            }
+            if (covered) continue;
+            const sx = hw + (c.x - cam.x) * zoom + shake.x;
+            const sy = hh + (c.y - cam.y) * zoom + shake.y;
+            if (sx < -80 || sy < -40 || sx > this.canvas.width + 80 || sy > this.canvas.height + 40) continue;
+
+            const label = String(c.name).toUpperCase();
+            let size = 18;
+            const limit = screenR * 2;
+            ctx.font = size + 'px VT323, monospace';
+            while (size > 13 && ctx.measureText(label).width > limit) {
+                size -= 1;
+                ctx.font = size + 'px VT323, monospace';
+            }
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#000';
+            ctx.strokeText(label, sx, sy);
+            ctx.fillStyle = '#f4fbff';
+            ctx.fillText(label, sx, sy);
+        }
+        ctx.restore();
     },
 
     drawMinimap(ctx) {
@@ -2229,20 +2285,6 @@ const engine = {
             }
         }
         ctx.restore();
-    },
-
-    drawGrid(ctx) {
-        const step = 50;
-        ctx.strokeStyle = '#12122a';
-        ctx.lineWidth = 1;
-        const sx = Math.floor((state.camera.x - 1000) / step) * step;
-        const sy = Math.floor((state.camera.y - 1000) / step) * step;
-        for (let x = sx; x < state.camera.x + 1500; x += step) {
-            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, WORLD.h); ctx.stroke();
-        }
-        for (let y = sy; y < state.camera.y + 1500; y += step) {
-            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(WORLD.w, y); ctx.stroke();
-        }
     },
 
     drawBorder(ctx) {
@@ -2483,15 +2525,6 @@ const engine = {
             ctx.stroke();
         }
 
-        if (r > 16) {
-            ctx.fillStyle = '#000';
-            ctx.font = `bold ${Math.min(Math.floor(r * 0.42), 18)}px VT323, monospace`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(String(c.name || '').toUpperCase(), ix, iy);
-            ctx.textAlign = 'left';
-            ctx.textBaseline = 'alphabetic';
-        }
     }
 };
 
