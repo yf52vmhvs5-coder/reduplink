@@ -452,53 +452,54 @@
 
     function paintField() {
         var canvas = document.getElementById("field");
-        if (!canvas || motionReduced()) return;
+        if (!canvas) return;
         var ctx = canvas.getContext("2d");
-        var stars = [];
-        var viewW = 0;
-        var viewH = 0;
-
-        function resize() {
-            var w = window.innerWidth;
-            var h = window.innerHeight;
-            var dpr = Math.min(window.devicePixelRatio || 1, 2);
-            canvas.width = Math.round(w * dpr);
-            canvas.height = Math.round(h * dpr);
-            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-            if (!stars.length || Math.abs(w - viewW) > 1) {
-                var n = Math.round((w * h) / 18000);
-                stars = [];
-                for (var i = 0; i < n; i++) {
-                    stars.push({
-                        x: Math.random() * w,
-                        y: Math.random() * h,
-                        r: Math.random() * 1.2 + 0.3,
-                        v: Math.random() * 0.15 + 0.04,
-                        a: Math.random() * 0.45 + 0.15
-                    });
-                }
-            }
-            viewW = w;
-            viewH = h;
+        if (!ctx) return;
+        var WORLD = 4000;
+        var dust = [];
+        var i;
+        for (i = 0; i < 600; i++) {
+            dust.push({
+                x: Math.random() * WORLD,
+                y: Math.random() * WORLD,
+                size: Math.random() * 2 + 1,
+                opacity: Math.random() * 0.2 + 0.8,
+                color: Math.random() > 0.5 ? "#444" : "#222"
+            });
         }
 
         function frame() {
-            ctx.clearRect(0, 0, viewW, viewH);
-            for (var i = 0; i < stars.length; i++) {
-                var s = stars[i];
-                s.y -= s.v;
-                if (s.y < 0) s.y = viewH;
-                ctx.globalAlpha = s.a;
-                ctx.fillStyle = "#f4f4f4";
-                ctx.fillRect(s.x, s.y, s.r, s.r);
+            var w = window.innerWidth;
+            var h = window.innerHeight;
+            var dpr = Math.min(window.devicePixelRatio || 1, 2);
+            var camX = WORLD / 2;
+            var camY = WORLD / 2;
+            var viewDist = w > h ? w : h;
+            var pass;
+            var n;
+            var color;
+            var d;
+            canvas.width = Math.round(w * dpr);
+            canvas.height = Math.round(h * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.fillStyle = "#020202";
+            ctx.fillRect(0, 0, w, h);
+            for (pass = 0; pass < 2; pass++) {
+                color = pass === 0 ? "#444" : "#222";
+                ctx.fillStyle = color;
+                for (n = 0; n < dust.length; n++) {
+                    d = dust[n];
+                    if (d.color !== color) continue;
+                    if (Math.abs(d.x - camX) >= viewDist || Math.abs(d.y - camY) >= viewDist) continue;
+                    ctx.globalAlpha = d.opacity;
+                    ctx.fillRect(d.x - camX + w / 2, d.y - camY + h / 2, d.size, d.size);
+                }
             }
             ctx.globalAlpha = 1;
-            requestAnimationFrame(frame);
         }
 
-        resize();
-        window.addEventListener("resize", resize);
-        requestAnimationFrame(frame);
+        frame();
+        window.addEventListener("resize", frame);
     }
 
     function paint() {

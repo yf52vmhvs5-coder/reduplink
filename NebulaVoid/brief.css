@@ -1,4 +1,9 @@
-/* Signal brief — layout only. Type, tint, and the starfield come from the studio sheet. */
+/* Signal brief — layout only. Type and tint stay on the studio sheet.
+   The void is the game's flat #020202, not the studio plum gradient. */
+
+body {
+    background: #020202;
+}
 
 .bar {
     flex-wrap: wrap;
@@ -355,6 +360,24 @@
 .brief-empty {
     margin: 0;
     color: var(--dim);
+}
+
+.colophon-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.colophon .void-mark {
+    flex: 0 0 auto;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 0.92;
+    letter-spacing: 0.08em;
+    color: var(--signal);
+    text-shadow: 0 0 8px var(--signal-soft);
 }
 
 @media (max-width: 860px) {

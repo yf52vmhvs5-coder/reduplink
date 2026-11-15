@@ -29,9 +29,7 @@
 </head>
 <body class="cell-brief">
     <a class="skip" href="#brief">Skip to brief</a>
-    <div class="brief-night" aria-hidden="true">
-        <div class="brief-scan"></div>
-    </div>
+    <div class="brief-night" aria-hidden="true"></div>
 
     <header class="bar">
         <a class="mark" href="../index.html#signals">
@@ -58,27 +56,27 @@
             <h1 id="briefTitle" class="cell-title">CELL<span>WARS</span></h1>
             <p class="lede">A mass arena on a phosphor grid. You and the bots start at 100. Eat food and smaller cells, split to hunt, and hold merge to pull yourself back together. Clear the field, or get eaten.</p>
             <div class="spec" role="list">
-                <div role="listitem">
+                <div class="spec-item spec-item--field" role="listitem">
                     <p class="spec-k">FIELD</p>
                     <p class="spec-v">5000 × 5000</p>
                 </div>
-                <div role="listitem">
+                <div class="spec-item spec-item--start" role="listitem">
                     <p class="spec-k">START</p>
                     <p class="spec-v">100 MASS</p>
                 </div>
-                <div role="listitem">
+                <div class="spec-item spec-item--bots" role="listitem">
                     <p class="spec-k">BOTS</p>
                     <p class="spec-v">25 DEFAULT</p>
                 </div>
-                <div role="listitem">
+                <div class="spec-item spec-item--food" role="listitem">
                     <p class="spec-k">FOOD</p>
                     <p class="spec-v">800 DEFAULT</p>
                 </div>
-                <div role="listitem">
+                <div class="spec-item spec-item--eat" role="listitem">
                     <p class="spec-k">EAT</p>
                     <p class="spec-v">ABOVE 1.25×</p>
                 </div>
-                <div role="listitem">
+                <div class="spec-item spec-item--platform" role="listitem">
                     <p class="spec-k">PLATFORM</p>
                     <p class="spec-v">WEB + TABLET</p>
                 </div>
@@ -88,7 +86,7 @@
         <section class="band" aria-labelledby="massTitle">
             <div class="band-head">
                 <h2 id="massTitle">MASS</h2>
-                <p class="band-meta">EAT · SPLIT · MERGE · EJECT</p>
+                <p class="band-meta band-meta--hue"><span class="tone tone--eat">EAT</span> · <span class="tone tone--split">SPLIT</span> · <span class="tone tone--merge">MERGE</span> · <span class="tone tone--eject">EJECT</span></p>
             </div>
             <p class="dossier-lead">Mass is the score, summed across every piece you own. Bigger cells move slower. The HUD shows your rank and that total. The board lists the top 10, and pins you underneath if you fall out of it.</p>
             <ul class="rule-list">
@@ -118,7 +116,7 @@
         <section class="band" aria-labelledby="fieldTitle">
             <div class="band-head">
                 <h2 id="fieldTitle">FIELD</h2>
-                <p class="band-meta">FOOD · VIRUSES · PICKUPS</p>
+                <p class="band-meta band-meta--hue"><span class="tone tone--food">FOOD</span> · <span class="tone tone--virus">VIRUSES</span> · <span class="tone tone--pickup">PICKUPS</span></p>
             </div>
             <p class="dossier-lead">Food pellets are 1–3 mass. The field refills to your food setting, and ejected pellets sit on top of that count. Five viruses, each 100 mass, rest near the corners and the center. You cannot eat a virus.</p>
             <div class="notes">
@@ -134,17 +132,14 @@
             <ul class="buff-list">
                 <li class="buff buff--speed">
                     <span class="buff-name">SPEED</span>
-                    <span class="buff-track" aria-hidden="true"><i></i></span>
                     <span class="buff-detail">1.9× move speed for 11 seconds</span>
                 </li>
                 <li class="buff buff--shield">
                     <span class="buff-name">SHIELD</span>
-                    <span class="buff-track" aria-hidden="true"><i></i></span>
                     <span class="buff-detail">One hit. The cell that would eat you is shoved off, and the shield breaks.</span>
                 </li>
                 <li class="buff buff--magnet">
                     <span class="buff-name">MAGNET</span>
-                    <span class="buff-track" aria-hidden="true"><i></i></span>
                     <span class="buff-detail">Pulls food toward your largest piece for 10 seconds</span>
                 </li>
             </ul>
@@ -153,7 +148,7 @@
         <section class="band" aria-labelledby="runTitle">
             <div class="band-head">
                 <h2 id="runTitle">RUN</h2>
-                <p class="band-meta">LOSS · VICTORY · RETRY</p>
+                <p class="band-meta band-meta--hue"><span class="tone tone--loss">LOSS</span> · <span class="tone tone--victory">VICTORY</span> · <span class="tone tone--retry">RETRY</span></p>
             </div>
             <div class="notes notes--single">
                 <article class="note">
@@ -174,48 +169,22 @@
         <section class="band" aria-labelledby="controlsTitle">
             <div class="band-head">
                 <h2 id="controlsTitle">CONTROLS</h2>
-                <p class="band-meta">MOUSE · KEYS · PAD</p>
+                <p class="band-meta band-meta--hue"><span class="tone tone--mouse">MOUSE</span> · <span class="tone tone--keys">KEYS</span> · <span class="tone tone--pad">PAD</span></p>
             </div>
             <p class="dossier-lead">The mouse aims. The camera leads a little toward the cursor. The map starts on: you, the other cells, and the five viruses. M toggles it. Your name takes up to 12 characters.</p>
-            <ul class="key-list">
-                <li class="key-chip key-chip--split">
-                    <span class="key-face">SPACE</span>
-                    <span class="key-act">Split toward the cursor</span>
-                </li>
-                <li class="key-chip key-chip--merge">
-                    <span class="key-face">SHIFT</span>
-                    <span class="key-act">Hold to merge</span>
-                </li>
-                <li class="key-chip key-chip--eject">
-                    <span class="key-face">W</span>
-                    <span class="key-act">Eject from your largest piece</span>
-                </li>
-                <li class="key-chip key-chip--map">
-                    <span class="key-face">M</span>
-                    <span class="key-act">Toggle the map</span>
-                </li>
+            <ul class="legend">
+                <li><kbd class="k k--split">SPACE</kbd><span>Split toward the cursor</span></li>
+                <li><kbd class="k k--merge">SHIFT</kbd><span>Hold to merge</span></li>
+                <li><kbd class="k k--eject">W</kbd><span>Eject from the largest piece</span></li>
+                <li><kbd class="k k--map">M</kbd><span>Toggle the map</span></li>
             </ul>
-            <div class="pad-board">
-                <div class="pad-stick" aria-hidden="true"><i></i></div>
-                <ul class="pad-keys">
-                    <li>
-                        <span class="pad-key pad-key--split">S</span>
-                        <span class="pad-key-label">Split</span>
-                    </li>
-                    <li>
-                        <span class="pad-key pad-key--merge">U</span>
-                        <span class="pad-key-label">Merge</span>
-                    </li>
-                    <li>
-                        <span class="pad-key pad-key--eject">E</span>
-                        <span class="pad-key-label">Eject</span>
-                    </li>
-                    <li>
-                        <span class="pad-key pad-key--map">M</span>
-                        <span class="pad-key-label">Map</span>
-                    </li>
-                </ul>
-            </div>
+            <p class="legend-pad">
+                <span class="legend-where">TABLET</span>
+                <span><kbd class="k k--split">S</kbd>Split</span>
+                <span><kbd class="k k--merge">U</kbd>Merge</span>
+                <span><kbd class="k k--eject">E</kbd>Eject</span>
+                <span><kbd class="k k--map">M</kbd>Map</span>
+            </p>
             <p class="power-note" role="note">
                 <span class="power-note-kicker">[ TABLET ]</span>
                 On a touch tablet whose shorter side is at least 600 pixels, the stick aims and sets your speed — push it farther to move faster, up to full speed. Hold S to keep splitting, U to merge, E to keep ejecting. M toggles the map. Same rules.
@@ -226,7 +195,10 @@
     </main>
 
     <footer class="colophon">
-        <p>CELL WARS · v1.1.0 · <span>SIGNAL BRIEF</span></p>
+        <p class="colophon-line">
+            <span class="cell-mark">CELL<span>WARS</span></span>
+            <span class="colophon-rest">· v1.1.0 · <span>SIGNAL BRIEF</span></span>
+        </p>
         <p id="year">2026</p>
     </footer>
 

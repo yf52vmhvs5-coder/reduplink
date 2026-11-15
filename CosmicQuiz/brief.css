@@ -369,6 +369,37 @@ body.cosmic-brief .colophon span {
     color: var(--signal);
 }
 
+body.cosmic-brief .colophon .cosmic-mark {
+    color: var(--cq-ink);
+}
+
+.colophon-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.cosmic-mark {
+    flex: 0 0 auto;
+    font-family: var(--font-display);
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    color: var(--cq-ink);
+    text-shadow:
+        0 0 8px color-mix(in srgb, var(--signal) 22%, transparent),
+        0 0 14px rgba(74, 14, 107, 0.45);
+}
+
+.cosmic-mark span {
+    display: block;
+    color: var(--signal);
+    text-shadow: 0 0 8px color-mix(in srgb, var(--signal) 45%, transparent);
+}
+
 @media (max-width: 900px) {
     .notes,
     .notes--single {
