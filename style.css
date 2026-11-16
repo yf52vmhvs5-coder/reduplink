@@ -529,6 +529,14 @@ h2 {
     text-shadow: 0 0 8px var(--signal-soft);
 }
 
+.open.open--info.is-locked,
+.open.open--info.is-locked:hover,
+.open.open--info.is-locked:focus-visible {
+    color: rgba(255, 255, 255, 0.28);
+    text-shadow: none;
+    cursor: default;
+}
+
 .sealed { color: var(--mute); }
 
 .card-platforms {

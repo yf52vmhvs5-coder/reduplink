@@ -11,7 +11,7 @@ Small browser games for the quiet between bigger ones. This repo is the studio u
 | --- | --- | --- |
 | **Nebula Void** | Survival arena | [`NebulaVoid/`](NebulaVoid/) |
 | **Cosmic Quiz** | Trivia | [`CosmicQuiz/`](CosmicQuiz/) |
-| **Cell Wars** | Mass-and-split arena | [`Cell War/`](Cell%20War/) |
+| **Drift Lock** | Two wells | [`Cell War/`](Cell%20War/) |
 <!-- games:end -->
 
 ## Local

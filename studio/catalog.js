@@ -7,6 +7,7 @@
  * status: "live" (needs href), "hold", or "sealed"
  * href: omit or leave "" while the build is sealed
  * info: optional dossier; does not replace [ OPEN ]
+ * infoLocked: show [ INFO ] but do not open the dossier yet
  * web / tablet: platform badges. tabletLine: optional tablet tooltip
  * summary: optional phrase for the README table; otherwise kind is used
  */
@@ -39,17 +40,15 @@
             tabletLine: "Touch layout sized for the tablet. Same modes and room code — not a shrunk desktop page."
         },
         {
-            id: "cell-wars",
-            title: "CELL WARS",
+            id: "drift-lock",
+            title: "DRIFT LOCK",
             kind: "ARENA",
             status: "live",
-            line: "Mass-and-split arena on phosphor and scanlines. Outgrow the bots with mouse and keys, or the tablet pad.",
+            line: "In construction. The room is open. The wells follow.",
             href: "Cell War/index.html",
-            info: "Cell War/brief.html",
-            summary: "Mass-and-split arena",
-            web: true,
-            tablet: true,
-            tabletLine: "A stick to aim and four buttons: split, merge, eject, map. Same mass rules — not a shrunk desktop page."
+            infoLocked: true,
+            summary: "Two wells",
+            web: true
         }
     ];
 

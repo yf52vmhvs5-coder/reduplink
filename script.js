@@ -300,7 +300,7 @@
         var kind = document.createElement("span");
         kind.textContent = game.kind || "SIGNAL";
         var state = document.createElement("span");
-        state.textContent = live ? "LIVE" : "SEALED";
+        state.textContent = !live ? "SEALED" : (game.infoLocked ? "BUILD" : "LIVE");
         kicker.appendChild(kind);
         kicker.appendChild(state);
 
@@ -331,12 +331,18 @@
                 link.rel = "noopener noreferrer";
             }
             actions.appendChild(link);
-            if (game.info) {
+            if (game.info && !game.infoLocked) {
                 var info = document.createElement("a");
                 info.className = "open open--info";
                 info.href = gameHref(game.info);
                 info.textContent = "[ INFO ]";
                 actions.appendChild(info);
+            } else if (game.infoLocked) {
+                var locked = document.createElement("span");
+                locked.className = "open open--info is-locked";
+                locked.setAttribute("aria-disabled", "true");
+                locked.textContent = "[ INFO ]";
+                actions.appendChild(locked);
             }
             foot.appendChild(actions);
             var pressX = 0;
@@ -351,7 +357,7 @@
             });
             li.addEventListener("click", function (ev) {
                 if (ev.button !== 0) return;
-                if (ev.target.closest("a")) return;
+                if (ev.target.closest("a") || ev.target.closest(".open--info")) return;
                 if (ev.target.closest(".card-platform")) return;
                 if (ev.altKey) return;
                 var moved = Math.hypot(ev.clientX - pressX, ev.clientY - pressY);
@@ -367,7 +373,7 @@
             });
             li.addEventListener("auxclick", function (ev) {
                 if (ev.button !== 1) return;
-                if (ev.target.closest("a")) return;
+                if (ev.target.closest("a") || ev.target.closest(".open--info")) return;
                 if (ev.target.closest(".card-platform")) return;
                 ev.preventDefault();
                 openBeside();

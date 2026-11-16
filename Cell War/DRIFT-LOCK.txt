@@ -1,0 +1,24 @@
+DRIFT LOCK
+Notite de lucru. Brief-ul vechi nu e asta.
+
+CE E GATA
+- Cell Wars, ca joc, a fost scos din ecranul live. A ramas dosarul, sunetul si brief-ul vechi.
+- Numele pe deck este Drift Lock. Open intra in joc. Info este stins, pana rescriem brief-ul.
+- Textul de pe card: "In construction. The room is open. The wells follow."
+- Ecranul de start: titlu Drift Lock, piese mici care cad, fundal inchis.
+- Butoanele sunt neon, rotunde. Start, Options, About. Textul Reduplink Games e subtitrat, logo-ul RU e mic, sub text.
+- Logo-ul RU schimba tinta studioului. Aceeasi culoare coloreaza LOCK si conturul lui Start. Se salveaza in studio.
+- Options: Sound si Full screen, butoane centrate, fara panou vechi si fara bara de volum. Se aplica la click.
+- About: pagina goala, acelasi fundal, un Back.
+- Start deschide camera, nu un meci. Create arata un cod de 6 caractere si Waiting. Join cere 6 caractere. Back revine la titlu.
+- Camera nu are retea. Codul exista doar pe ecranul asta.
+
+CE URMEAZA
+1. Putul din stanga. O piesa care cade, sageti, rotatie, un rand care se curata. Putul din dreapta ramane gol.
+2. Trei sabotaje, pe rand: linii de gunoi, ventilator, magnet. Se vad pe ambele ecrane.
+3. Releul. Create si Join chiar leaga doi jucatori. Tabla ta e locala. Tabla lui e copia vie. Sabotajul il aplica jocul lui.
+4. Brief-ul se rescrie pentru Drift Lock, apoi se aprinde Info pe deck.
+
+NU SE ATINGE INCA
+- Cell War/brief.html, brief.css, brief.js
+- Folderul Cell War/backup

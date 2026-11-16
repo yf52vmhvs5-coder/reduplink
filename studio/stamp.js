@@ -42,19 +42,28 @@ function live(game) {
     return game.status === "live" && !!game.href;
 }
 
+function kickerState(game, open) {
+    if (!open) return "SEALED";
+    if (game.infoLocked) return "BUILD";
+    return "LIVE";
+}
+
 function cardHtml(game) {
     var pad = "                    ";
     var open = live(game);
     var lines = [
         pad + "<li class=\"card " + (open ? "card--live" : "card--hold") + "\">",
-        pad + "    <p class=\"card-kicker\"><span>" + esc(game.kind) + "</span><span>" + (open ? "LIVE" : "SEALED") + "</span></p>",
+        pad + "    <p class=\"card-kicker\"><span>" + esc(game.kind) + "</span><span>" + kickerState(game, open) + "</span></p>",
         pad + "    <h3>" + esc(game.title) + "</h3>",
         pad + "    <p class=\"blurb\">" + esc(game.line || "") + "</p>"
     ];
     if (open) {
         var link = "<a class=\"open\" href=\"" + esc(game.href) + "\"" + externalAttrs(game.href) + ">[ OPEN ]</a>";
-        if (game.info) {
+        if (game.info && !game.infoLocked) {
             link += "<a class=\"open open--info\" href=\"" + esc(game.info) + "\"" + externalAttrs(game.info) + ">[ INFO ]</a>";
+            lines.push(pad + "    <div class=\"card-foot\"><span class=\"card-actions\">" + link + "</span></div>");
+        } else if (game.infoLocked) {
+            link += "<span class=\"open open--info is-locked\" aria-disabled=\"true\">[ INFO ]</span>";
             lines.push(pad + "    <div class=\"card-foot\"><span class=\"card-actions\">" + link + "</span></div>");
         } else {
             lines.push(pad + "    <div class=\"card-foot\">" + link + "</div>");
