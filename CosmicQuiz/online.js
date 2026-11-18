@@ -469,7 +469,7 @@
         function onLobbyStatus(status, detail) {
             if (status === 'hosting') {
                 app.showLobbyPanels(true);
-                if (app.lobbyCodeDisplay) app.lobbyCodeDisplay.textContent = detail.roomCode || '------';
+                if (app.setRoomCode) app.setRoomCode(detail.roomCode || '------');
                 app.setLobbyStatus('Share this code with your friend');
                 if (app.lobbyWaitingText) app.lobbyWaitingText.textContent = 'Waiting for friend to join…';
             }
@@ -502,7 +502,7 @@
                 if (app.lobby.isHost()) {
                     app.showLobbyPanels(true);
                     const code = app.lobby.getRoomCode();
-                    if (app.lobbyCodeDisplay && code) app.lobbyCodeDisplay.textContent = code;
+                    if (code) app.setRoomCode(code);
                     app.setLobbyStatus('Friend left — share the code to invite them back');
                     if (app.lobbyWaitingText) app.lobbyWaitingText.textContent = 'Waiting for friend to join…';
                     app.showScreen(app.lobbyScreen);

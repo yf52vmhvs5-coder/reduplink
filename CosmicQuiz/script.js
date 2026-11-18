@@ -284,6 +284,73 @@ document.addEventListener('DOMContentLoaded', () => {
         if (lobbyActive) lobbyActive.hidden = !active;
     }
 
+    let roomCodeText = '------';
+    let roomCodeCopyTimer = 0;
+
+    function isRoomCode(value) {
+        return /^[A-Z0-9]{6}$/.test(value || '');
+    }
+
+    function setRoomCode(code) {
+        roomCodeText = String(code || '------');
+        if (!lobbyCodeDisplay || lobbyCodeDisplay.classList.contains('is-copied')) return;
+        lobbyCodeDisplay.textContent = roomCodeText;
+        lobbyCodeDisplay.setAttribute(
+            'aria-label',
+            isRoomCode(roomCodeText) ? `Copy room code ${roomCodeText}` : 'Room code'
+        );
+    }
+
+    function clearCopiedFlash() {
+        window.clearTimeout(roomCodeCopyTimer);
+        roomCodeCopyTimer = 0;
+        if (!lobbyCodeDisplay) return;
+        lobbyCodeDisplay.classList.remove('is-copied');
+        lobbyCodeDisplay.style.minWidth = '';
+        lobbyCodeDisplay.textContent = roomCodeText;
+        lobbyCodeDisplay.setAttribute(
+            'aria-label',
+            isRoomCode(roomCodeText) ? `Copy room code ${roomCodeText}` : 'Room code'
+        );
+    }
+
+    async function writeClipboard(text) {
+        try {
+            if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(text);
+                return true;
+            }
+        } catch (_) { /* fall through */ }
+        try {
+            const area = document.createElement('textarea');
+            area.value = text;
+            area.setAttribute('readonly', '');
+            area.style.position = 'fixed';
+            area.style.left = '-9999px';
+            document.body.appendChild(area);
+            area.select();
+            const ok = document.execCommand('copy');
+            area.remove();
+            return ok;
+        } catch (_) {
+            return false;
+        }
+    }
+
+    async function copyRoomCode() {
+        if (!lobbyCodeDisplay || !isRoomCode(roomCodeText)) return;
+        const ok = await writeClipboard(roomCodeText);
+        if (!ok) return;
+        sfx('click');
+        const width = lobbyCodeDisplay.getBoundingClientRect().width;
+        lobbyCodeDisplay.style.minWidth = `${Math.ceil(width)}px`;
+        lobbyCodeDisplay.textContent = 'copied';
+        lobbyCodeDisplay.classList.add('is-copied');
+        lobbyCodeDisplay.setAttribute('aria-label', 'Copied');
+        window.clearTimeout(roomCodeCopyTimer);
+        roomCodeCopyTimer = window.setTimeout(clearCopiedFlash, 1000);
+    }
+
     function returnToMenu() {
         app.gameActive = false;
         app.onlineSession = false;
@@ -659,6 +726,7 @@ document.addEventListener('DOMContentLoaded', () => {
     app.startBlitzTimer = startBlitzTimer;
     app.setLobbyStatus = setLobbyStatus;
     app.showLobbyPanels = showLobbyPanels;
+    app.setRoomCode = setRoomCode;
     app.goToHostModeSelect = goToHostModeSelect;
     app.goToGuestModeSelect = goToGuestModeSelect;
     app.shakeQuiz = shakeQuiz;
@@ -730,7 +798,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         try {
             const code = await lobby.createRoom();
-            if (lobbyCodeDisplay) lobbyCodeDisplay.textContent = code;
+            setRoomCode(code);
         } catch (_) { /* status handler shows error */ }
     });
 
@@ -754,6 +822,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (ev.key !== 'Enter') return;
         ev.preventDefault();
         document.getElementById('lobby-join-btn')?.click();
+    });
+
+    lobbyCodeDisplay?.addEventListener('click', () => {
+        copyRoomCode();
     });
 
     if (lobbyBackBtn) {
@@ -947,6 +1019,16 @@ document.addEventListener('DOMContentLoaded', () => {
         document.documentElement.style.setProperty('--app-cursor', makeSignalCursor(hex));
     }
 
+    let signalRetintTimer = 0;
+
+    function armSignalRetint() {
+        document.documentElement.classList.add('is-retinting');
+        window.clearTimeout(signalRetintTimer);
+        signalRetintTimer = window.setTimeout(() => {
+            document.documentElement.classList.remove('is-retinting');
+        }, 700);
+    }
+
     function applySignalTint(entry) {
         document.documentElement.style.setProperty('--signal', entry.color);
         updateSignalCursor(entry.color);
@@ -972,6 +1054,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const current = (document.documentElement.style.getPropertyValue('--signal') || '').trim().toLowerCase();
             const index = SIGNAL_TINTS.findIndex((entry) => entry.color === current);
             const next = SIGNAL_TINTS[(index + 1) % SIGNAL_TINTS.length];
+            armSignalRetint();
             applySignalTint(next);
             try {
                 localStorage.setItem(SIGNAL_TINT_KEY, next.color);
