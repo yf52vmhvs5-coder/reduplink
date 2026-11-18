@@ -38,17 +38,6 @@
             web: true,
             tablet: true,
             tabletLine: "Touch layout sized for the tablet. Same modes and room code — not a shrunk desktop page."
-        },
-        {
-            id: "drift-lock",
-            title: "DRIFT LOCK",
-            kind: "ARENA",
-            status: "live",
-            line: "In construction. The room is open. The wells follow.",
-            href: "Cell War/index.html",
-            infoLocked: true,
-            summary: "Two wells",
-            web: true
         }
     ];
 
