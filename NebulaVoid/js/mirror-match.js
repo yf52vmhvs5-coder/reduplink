@@ -12,6 +12,10 @@
     let mirrorCard = null;
 
     const MIRROR_CLAIM_WINDOW_MS = 100;
+    const SELF_POSE_HISTORY_MS = 240;
+    const SELF_POSE_MIN_STEP_MS = 16;
+    /** Claimed center farther than this from the drawn attacker is ignored. */
+    const CLAIM_POSE_SLACK_PX = 320;
 
     function knownPlayerAbility(kind) {
         if (typeof global.playerAbilityKnown === "function") return global.playerAbilityKnown(kind);
@@ -19,6 +23,8 @@
     }
 
     let mirrorClaimSentAt = 0;
+    /** @type {{ t: number, x: number, y: number, r: number }[]} */
+    let selfPoseHist = [];
     /** @type {{ t: number, targetPeerId: string }[]} */
     let mirrorOpenClaims = [];
     let mirrorClaimAcceptedAt = 0;
@@ -169,6 +175,62 @@
         mirrorClaimAcceptedAt = 0;
         mirrorContactDebtByPeer = {};
         mirrorLastDrainGrantAt = 0;
+        selfPoseHist = [];
+    }
+
+    function noteSelfPose() {
+        if (!mirrorRunActive()) return;
+        const player = deps.getPlayer();
+        if (!player) return;
+        const now = performance.now();
+        const last = selfPoseHist.length > 0 ? selfPoseHist[selfPoseHist.length - 1] : null;
+        if (last && now - last.t < SELF_POSE_MIN_STEP_MS) return;
+        selfPoseHist.push({ t: now, x: player.x, y: player.y, r: player.radius });
+        const cutoff = now - SELF_POSE_HISTORY_MS;
+        while (selfPoseHist.length > 2 && selfPoseHist[0].t < cutoff) selfPoseHist.shift();
+    }
+
+    function selfPoseAt(time) {
+        const n = selfPoseHist.length;
+        if (n === 0) return null;
+        if (time <= selfPoseHist[0].t) return selfPoseHist[0];
+        const last = selfPoseHist[n - 1];
+        if (time >= last.t) return last;
+        let i = 1;
+        while (i < n - 1 && selfPoseHist[i].t < time) i++;
+        const a = selfPoseHist[i - 1];
+        const b = selfPoseHist[i];
+        const span = b.t - a.t;
+        if (!(span > 0)) return b;
+        const u = (time - a.t) / span;
+        return {
+            t: time,
+            x: a.x + (b.x - a.x) * u,
+            y: a.y + (b.y - a.y) * u,
+            r: a.r + (b.r - a.r) * u,
+        };
+    }
+
+    function claimRewindMs(attackerId) {
+        const read = global.remoteViewDelayMs;
+        if (typeof read === "function") {
+            const ms = read(attackerId);
+            if (typeof ms === "number" && ms >= 16 && ms <= 160) return ms;
+        }
+        return 48;
+    }
+
+    function attackerClaimCircle(msg, visible) {
+        const x = typeof msg.x === "number" && Number.isFinite(msg.x) ? msg.x : visible.x;
+        const y = typeof msg.y === "number" && Number.isFinite(msg.y) ? msg.y : visible.y;
+        let r = typeof msg.radius === "number" && msg.radius > 0 ? msg.radius : visible.r;
+        const dx = x - visible.x;
+        const dy = y - visible.y;
+        if (dx * dx + dy * dy > CLAIM_POSE_SLACK_PX * CLAIM_POSE_SLACK_PX) {
+            return { x: visible.x, y: visible.y, r: visible.r };
+        }
+        if (!(r > 0) || r > visible.r * 1.5 || r < visible.r * 0.5) r = visible.r;
+        return { x: x, y: y, r: r };
     }
 
     function addContactDebt(peerId, amount) {
@@ -1233,6 +1295,7 @@
         if (!mirrorEliminationMode()) return;
         if (!global.NebulaGameMode || global.NebulaGameMode.getRunMode() !== "mirror") return;
         if (!mirrorInArena || !deps.getGameActive() || deps.getIsDying()) return;
+        noteSelfPose();
 
         const player = deps.getPlayer();
         const GAME_SETTINGS = settings();
@@ -1269,6 +1332,7 @@
         const player = deps.getPlayer();
         const GAME_SETTINGS = settings();
         if (!mirrorRunActive()) return;
+        noteSelfPose();
 
         const list = remoteList();
         let target = null;
@@ -1325,13 +1389,19 @@
             return;
         }
 
-        const pose = remoteVisiblePose(remotePlayer);
-        if (!(pose.r > player.radius * GAME_SETTINGS.BOT_EAT_THRESHOLD)) return;
+        noteSelfPose();
+        const visible = remoteVisiblePose(remotePlayer);
+        const pose = attackerClaimCircle(msg, visible);
+        const past = selfPoseAt(now - claimRewindMs(attackerId));
+        const selfX = past ? past.x : player.x;
+        const selfY = past ? past.y : player.y;
+        const selfR = past ? past.r : player.radius;
+        if (!(pose.r > selfR * GAME_SETTINGS.BOT_EAT_THRESHOLD)) return;
 
-        const dx = player.x - pose.x;
-        const dy = player.y - pose.y;
+        const dx = selfX - pose.x;
+        const dy = selfY - pose.y;
         const distSq = dx * dx + dy * dy;
-        const touch = player.radius + pose.r;
+        const touch = selfR + pose.r;
         if (distSq >= touch * touch) return;
 
         mirrorClaimAcceptedAt = now;

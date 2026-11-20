@@ -676,6 +676,164 @@ describe("mirror-match eat relay", () => {
         assert.equal(overlays.length, 1);
     });
 
+    it("confirms an eat against the victim pose the attacker saw", () => {
+        const remotes = new Map();
+        const sent = [];
+        let gameActive = false;
+        let runMode = "single";
+        let died = false;
+        const player = { x: 0, y: 100, radius: 20, glow: "#fff", color: "#0a0a0a", cooldown: 0 };
+        const settings = {
+            WORLD_SIZE: 4000,
+            START_RADIUS: 20,
+            MAX_PLAYER_RADIUS: 60,
+            BOT_EAT_THRESHOLD: 1.1,
+            BOT_CONTACT_DRAIN: 24,
+            GROW_FROM_BOT: 0.11,
+            PLAYER_DEATH_DIST_FACTOR: 0.25,
+        };
+        function blank(id) {
+            return {
+                peerId: id,
+                active: false,
+                arenaOut: false,
+                x: 0,
+                y: 0,
+                radius: 20,
+                displayX: 0,
+                displayY: 0,
+                displayRadius: 20,
+                entity: "",
+                ability: "",
+                cd: 0,
+                cdMax: 0,
+                cdAt: 0,
+            };
+        }
+        const sandbox = makeSandbox({
+            document: {
+                activeElement: null,
+                body: { classList: { add() {}, remove() {} } },
+            },
+            NebulaGameMode: {
+                getRunMode: () => runMode,
+                setRunMode(mode) {
+                    runMode = mode;
+                },
+                resetRunMode() {
+                    runMode = "single";
+                },
+            },
+            NebulaMpMirror: {
+                send(payload) {
+                    sent.push(payload);
+                    return true;
+                },
+            },
+            NebulaMpRemotes: {
+                ensureRemotePeer(id) {
+                    if (!remotes.has(id)) remotes.set(id, blank(id));
+                    return remotes.get(id);
+                },
+                clearRemotePeers() {
+                    remotes.clear();
+                },
+                deactivateRemotePeer(id) {
+                    const rp = remotes.get(id);
+                    if (!rp) return;
+                    rp.active = false;
+                    rp.arenaOut = true;
+                },
+            },
+            remoteViewDelayMs() {
+                return 80;
+            },
+        });
+        loadScript(sandbox, "js/mirror-match.js");
+        sandbox.configureMirrorMatch({
+            getPlayer: () => player,
+            getGameSettings: () => settings,
+            getGameActive: () => gameActive,
+            getIsDying: () => false,
+            setGameActive(v) {
+                gameActive = v;
+            },
+            setIsDying() {},
+            invokePlayerDeath() {
+                died = true;
+            },
+            getLocalPeerId: () => "me",
+            getRemotePlayer(id) {
+                return remotes.get(id) || null;
+            },
+            getRemotePlayers: () => Array.from(remotes.values()),
+            getRoundStartTime: () => 0,
+            getActiveRunSkinName: () => "THE RAVENOUS",
+            hideMenuOverlay() {},
+            hideGameOverOverlay() {},
+            showMenuOverlay() {},
+            initAudio() {},
+            resetRunState() {},
+            setCameraPosition() {},
+            setActiveRunSkinName() {},
+            setSelectedAbility() {},
+            initJellyBubbles() {},
+            ensureDrawLoop() {},
+            showMirrorMatchOverlay() {},
+            getMultiplayerLobbyState: () => ({ peerOrder: ["me", "pAtk"], isHost: true }),
+            dom: {},
+        });
+        sandbox._now = 5000;
+        sandbox.requestStartMirrorMatch({
+            isHost: true,
+            skin: { name: "THE RAVENOUS", color: "#ff0000", ability: "vampire", unlocked: true },
+            dustSeed: 1,
+        });
+        player.x = 0;
+        player.y = 100;
+        player.radius = 20;
+        sandbox.tickMirrorVictimContact(0.016);
+
+        player.x = 400;
+        sandbox._now = 5080;
+        sandbox.tickMirrorVictimContact(0.016);
+
+        const atk = remotes.get("pAtk");
+        atk.active = true;
+        atk.arenaOut = false;
+        atk.displayX = 900;
+        atk.displayY = 100;
+        atk.displayRadius = 40;
+        atk.radius = 40;
+        sandbox.onRemoteClaimHit({
+            type: "claimHit",
+            t: 5080,
+            kind: "eat",
+            fromPeerId: "pAtk",
+            targetPeerId: "me",
+            x: 5000,
+            y: 100,
+            radius: 40,
+        });
+        assert.equal(died, false);
+
+        atk.displayX = 20;
+        sandbox.onRemoteClaimHit({
+            type: "claimHit",
+            t: 5080,
+            kind: "eat",
+            fromPeerId: "pAtk",
+            targetPeerId: "me",
+            x: 0,
+            y: 100,
+            radius: 40,
+        });
+        assert.equal(died, true);
+        const ack = sent.filter((msg) => msg.type === "hitAck").pop();
+        assert.equal(ack.kind, "kill");
+        assert.equal(ack.targetPeerId, "me");
+    });
+
     it("ignores matchStart when this client is not in peerOrder", () => {
         let gameActive = false;
         let runMode = "single";

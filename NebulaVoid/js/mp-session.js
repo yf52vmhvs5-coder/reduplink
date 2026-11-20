@@ -186,6 +186,22 @@
         return renderT;
     }
 
+    function remoteViewDelayMs(peerId) {
+        const id = typeof peerId === "string" ? peerId : "";
+        const st = id ? poseByPeerId[id] : null;
+        if (!st || st.samples.length < 2) return INTERP_DELAY_MIN_MS;
+        const newest = st.samples[st.samples.length - 1];
+        const oldest = st.samples[0];
+        const span = newest.t - oldest.t;
+        const target = Math.min(
+            INTERP_DELAY_MAX_MS,
+            Math.max(INTERP_DELAY_MIN_MS, stateSendIntervalMs + st.jitter * 2)
+        );
+        let room = span;
+        if (span > stateSendIntervalMs) room = span - stateSendIntervalMs;
+        return room > 0 ? Math.min(target, room) : INTERP_DELAY_MIN_MS;
+    }
+
     function coastLeadSec(overSec) {
         const maxSec = remoteExtrapMaxSec;
         if (!(maxSec > 0) || !(overSec > 0)) return 0;
@@ -645,5 +661,6 @@
     global.stopMpNetworkTick = stopMpNetworkTick;
     global.pushMirrorStateFromSim = pushMirrorStateFromSim;
     global.tickRemoteDisplayInterpolation = tickRemoteDisplayInterpolation;
+    global.remoteViewDelayMs = remoteViewDelayMs;
     global.handleMpRelayMessage = handleRelayMessage;
 })(typeof window !== "undefined" ? window : globalThis);
