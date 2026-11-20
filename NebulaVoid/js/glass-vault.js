@@ -20,6 +20,8 @@
     const PLACE_TRIES = 64;
     const SHAKE_SEC = 0.18;
     const CHAMBER_GAP = 52;
+    /** Drawn cell is behind the eat. Keep the egg until it arrives, then drop it. */
+    const REMOTE_EAT_HOLD_MS = 200;
     /** Gri prăfuit. Radial: 5% culoarea conturului în centru, 13% spre colțuri. */
     const INTERIOR_RGB = [45, 42, 40];
     const INTERIOR_ALPHA = 0.72;
@@ -68,6 +70,8 @@
     const revoked = [];
     /** Local eats that won the replay. Ids are the generation that was eaten. */
     const wonLocal = new Set();
+    /** Eggs already decided, still drawn until the remote cell covers them. */
+    const ghosts = [];
 
     function mix01(seed, id, salt) {
         let h = (seed >>> 0) ^ Math.imul(id >>> 0, 0x9e3779b1) ^ Math.imul(salt >>> 0, 0x85ebca6b);
@@ -311,6 +315,7 @@
         grants.clear();
         revoked.length = 0;
         wonLocal.clear();
+        ghosts.length = 0;
         for (let c = 0; c < chambers.length; c++) {
             const chamber = chambers[c];
             const lead = mix01(fieldSeed, c, 11) * appearStepSec;
@@ -343,6 +348,7 @@
         grants.clear();
         revoked.length = 0;
         wonLocal.clear();
+        ghosts.length = 0;
     }
 
     /** Death respawn teleports the body. Do not play an exit for the chamber it left behind. */
@@ -373,6 +379,7 @@
 
     function tick(dt, player) {
         if (!fieldOn || !player) return;
+        releaseGhosts();
         const step = Math.max(0, Math.min(0.1, Number(dt) || 0));
         for (let i = 0; i < chambers.length; i++) {
             const chamber = chambers[i];
@@ -493,8 +500,53 @@
         if (typeof at !== "number" || !Number.isFinite(at) || at < 0) return;
         const peer = typeof peerId === "string" ? peerId : "";
         if (hasEvent(id, peer)) return;
+        const slot = findSlot(id);
+        let ghost = null;
+        if (slot && !slot.dead && matchSec() >= slot.bornAt) {
+            const chamber = chambers[slot.chamber];
+            if (chamber) {
+                const atW = worldOf(chamber, slot.lx, slot.ly);
+                ghost = {
+                    x: atW.x,
+                    y: atW.y,
+                    r: eggRadius(slot.slot),
+                    color: slot.color,
+                    until: performance.now() + REMOTE_EAT_HOLD_MS,
+                };
+            }
+        }
         events.push({ id: id, at: at, peer: peer, local: false });
         reconcile();
+        if (ghost && !wonLocal.has(id) && !remoteDisplayCovers(ghost.x, ghost.y, ghost.r)) ghosts.push(ghost);
+    }
+
+    function remoteDisplayCovers(x, y, pad) {
+        const api = global.NebulaMpRemotes;
+        if (!api || typeof api.getRemotePlayers !== "function") return false;
+        const list = api.getRemotePlayers();
+        const extra = pad > 0 ? pad : 0;
+        for (let i = 0; i < list.length; i++) {
+            const rp = list[i];
+            if (!rp || !rp.active || rp.arenaOut) continue;
+            const rx = typeof rp.displayX === "number" && Number.isFinite(rp.displayX) ? rp.displayX : rp.x;
+            const ry = typeof rp.displayY === "number" && Number.isFinite(rp.displayY) ? rp.displayY : rp.y;
+            const rr =
+                typeof rp.displayRadius === "number" && rp.displayRadius > 0 ? rp.displayRadius : rp.radius;
+            if (!(rr > 0) || typeof rx !== "number" || typeof ry !== "number") continue;
+            const reach = rr + extra;
+            const dx = rx - x;
+            const dy = ry - y;
+            if (dx * dx + dy * dy < reach * reach) return true;
+        }
+        return false;
+    }
+
+    function releaseGhosts() {
+        const now = performance.now();
+        for (let i = ghosts.length - 1; i >= 0; i--) {
+            const g = ghosts[i];
+            if (now >= g.until || remoteDisplayCovers(g.x, g.y, g.r)) ghosts.splice(i, 1);
+        }
     }
 
     function noteLocalGrant(id, radius, score) {
@@ -539,6 +591,7 @@
 
     function draw(ctx, camX, camY, viewDist, timeNow) {
         if (!fieldOn || !ctx) return;
+        releaseGhosts();
         const t = matchSec();
         const now = typeof timeNow === "number" ? timeNow : Date.now();
         const pulseGlow = 15 + Math.sin(now * 0.005) * 10;
@@ -598,6 +651,20 @@
             }
 
             ctx.restore();
+        }
+
+        for (let g = 0; g < ghosts.length; g++) {
+            const ghost = ghosts[g];
+            const gdx = ghost.x - camX;
+            const gdy = ghost.y - camY;
+            if (gdx * gdx + gdy * gdy > limitSq) continue;
+            ctx.beginPath();
+            ctx.arc(ghost.x, ghost.y, ghost.r, 0, Math.PI * 2);
+            ctx.fillStyle = ghost.color;
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = ghost.color;
+            ctx.fill();
+            ctx.shadowBlur = 0;
         }
     }
 

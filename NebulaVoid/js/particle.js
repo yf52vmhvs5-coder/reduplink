@@ -15,6 +15,8 @@
     const GAME_SETTINGS = boot.gameSettings;
     const DUST_STEP = 1 / 30;
     const DUST_ID_MAX = 8000000;
+    /** Drawn cell is behind the eat. Keep the mote until it arrives, then drop it. */
+    const REMOTE_EAT_HOLD_MS = 200;
     const COLOR_TYPES = [
         { h: 185, s: 100, l: 60 },
         { h: 320, s: 100, l: 65 },
@@ -126,6 +128,7 @@
         for (let i = 0; i < list.length; i++) {
             list[i].active = false;
             list[i].dustLocked = false;
+            list[i].dustHeld = false;
             list[i].dustId = 0;
         }
     }
@@ -142,6 +145,7 @@
         const y = mix01(fieldSeed, id, 21) * GAME_SETTINGS.WORLD_SIZE;
         paintMote(p, next, x, y);
         p.dustLocked = true;
+        p.dustHeld = false;
         p.dustId = id;
         p.spawnId = id;
         p.bornAt = bornAt;
@@ -156,6 +160,7 @@
         if (!p || !p.active || p.dustId !== id) return false;
         p.active = false;
         p.dustLocked = false;
+        p.dustHeld = false;
         p.dustId = 0;
         byId.delete(id);
         const nextId = id + stride();
@@ -217,6 +222,39 @@
             if (!deaths.length) break;
             for (let i = 0; i < deaths.length; i++) killAt(deaths[i].id, deaths[i].at);
         }
+        releaseHeldDust(now);
+    }
+
+    function remoteDisplayCovers(x, y, pad) {
+        const api = global.NebulaMpRemotes;
+        if (!api || typeof api.getRemotePlayers !== "function") return false;
+        const list = api.getRemotePlayers();
+        const extra = pad > 0 ? pad : 0;
+        for (let i = 0; i < list.length; i++) {
+            const rp = list[i];
+            if (!rp || !rp.active || rp.arenaOut) continue;
+            const rx = typeof rp.displayX === "number" && Number.isFinite(rp.displayX) ? rp.displayX : rp.x;
+            const ry = typeof rp.displayY === "number" && Number.isFinite(rp.displayY) ? rp.displayY : rp.y;
+            const rr =
+                typeof rp.displayRadius === "number" && rp.displayRadius > 0 ? rp.displayRadius : rp.radius;
+            if (!(rr > 0) || typeof rx !== "number" || typeof ry !== "number") continue;
+            const reach = rr + extra;
+            const dx = rx - x;
+            const dy = ry - y;
+            if (dx * dx + dy * dy < reach * reach) return true;
+        }
+        return false;
+    }
+
+    function releaseHeldDust(now) {
+        const due = [];
+        for (const [id, p] of byId) {
+            if (!p.dustHeld || p.dustId !== id) continue;
+            if (now >= p.dustHoldUntil || remoteDisplayCovers(p.x, p.y, 0)) {
+                due.push({ id: id, at: p.dustHoldBorn });
+            }
+        }
+        for (let i = 0; i < due.length; i++) killAt(due[i].id, due[i].at);
     }
 
     function begin(seed) {
@@ -241,6 +279,8 @@
 
     function consumeLocal(id) {
         if (!fieldOn) return false;
+        const held = byId.get(id);
+        if (held && held.dustHeld) return false;
         const matchSec = Math.max(0, (performance.now() - fieldEpoch) / 1000);
         const bornAt = Math.round(matchSec / DUST_STEP) * DUST_STEP;
         if (!killAt(id, bornAt)) return false;
@@ -253,7 +293,16 @@
         if (!fieldOn) return;
         if (!Number.isInteger(id) || id < 1 || id > DUST_ID_MAX) return;
         const at = typeof bornAt === "number" && bornAt >= 0 ? bornAt : 0;
-        killAt(id, at);
+        const p = byId.get(id);
+        if (!p || !p.active || p.dustId !== id) return;
+        if (p.dustHeld) return;
+        if (remoteDisplayCovers(p.x, p.y, 0)) {
+            killAt(id, at);
+            return;
+        }
+        p.dustHeld = true;
+        p.dustHoldUntil = performance.now() + REMOTE_EAT_HOLD_MS;
+        p.dustHoldBorn = at;
     }
 
     function takeLocalEats() {
