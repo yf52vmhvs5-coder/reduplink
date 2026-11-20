@@ -34,6 +34,11 @@
         shakeState.cooldown = 0.09;
     }
 
+    /** Tăietura liniei: un fior scurt, nu bufnitura de damage. */
+    function pulseChordCutShake() {
+        addScreenShake(3.1, 0.2);
+    }
+
     function pulseSporeAbsorbShake() {
         addScreenShake(0.32, 0.058);
     }
@@ -78,6 +83,7 @@
 
     global.addScreenShake = addScreenShake;
     global.pulseDamageShake = pulseDamageShake;
+    global.pulseChordCutShake = pulseChordCutShake;
     global.pulseSporeAbsorbShake = pulseSporeAbsorbShake;
     global.pulsePhaseCageResonanceShake = pulsePhaseCageResonanceShake;
     global.updateScreenShake = updateScreenShake;

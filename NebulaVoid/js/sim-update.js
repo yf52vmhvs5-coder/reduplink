@@ -318,7 +318,7 @@
                     sp.r = 1.8 + Math.random() * 2.8;
                     sp.maxLife = 0.36 + Math.random() * 0.26;
                     sp.life = sp.maxLife;
-                    sp.color = Math.random() > 0.5 ? "rgba(210,140,255,0.72)" : "rgba(130,220,255,0.66)";
+                    sp.color = intruderSiphonColor(player.glow);
                 }
             } else {
                 player.radius -= GAME_SETTINGS.BH_CORE_DAMAGE * dt;
@@ -792,6 +792,30 @@
         if (typeof deps.afterSimUpdate === "function") deps.afterSimUpdate(dt);
     }
 
+    function intruderSiphonColor(glow) {
+        if (typeof glow !== "string" || !glow) return "rgba(210,140,255,0.72)";
+        const match = /^#([0-9a-f]{6})$/i.exec(glow.trim());
+        if (!match) return glow;
+        const n = parseInt(match[1], 16);
+        return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},0.72)`;
+    }
+
+    function chordView(cam, screenW, screenH) {
+        if (!cam || !(screenW > 0) || !(screenH > 0)) return null;
+        const zoom = cam.interpolatedZoom > 0.05 ? cam.interpolatedZoom : 1;
+        const halfW = screenW / (2 * zoom);
+        const halfH = screenH / (2 * zoom);
+        return {
+            left: cam.cameraX - halfW,
+            right: cam.cameraX + halfW,
+            top: cam.cameraY - halfH,
+            bottom: cam.cameraY + halfH,
+            cx: cam.cameraX,
+            cy: cam.cameraY,
+            reach: Math.hypot(halfW, halfH),
+        };
+    }
+
     function update(dt = 0.016) {
         if (!deps) return;
 
@@ -830,6 +854,19 @@
             if (simStepMove()) return;
             if (simStepBots()) return;
             simStepCageRepel();
+            if (
+                typeof global.tickBarrierChords === "function" &&
+                global.tickBarrierChords(
+                    sim.dt,
+                    sim.player,
+                    sim.poolBots,
+                    sim.poolNutrients,
+                    sim.GAME_SETTINGS.WORLD_SIZE,
+                    chordView(sim.cam, sim.screenW, sim.screenH)
+                )
+            ) {
+                return;
+            }
             simStepNutrients();
             if (simStepDust()) return;
             simStepClose();

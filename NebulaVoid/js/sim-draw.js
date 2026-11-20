@@ -665,6 +665,9 @@
                 localFrozen
             );
         }
+        if (typeof global.drawBarrierChords === "function") {
+            global.drawBarrierChords(ctx, timeNow, dt, isDying);
+        }
         ctx.restore();
 
         if (!isDying && gameActive) {

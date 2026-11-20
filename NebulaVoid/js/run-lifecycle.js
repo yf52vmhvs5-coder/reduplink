@@ -112,6 +112,7 @@
         activeEffects.dashTime = 0;
         player.cooldown = 0;
         if (typeof deps.clearPhaseCage === "function") deps.clearPhaseCage();
+        if (typeof global.clearBarrierChords === "function") global.clearBarrierChords();
         if (typeof deps.clearPickupFloats === "function") deps.clearPickupFloats();
     }
 

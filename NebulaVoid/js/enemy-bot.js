@@ -204,7 +204,8 @@
                     n.vx = Math.cos(trailAng) * spit + (Math.random() - 0.5) * 90;
                     n.vy = Math.sin(trailAng) * spit + (Math.random() - 0.5) * 90;
                     n.radius = 2.2 + Math.random() * 1.3;
-                    n.life = 6.5 + Math.random() * 2.5;
+                    n.life = 2.8 + Math.random() * 0.6;
+                    n.maxLife = n.life;
                     n.botEatDelay = 0.45;
                 }
             }

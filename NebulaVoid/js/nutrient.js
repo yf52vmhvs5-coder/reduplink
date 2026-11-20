@@ -36,6 +36,7 @@
             this.vy = 0;
             this.friction = 0.96;
             this.life = 0;
+            this.maxLife = 0;
             this.jellyId = 0;
             this.suppressPickupFloat = false;
         }
@@ -49,6 +50,7 @@
             this.vx = (Math.random() - 0.5) * 1920;
             this.vy = (Math.random() - 0.5) * 1920;
             this.life = 3.75 + Math.random() * 2.5;
+            this.maxLife = 0;
             this.jellyId = 0;
             this.suppressPickupFloat = false;
             this.botEatDelay = 0;
@@ -105,7 +107,8 @@
             const relY = this.y - (pY - scrH / 2);
             if (relX < -20 || relX > scrW + 20 || relY < -20 || relY > scrH + 20) return;
 
-            ctx.globalAlpha = Math.min(1, this.life / 0.625);
+            const fadeSpan = this.maxLife > 0 ? 1 : 0.625;
+            ctx.globalAlpha = Math.min(1, this.life / fadeSpan);
 
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, 6.28);

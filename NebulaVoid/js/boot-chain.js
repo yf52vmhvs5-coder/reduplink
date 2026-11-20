@@ -18,6 +18,7 @@
             "js/glass-vault.js",
             "js/ravenous-blood-rift.js",
             "js/phase-cage.js",
+            "js/barrier-chords.js",
             "js/evolution-rules.js",
         ],
         [
@@ -65,6 +66,7 @@
         { path: "NebulaGlass", hint: "js/glass-vault.js" },
         { path: "configureBloodRift", hint: "js/ravenous-blood-rift.js" },
         { path: "spawnPhaseCageFromWarp", hint: "js/phase-cage.js" },
+        { path: "tickBarrierChords", hint: "js/barrier-chords.js" },
         { path: "configureEvolution", hint: "js/evolution-rules.js" },
         { path: "configureEntitySelectUi", hint: "js/entity-select-ui.js" },
         { path: "EnemyBot", hint: "js/enemy-bot.js" },

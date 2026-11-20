@@ -944,6 +944,129 @@
         osc.stop(now + dur + 0.02);
     }
 
+    let lastChordCutAt = 0;
+    /** @type {Map<number, { gain: GainNode, oscs: OscillatorNode[], stopped: boolean }>} */
+    const chordVoices = new Map();
+
+    function startChordVoice() {
+        const now = audioCtx.currentTime;
+        const fund = audioCtx.createOscillator();
+        const beat = audioCtx.createOscillator();
+        const shine = audioCtx.createOscillator();
+        const filter = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+        const fundGain = audioCtx.createGain();
+        const beatGain = audioCtx.createGain();
+        const shineGain = audioCtx.createGain();
+        fund.type = "sine";
+        beat.type = "sine";
+        shine.type = "triangle";
+        fund.frequency.value = 622;
+        beat.frequency.value = 626.5;
+        shine.frequency.value = 1244;
+        fundGain.gain.value = 0.62;
+        beatGain.gain.value = 0.48;
+        shineGain.gain.value = 0.22;
+        filter.type = "lowpass";
+        filter.frequency.value = 6400;
+        filter.Q.value = 0.35;
+        gain.gain.setValueAtTime(0.0001, now);
+        fund.connect(fundGain).connect(filter);
+        beat.connect(beatGain).connect(filter);
+        shine.connect(shineGain).connect(filter);
+        filter.connect(gain).connect(audioCtx.destination);
+        fund.start(now);
+        beat.start(now);
+        shine.start(now);
+        return { gain: gain, oscs: [fund, beat, shine], stopped: false };
+    }
+
+    function stopChordVoice(voice) {
+        if (!voice || voice.stopped || !audioCtx) return;
+        voice.stopped = true;
+        const now = audioCtx.currentTime;
+        const current = Math.max(0.0001, voice.gain.gain.value || 0.0001);
+        voice.gain.gain.cancelScheduledValues(now);
+        voice.gain.gain.setValueAtTime(current, now);
+        voice.gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+        const stopAt = now + 0.11;
+        for (let i = 0; i < voice.oscs.length; i++) {
+            try {
+                voice.oscs[i].stop(stopAt);
+            } catch (err) {
+                /* already stopped */
+            }
+        }
+    }
+
+    /**
+     * Tonul liniei ține cât trăiește ea.
+     * level 0–1 urmărește stingerea grafică și distanța față de cameră.
+     * @param {{ id: number, level: number }[]} entries
+     */
+    function syncChordTones(entries) {
+        if (!audioCtx) {
+            chordVoices.forEach(stopChordVoice);
+            chordVoices.clear();
+            return;
+        }
+        const live = new Set();
+        const list = Array.isArray(entries) ? entries : [];
+        const now = audioCtx.currentTime;
+        for (let i = 0; i < list.length; i++) {
+            const row = list[i];
+            if (!row || typeof row.id !== "number") continue;
+            live.add(row.id);
+            let voice = chordVoices.get(row.id);
+            if (!voice || voice.stopped) {
+                voice = startChordVoice();
+                chordVoices.set(row.id, voice);
+            }
+            const level = Math.max(0, Math.min(1, Number(row.level) || 0));
+            voice.gain.gain.setTargetAtTime(Math.max(0.0001, 0.032 * level), now, 0.045);
+        }
+        chordVoices.forEach((voice, id) => {
+            if (live.has(id)) return;
+            stopChordVoice(voice);
+            chordVoices.delete(id);
+        });
+    }
+
+    /** Linia te taie: un snap scurt, nu bufnitura de damage. */
+    function playChordCutSound() {
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        if (now - lastChordCutAt < 0.08) return;
+        lastChordCutAt = now;
+
+        const bright = audioCtx.createOscillator();
+        const body = audioCtx.createOscillator();
+        const brightGain = audioCtx.createGain();
+        const bodyGain = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+        bright.type = "sine";
+        body.type = "sine";
+        bright.frequency.setValueAtTime(1680, now);
+        bright.frequency.exponentialRampToValueAtTime(620, now + 0.08);
+        body.frequency.setValueAtTime(240, now);
+        body.frequency.exponentialRampToValueAtTime(90, now + 0.16);
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(4200, now);
+        filter.frequency.exponentialRampToValueAtTime(900, now + 0.12);
+        filter.Q.value = 0.5;
+        brightGain.gain.setValueAtTime(0.042, now);
+        brightGain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+        bodyGain.gain.setValueAtTime(0.03, now);
+        bodyGain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+        bright.connect(brightGain).connect(filter);
+        body.connect(bodyGain).connect(filter);
+        filter.connect(audioCtx.destination);
+        bright.start(now);
+        body.start(now);
+        bright.stop(now + 0.11);
+        body.stop(now + 0.18);
+    }
+
     /** Phase Shifter — trecere barieră hartă (violet chime scurt). */
     function playWarpBarrierCrossSound() {
         if (!audioCtx) return;
@@ -1463,6 +1586,8 @@
     global.playJellyEggBurstSound = playJellyEggBurstSound;
     global.playBloodRiftCastSound = playBloodRiftCastSound;
     global.playBloodRiftSiphonPulse = playBloodRiftSiphonPulse;
+    global.syncChordTones = syncChordTones;
+    global.playChordCutSound = playChordCutSound;
     global.playWarpBarrierCrossSound = playWarpBarrierCrossSound;
     global.playGlassEnterSound = playGlassEnterSound;
     global.playGlassExitSound = playGlassExitSound;
