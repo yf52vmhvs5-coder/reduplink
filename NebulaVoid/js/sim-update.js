@@ -185,6 +185,7 @@
         updateBlackHoleAudio(player.x, player.y);
         updateAmbientAudio(player.x, player.y, player.radius, bountySystem.multiplier);
 
+        bountySystem.simTime = (bountySystem.simTime || 0) + dt;
         if (bountySystem.timer > 0) {
             bountySystem.timer -= dt;
             if (bountySystem.timer <= 0) {
@@ -337,7 +338,8 @@
         poolBots.forEach((bot) => {
             if (!bot.active) return;
             let distBotBH = Math.hypot(bhX - bot.x, bhY - bot.y);
-            if (distBotBH < bhBotVisualRange && distBotBH > 1) {
+            const held = bot.frozen > 0;
+            if (!held && distBotBH < bhBotVisualRange && distBotBH > 1) {
                 const visualIntensity = Math.max(
                     0,
                     Math.min(1, 1 - (distBotBH - bhPullRange) / Math.max(1, bhBotVisualRange - bhPullRange))
@@ -362,12 +364,12 @@
                     sp.life = sp.maxLife;
                     sp.color = bot.color || "rgba(220,220,255,0.65)";
                 }
-            } else {
+            } else if (!held) {
                 bot._bhSiphonCarry = 0;
             }
 
             if (distBotBH < bhPullRange) {
-                if (distBotBH > 1) {
+                if (!held && distBotBH > 1) {
                     let pullForce = (1 - distBotBH / bhPullRange) * GAME_SETTINGS.BH_PULL_FORCE;
                     const dirX = (bhX - bot.x) / distBotBH;
                     const dirY = (bhY - bot.y) / distBotBH;
@@ -482,7 +484,10 @@
 
         for (let i = 0; i < poolBots.length; i++) {
             const bot = poolBots[i];
-            if (!bot.active) continue;
+            if (!bot.active) {
+                if (typeof bot.tickRespawn === "function") bot.tickRespawn(dt);
+                continue;
+            }
             bot.update(player, poolParticles, dt);
             if (player.radius < 5) {
                 playerDeath();
@@ -560,6 +565,10 @@
                         if (player.radius < 5) {
                             deathFromEnvironment();
                             return true;
+                        }
+                        if ((window._dmgSoundTimer || 0) >= 0.25) {
+                            if (typeof playDamageSound === "function") playDamageSound();
+                            window._dmgSoundTimer = 0;
                         }
                     }
                 }

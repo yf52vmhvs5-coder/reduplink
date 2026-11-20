@@ -269,6 +269,7 @@
 
         spawn(typeKey) {
             this.active = true;
+            this._respawnIn = 0;
             this.typeKey = typeKey;
             this.config = ENTITY_TYPES[typeKey] || {
                 color: "#fff",
@@ -351,14 +352,24 @@
                     n.suppressPickupFloat = suppressDebrisFloat;
                 }
             }
-            const self = this;
-            const typeKey = this.typeKey;
-            const spawnRunId = botWorld().runId;
-            setTimeout(() => {
-                const w = botWorld();
-                if (!w.gameActive || w.runId !== spawnRunId) return;
-                self.spawn(typeKey);
-            }, WORLD_CFG.botRespawnDelayMs);
+            // 8s de simulare activă, nu de ceas real: tabul în fundal nu mai reface populația.
+            this._respawnType = this.typeKey;
+            this._respawnRunId = botWorld().runId;
+            this._respawnIn = WORLD_CFG.botRespawnDelayMs / 1000;
+        }
+
+        tickRespawn(dt) {
+            if (this.active || !(this._respawnIn > 0)) return;
+            const w = botWorld();
+            if (w.runId !== this._respawnRunId) {
+                this._respawnIn = 0;
+                return;
+            }
+            if (!w.gameActive) return;
+            this._respawnIn -= dt;
+            if (this._respawnIn > 0) return;
+            this._respawnIn = 0;
+            this.spawn(this._respawnType);
         }
 
         useAbility(player, dist, dt = 0.016) {

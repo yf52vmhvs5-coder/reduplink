@@ -814,6 +814,7 @@ configureMirrorMatch({
     retitleMirrorMatchOverlay,
     addScreenShake,
     playDeathSound,
+    playWinSound,
     updateBlackHoleAudio,
     pulseDamageShake,
     invokePlayerDeath: () => playerDeath(),
@@ -995,8 +996,8 @@ function onBotKilled(bot) {
     bot._killCredited = true;
     roundBotKills++;
     addScreenShake(1.1, 0.07);
-    playEatBotSound(bot.radius); const now = Date.now();
-    bountySystem.comboCount = (now - bountySystem.lastKillTime > GAME_SETTINGS.COMBO_WINDOW) ? 1 : bountySystem.comboCount + 1;
+    playEatBotSound(bot.radius); const now = bountySystem.simTime || 0;
+    bountySystem.comboCount = (now - bountySystem.lastKillTime > GAME_SETTINGS.COMBO_WINDOW / 1000) ? 1 : bountySystem.comboCount + 1;
     bountySystem.lastKillTime = now;
 
     let tier = null;

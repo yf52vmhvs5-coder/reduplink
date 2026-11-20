@@ -17,6 +17,17 @@
     const MAX_REMOTE_SPEED = 960;
     const STATE_KEEPALIVE_MS = 300;
     const STATE_SEND_OPTS = { dropIfBuffered: true };
+    /** Draw this far behind the newest sample once the buffer can cover it. */
+    const INTERP_DELAY_MIN_MS = 32;
+    const INTERP_DELAY_MAX_MS = 80;
+    /** A long frame may advance the remote pose by at most this much. */
+    const INTERP_STEP_CAP_MS = 32;
+    const CLOCK_SLEW_MS = 40;
+    const CLOCK_BLEND = 0.15;
+    const POSE_BUFFER_MAX = 4;
+
+    /** @type {Record<string, { samples: { t: number, x: number, y: number, vx: number, vy: number, r: number }[], offset: number | null, jitter: number, renderT: number | null }>} */
+    const poseByPeerId = Object.create(null);
 
     function knownPlayerAbility(kind) {
         if (typeof global.playerAbilityKnown === "function") return global.playerAbilityKnown(kind);
@@ -45,6 +56,7 @@
             if (Number.isFinite(interval) && interval >= 8 && interval <= 250) {
                 stateSendIntervalMs = interval;
             }
+            // Accepted so existing configs still load. The pose follows the snapshot buffer, not this gain.
             const speed = Number(cfg.remoteInterpSpeed);
             if (Number.isFinite(speed) && speed >= 4 && speed <= 64) {
                 remoteInterpSpeed = speed;
@@ -97,6 +109,7 @@
         lastStateSentAt = 0;
         lastFullStateSentAt = -1;
         lastStatePayload = null;
+        for (const key in poseByPeerId) delete poseByPeerId[key];
     }
 
     function ensureRemoteDisplayFields(rp) {
@@ -109,6 +122,145 @@
         rp.displayX = rp.x;
         rp.displayY = rp.y;
         rp.displayRadius = rp.radius;
+    }
+
+    function poseOf(rp) {
+        const id = rp && typeof rp.peerId === "string" && rp.peerId ? rp.peerId : "";
+        if (!id) return null;
+        let st = poseByPeerId[id];
+        if (!st) {
+            st = { samples: [], offset: null, jitter: 0, renderT: null };
+            poseByPeerId[id] = st;
+        }
+        return st;
+    }
+
+    function resetPose(st) {
+        if (!st) return;
+        st.samples.length = 0;
+        st.offset = null;
+        st.jitter = 0;
+        st.renderT = null;
+    }
+
+    function notePoseClock(st, now, senderT, prevSenderT) {
+        const raw = now - senderT;
+        if (st.offset == null) st.offset = raw;
+        else {
+            let delta = raw - st.offset;
+            if (delta > CLOCK_SLEW_MS) delta = CLOCK_SLEW_MS;
+            else if (delta < -CLOCK_SLEW_MS) delta = -CLOCK_SLEW_MS;
+            st.offset += delta * CLOCK_BLEND;
+        }
+        if (prevSenderT != null && senderT > prevSenderT) {
+            const gap = senderT - prevSenderT;
+            if (gap > 0 && gap < 350) {
+                const excess = Math.abs(gap - stateSendIntervalMs);
+                st.jitter += (excess - st.jitter) * 0.25;
+                if (st.jitter > INTERP_DELAY_MAX_MS) st.jitter = INTERP_DELAY_MAX_MS;
+            }
+        }
+    }
+
+    function pushPoseSample(st, sample) {
+        const samples = st.samples;
+        const last = samples.length > 0 ? samples[samples.length - 1] : null;
+        if (last && sample.t <= last.t) return;
+        samples.push(sample);
+        if (samples.length > POSE_BUFFER_MAX) samples.shift();
+    }
+
+    function desiredRenderTime(st, now) {
+        const samples = st.samples;
+        const newest = samples[samples.length - 1];
+        const oldest = samples[0];
+        const senderNow = now - (st.offset == null ? 0 : st.offset);
+        const span = newest.t - oldest.t;
+        const target = Math.min(
+            INTERP_DELAY_MAX_MS,
+            Math.max(INTERP_DELAY_MIN_MS, stateSendIntervalMs + st.jitter * 2)
+        );
+        const delay = span > 0 ? Math.min(target, span) : 0;
+        let renderT = senderNow - delay;
+        if (renderT < oldest.t) renderT = oldest.t;
+        return renderT;
+    }
+
+    function coastLeadSec(overSec) {
+        const maxSec = remoteExtrapMaxSec;
+        if (!(maxSec > 0) || !(overSec > 0)) return 0;
+        if (overSec <= maxSec) return overSec;
+        const fade = maxSec;
+        const k = Math.min(1, (overSec - maxSec) / fade);
+        return maxSec + fade * (k - k * k * 0.5);
+    }
+
+    function coastFrom(sample, overSec) {
+        const lead = coastLeadSec(overSec);
+        return {
+            x: sample.x + sample.vx * lead,
+            y: sample.y + sample.vy * lead,
+            r: sample.r,
+        };
+    }
+
+    function chordSafeTangent(v, chord) {
+        if (typeof v !== "number" || !Number.isFinite(v)) return chord;
+        const scale = Math.max(Math.abs(chord), 1);
+        if (Math.abs(v - chord) > scale * 0.5) return chord;
+        const cap = Math.max(MAX_REMOTE_SPEED, Math.abs(chord));
+        if (Math.abs(v) > cap) return Math.sign(v) * cap;
+        return v;
+    }
+
+    function hermite(u, p0, p1, v0, v1, dtSec) {
+        const u2 = u * u;
+        const u3 = u2 * u;
+        const h00 = 2 * u3 - 3 * u2 + 1;
+        const h10 = u3 - 2 * u2 + u;
+        const h01 = -2 * u3 + 3 * u2;
+        const h11 = u3 - u2;
+        return h00 * p0 + h10 * v0 * dtSec + h01 * p1 + h11 * v1 * dtSec;
+    }
+
+    function poseAt(st, renderT) {
+        const samples = st.samples;
+        const n = samples.length;
+        if (n === 0) return null;
+        if (renderT <= samples[0].t) {
+            return { x: samples[0].x, y: samples[0].y, r: samples[0].r };
+        }
+        const newest = samples[n - 1];
+        if (renderT >= newest.t) return coastFrom(newest, (renderT - newest.t) / 1000);
+        let i = 1;
+        while (i < n - 1 && samples[i].t < renderT) i++;
+        const a = samples[i - 1];
+        const b = samples[i];
+        const span = b.t - a.t;
+        if (!(span > 0)) return { x: b.x, y: b.y, r: b.r };
+        const u = (renderT - a.t) / span;
+        const dtSec = span / 1000;
+        const chordX = (b.x - a.x) / dtSec;
+        const chordY = (b.y - a.y) / dtSec;
+        return {
+            x: hermite(
+                u,
+                a.x,
+                b.x,
+                chordSafeTangent(a.vx, chordX),
+                chordSafeTangent(b.vx, chordX),
+                dtSec
+            ),
+            y: hermite(
+                u,
+                a.y,
+                b.y,
+                chordSafeTangent(a.vy, chordY),
+                chordSafeTangent(b.vy, chordY),
+                dtSec
+            ),
+            r: a.r + (b.r - a.r) * u,
+        };
     }
 
     function applyRemoteState(msg) {
@@ -127,15 +279,22 @@
         const prevX = rp.x;
         const prevY = rp.y;
         const senderT =
-            typeof msg.t === "number" && Number.isFinite(msg.t) ? msg.t : null;
+            typeof msg.t === "number" && Number.isFinite(msg.t) && msg.t > 0 ? msg.t : null;
+        const st = poseOf(rp);
+        const freshClock = !(typeof rp.netSenderT === "number" && rp.netSenderT > 0);
+        if (freshClock && st) resetPose(st);
         const prevSenderT =
-            typeof rp.netSenderT === "number" && rp.netSenderT > 0 ? rp.netSenderT : null;
+            !freshClock && typeof rp.netSenderT === "number" && rp.netSenderT > 0 ? rp.netSenderT : null;
+        if (senderT != null && prevSenderT != null && senderT <= prevSenderT) return;
 
         if (typeof msg.x === "number" && Number.isFinite(msg.x)) rp.x = msg.x;
         if (typeof msg.y === "number" && Number.isFinite(msg.y)) rp.y = msg.y;
         if (typeof msg.radius === "number" && Number.isFinite(msg.radius) && msg.radius > 0) {
             rp.radius = msg.radius;
         }
+
+        let sampleVx = 0;
+        let sampleVy = 0;
 
         if (wasActive && typeof prevX === "number" && typeof prevY === "number") {
             const hasExplicitVel =
@@ -192,6 +351,8 @@
                     rp.netVelX = instVx;
                     rp.netVelY = instVy;
                 }
+                sampleVx = instVx;
+                sampleVy = instVy;
             }
         } else {
             rp.netVelX = 0;
@@ -223,39 +384,43 @@
 
         ensureRemoteDisplayFields(rp);
 
+        let jumped = false;
         if (!wasActive) {
-            snapRemoteDisplay(rp);
+            sampleVx = 0;
+            sampleVy = 0;
         } else if (wasActive && typeof prevX === "number" && typeof prevY === "number") {
             const jx = rp.x - prevX;
             const jy = rp.y - prevY;
             if (jx * jx + jy * jy > remoteSnapDistancePx * remoteSnapDistancePx) {
-                snapRemoteDisplay(rp);
+                jumped = true;
+                sampleVx = 0;
+                sampleVy = 0;
                 rp.netVelX = 0;
                 rp.netVelY = 0;
             }
         }
 
-        rp.active = true;
-    }
-
-    function remoteAimPosition(rp) {
-        const ageSec = Math.max(0, (performance.now() - (rp.netStateT || performance.now())) / 1000);
-        let extrap;
-        if (ageSec <= remoteExtrapMaxSec) {
-            extrap = ageSec;
-        } else {
-            const over = ageSec - remoteExtrapMaxSec;
-            const fadeWindow = Math.max(0.08, remoteExtrapMaxSec * 2);
-            const decay = Math.max(0, 1 - over / fadeWindow);
-            extrap = remoteExtrapMaxSec * decay;
+        if (st && senderT != null) {
+            if (freshClock || jumped) resetPose(st);
+            const recvNow = performance.now();
+            notePoseClock(st, recvNow, senderT, freshClock || jumped ? null : prevSenderT);
+            pushPoseSample(st, {
+                t: senderT,
+                x: rp.x,
+                y: rp.y,
+                vx: sampleVx,
+                vy: sampleVy,
+                r: rp.radius,
+            });
+            if (freshClock || jumped || !wasActive) {
+                snapRemoteDisplay(rp);
+                st.renderT = senderT;
+            }
+        } else if (freshClock || jumped || !wasActive) {
+            snapRemoteDisplay(rp);
         }
-        const vx = typeof rp.netVelX === "number" ? rp.netVelX : 0;
-        const vy = typeof rp.netVelY === "number" ? rp.netVelY : 0;
-        return {
-            x: rp.x + vx * extrap,
-            y: rp.y + vy * extrap,
-            r: rp.radius,
-        };
+
+        rp.active = true;
     }
 
     function tickOneRemoteInterp(rp, dt) {
@@ -264,23 +429,27 @@
         const step = Math.max(0, Number(dt) || 0);
         if (step <= 0) return;
 
-        const aim = remoteAimPosition(rp);
-        const t = Math.min(0.82, step * remoteInterpSpeed);
-
-        const dx = aim.x - rp.displayX;
-        const dy = aim.y - rp.displayY;
-        const distSq = dx * dx + dy * dy;
-        if (distSq < 0.12 || distSq > remoteSnapDistancePx * remoteSnapDistancePx) {
-            rp.displayX = aim.x;
-            rp.displayY = aim.y;
-        } else {
-            rp.displayX += dx * t;
-            rp.displayY += dy * t;
+        const st = poseOf(rp);
+        if (!st) return;
+        if (!(typeof rp.netSenderT === "number" && rp.netSenderT > 0)) {
+            resetPose(st);
+            return;
         }
+        if (st.samples.length === 0) return;
 
-        const dr = aim.r - rp.displayRadius;
-        if (Math.abs(dr) < 0.06) rp.displayRadius = aim.r;
-        else rp.displayRadius += dr * t;
+        const stepMs = Math.min(INTERP_STEP_CAP_MS, step * 1000);
+        const desired = desiredRenderTime(st, performance.now());
+        if (st.renderT == null || !Number.isFinite(st.renderT)) st.renderT = desired;
+        let gap = desired - st.renderT;
+        if (gap > stepMs) gap = stepMs;
+        else if (gap < 0) gap = 0;
+        st.renderT += gap;
+
+        const pose = poseAt(st, st.renderT);
+        if (!pose) return;
+        rp.displayX = pose.x;
+        rp.displayY = pose.y;
+        rp.displayRadius = pose.r;
     }
 
     function tickRemoteDisplayInterpolation(dt) {

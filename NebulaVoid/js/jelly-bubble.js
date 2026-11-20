@@ -89,6 +89,8 @@ class JellyBubble {
     update(player, poolBots, poolNutrients, dt) {
         if (!this.active) return;
 
+        // step = 1 la 60 fps: arcul și frânarea rămân cele de acum, indiferent de refresh.
+        const step = dt * 60;
         const dxB = this.x - player.x, dyB = this.y - player.y;
         const distSq = dxB*dxB + dyB*dyB;
         const checkRange = this.radius + 150; 
@@ -183,18 +185,19 @@ class JellyBubble {
                     egg.vx -= nx * closing;
                     egg.vy -= ny * closing;
                     const push = Math.min(2.4, overlap * 0.45);
-                    egg.vx += nx * push;
-                    egg.vy += ny * push;
+                    egg.vx += nx * push * step;
+                    egg.vy += ny * push * step;
                 }
             }
 
             // Soft-body: oul revine lent la poziția lui proprie (home), nu la centrul jeleului
-            egg.vx += (egg.homeX - egg.offsetX) * 0.035; // FORȚĂ DE REVENIRE spre poziția "home" a oului
-            egg.vy += (egg.homeY - egg.offsetY) * 0.035; // Mai mare = revine mai repede, mai rigid
-            egg.offsetX += egg.vx * dt * 60;
-            egg.offsetY += egg.vy * dt * 60;
-            egg.vx *= 0.84; // DAMPING: mai mic = se oprește mai repede (mai puțin bounce)
-            egg.vy *= 0.84; // Mai mare = persistă mișcarea mai mult
+            egg.vx += (egg.homeX - egg.offsetX) * 0.035 * step; // FORȚĂ DE REVENIRE spre poziția "home" a oului
+            egg.vy += (egg.homeY - egg.offsetY) * 0.035 * step; // Mai mare = revine mai repede, mai rigid
+            egg.offsetX += egg.vx * step;
+            egg.offsetY += egg.vy * step;
+            const eggDamp = Math.pow(0.84, step); // DAMPING: mai mic = se oprește mai repede (mai puțin bounce)
+            egg.vx *= eggDamp;
+            egg.vy *= eggDamp;
 
             // Nu lăsăm ouăle să iasă din jeleu
             const maxDist = this.radius * 0.72;
@@ -304,14 +307,15 @@ class JellyBubble {
             const tx = p.origX + Math.cos(t + i) * 4;
             const ty = p.origY + Math.sin(t + i) * 4;
 
-            p.vx += (tx - p.x) * 0.1 + fx;
-            p.vy += (ty - p.y) * 0.1 + fy;
+            p.vx += ((tx - p.x) * 0.1 + fx) * step;
+            p.vy += ((ty - p.y) * 0.1 + fy) * step;
 
-            p.x += (p.vx + botPx[i]) * dt * 60;
-            p.y += (p.vy + botPy[i]) * dt * 60;
+            p.x += (p.vx + botPx[i]) * step;
+            p.y += (p.vy + botPy[i]) * step;
 
-            p.vx *= 0.8;
-            p.vy *= 0.8;
+            const skinDamp = Math.pow(0.8, step);
+            p.vx *= skinDamp;
+            p.vy *= skinDamp;
         }
     }
 

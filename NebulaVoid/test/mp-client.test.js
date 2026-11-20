@@ -190,8 +190,9 @@ describe("mp-session state send + remote apply", () => {
         assert.equal(sent[1].payload.x, 80);
     });
 
-    it("keeps glow across delta state and interpolates at the existing speed", () => {
+    it("keeps glow across delta state and follows the received segment", () => {
         const { sandbox, remotes } = sessionEnv();
+        sandbox._now = 0;
         sandbox.handleMpRelayMessage({
             type: "state",
             fromPeerId: "pOther",
@@ -218,8 +219,9 @@ describe("mp-session state send + remote apply", () => {
         assert.equal(rp.entity, "Ravenous");
         assert.equal(rp.x, 100);
         assert.equal(rp.displayX, 0);
-        sandbox.tickRemoteDisplayInterpolation(0.016);
-        assert.ok(Math.abs(rp.displayX - 51.2) < 0.05, `displayX ${rp.displayX}`);
+        sandbox._now = 24;
+        sandbox.tickRemoteDisplayInterpolation(0.008);
+        assert.ok(Math.abs(rp.displayX - 50) < 0.05, `displayX ${rp.displayX}`);
     });
 
     it("forces a full snapshot when glow changes without moving", () => {
@@ -328,7 +330,7 @@ describe("mp-session state send + remote apply", () => {
         assert.equal(remotes.size, 0);
     });
 
-    it("sends a stop packet when halting and decays stale extrapolation smoothly", () => {
+    it("sends a stop packet when halting and holds a short coast when packets stall", () => {
         const { sandbox, player, sent, remotes } = sessionEnv();
         sandbox._now = 0;
         sandbox.pushMirrorStateFromSim();
@@ -352,11 +354,12 @@ describe("mp-session state send + remote apply", () => {
         sandbox.pushMirrorStateFromSim();
         assert.equal(sent.length, 3);
 
-        // Remote side: explicit stop velocity zeroes extrapolation immediately
+        // Remote side: packet velocity is kept, and a stall coasts a short lead then holds.
+        sandbox._now = 5000;
         sandbox.handleMpRelayMessage({
             type: "state",
             fromPeerId: "pOther",
-            t: 1000,
+            t: 5000,
             x: 100,
             y: 100,
             vx: 200,
@@ -364,11 +367,11 @@ describe("mp-session state send + remote apply", () => {
             radius: 20,
         });
         const rp = remotes.get("pOther");
-        sandbox._now = 76;
+        sandbox._now = 5016;
         sandbox.handleMpRelayMessage({
             type: "state",
             fromPeerId: "pOther",
-            t: 1016,
+            t: 5016,
             x: 103.2,
             y: 100,
             vx: 200,
@@ -377,12 +380,37 @@ describe("mp-session state send + remote apply", () => {
         });
         assert.equal(rp.netVelX, 200);
 
-        // When packets stall well past remoteExtrapMaxSec (55ms), extrapolation decays back to rp.x
-        sandbox._now = 76 + 200;
-        sandbox.tickRemoteDisplayInterpolation(0.02);
-        sandbox.tickRemoteDisplayInterpolation(0.02);
-        sandbox.tickRemoteDisplayInterpolation(0.02);
-        assert.ok(Math.abs(rp.displayX - 103.2) < 1.5, `stalled displayX ${rp.displayX}`);
+        sandbox._now = 5016 + 200;
+        for (let i = 0; i < 12; i++) sandbox.tickRemoteDisplayInterpolation(0.032);
+        const lead = rp.displayX - 103.2;
+        assert.ok(lead > 10 && lead < 18, `stalled lead ${lead}`);
+        assert.ok(Math.abs(rp.displayY - 100) < 0.05);
+    });
+
+    it("renders a steady remote on the sampled path and caps a long frame", () => {
+        const { sandbox, remotes } = sessionEnv();
+        for (let i = 0; i < 4; i++) {
+            sandbox._now = 8000 + i * 16;
+            sandbox.handleMpRelayMessage({
+                type: "state",
+                fromPeerId: "pOther",
+                t: 8000 + i * 16,
+                x: i * 4,
+                y: 10,
+                vx: 250,
+                vy: 0,
+                radius: 20,
+            });
+        }
+        sandbox._now = 8056;
+        sandbox.tickRemoteDisplayInterpolation(0.032);
+        const rp = remotes.get("pOther");
+        assert.ok(Math.abs(rp.displayX - 6) < 0.05, `displayX ${rp.displayX}`);
+        assert.ok(Math.abs(rp.displayY - 10) < 0.05, `displayY ${rp.displayY}`);
+
+        sandbox._now = 8056 + 100;
+        sandbox.tickRemoteDisplayInterpolation(0.1);
+        assert.ok(Math.abs(rp.displayX - 14) < 0.05, `capped displayX ${rp.displayX}`);
     });
 });
 

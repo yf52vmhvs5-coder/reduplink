@@ -333,7 +333,9 @@ body.cosmic-brief .open:hover {
     color: rgba(238, 239, 232, 0.88);
 }
 
-.power-note {
+.power-note,
+.session-note,
+.blitz-note {
     margin: 28px 0 0;
     max-width: 42rem;
     padding: 14px 16px;
@@ -344,13 +346,31 @@ body.cosmic-brief .open:hover {
     color: rgba(238, 239, 232, 0.72);
 }
 
-.power-note-kicker {
+.power-note-kicker,
+.session-note-kicker,
+.blitz-note-kicker {
     display: block;
     margin-bottom: 8px;
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.18em;
     color: var(--signal);
+}
+
+.session-note {
+    border-left-color: #3dffb0;
+}
+
+.session-note-kicker {
+    color: #3dffb0;
+}
+
+.blitz-note {
+    border-left-color: #ff5c6c;
+}
+
+.blitz-note-kicker {
+    color: #ff5c6c;
 }
 
 .thanks {

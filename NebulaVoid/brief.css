@@ -329,6 +329,25 @@ body {
     letter-spacing: 0.02em;
 }
 
+.session-note {
+    margin: 36px 0 0;
+    max-width: 38rem;
+    color: #6ee7a0;
+    font-size: 14px;
+    line-height: 1.65;
+    letter-spacing: 0.03em;
+}
+
+.session-note-kicker {
+    display: block;
+    margin-bottom: 8px;
+    color: #3dffa6;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-shadow: 0 0 10px rgba(61, 255, 166, 0.35);
+}
+
 .power-note {
     margin: 36px 0 0;
     max-width: 38rem;

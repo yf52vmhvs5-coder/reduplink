@@ -504,6 +504,7 @@
         });
         mirrorCard = "victor";
         endMirrorMatch();
+        if (typeof deps.playWinSound === "function") deps.playWinSound();
         presentMirrorCard("victor", snapshot, {
             retry: "RETURN TO LOBBY",
             change: "CHANGE ENTITY",

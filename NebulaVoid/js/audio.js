@@ -1227,6 +1227,82 @@
         osc3.stop(now + 1.5);
     }
 
+    /** Aceeași durată ca moartea, urcare în loc de cădere. Patul coboară abia după swell. */
+    function playWinSound() {
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const dur = 2.5;
+
+        const bell = audioCtx.createOscillator();
+        const bellGain = audioCtx.createGain();
+        const bellFilter = audioCtx.createBiquadFilter();
+        bell.type = "sine";
+        bell.frequency.setValueAtTime(329.63, now);
+        bell.frequency.exponentialRampToValueAtTime(659.25, now + 1.5);
+        bellFilter.type = "lowpass";
+        bellFilter.frequency.setValueAtTime(640, now);
+        bellFilter.frequency.exponentialRampToValueAtTime(1800, now + 1.8);
+        bellGain.gain.setValueAtTime(0, now);
+        bellGain.gain.linearRampToValueAtTime(0.018, now + 0.08);
+        bellGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
+        bell.connect(bellFilter).connect(bellGain).connect(audioCtx.destination);
+        bell.start(now);
+        bell.stop(now + 1.85);
+
+        if (ambientNodes && ambientNodes.master) {
+            const current = Math.max(0.0001, ambientNodes.master.gain.value);
+            const lifted = Math.min(0.03, current * 1.35);
+            ambientNodes.master.gain.cancelScheduledValues(now);
+            ambientNodes.master.gain.setValueAtTime(current, now);
+            ambientNodes.master.gain.linearRampToValueAtTime(lifted, now + 0.45);
+            ambientNodes.master.gain.linearRampToValueAtTime(current, now + 2.2);
+            ambientNodes.master.gain.exponentialRampToValueAtTime(0.0001, now + 3.3);
+        }
+
+        for (let i = 0; i < 12; i++) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const freq = 320 + i * 80;
+            const startTime = now + i * 0.05;
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(freq, startTime);
+            osc.frequency.exponentialRampToValueAtTime(freq * 2, startTime + 0.8);
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(0.1, startTime + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.8);
+            osc.connect(gain).connect(audioCtx.destination);
+            osc.start(startTime);
+            osc.stop(startTime + 0.8);
+        }
+
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+        const osc3 = audioCtx.createOscillator();
+        const gain3 = audioCtx.createGain();
+        osc2.type = "triangle";
+        osc2.frequency.setValueAtTime(20, now);
+        osc2.frequency.exponentialRampToValueAtTime(80, now + dur);
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(400, now);
+        filter.frequency.exponentialRampToValueAtTime(1600, now + dur);
+        gain2.gain.setValueAtTime(0, now);
+        gain2.gain.linearRampToValueAtTime(0.2, now + 0.5);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + dur);
+        osc3.type = "sine";
+        osc3.frequency.setValueAtTime(375, now + 0.1);
+        osc3.frequency.exponentialRampToValueAtTime(1500, now + 1.5);
+        gain3.gain.setValueAtTime(0, now + 0.1);
+        gain3.gain.linearRampToValueAtTime(0.05, now + 0.2);
+        gain3.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+        osc2.connect(filter).connect(gain2).connect(audioCtx.destination);
+        osc3.connect(gain3).connect(audioCtx.destination);
+        osc2.start(now);
+        osc2.stop(now + dur);
+        osc3.start(now + 0.1);
+        osc3.stop(now + 1.5);
+    }
+
     /** Void Shriek — clinchet scurt de gheață. Fără cădere de octavă. */
     function playWarpFreezeSound() {
         if (!audioCtx) return;
@@ -1601,6 +1677,7 @@
     global.playDamageSound = playDamageSound;
     global.playBountyLostSound = playBountyLostSound;
     global.playDeathSound = playDeathSound;
+    global.playWinSound = playWinSound;
     global.playAbilitySound = playAbilitySound;
     global.playHoverSound = playHoverSound;
     global.playEvolutionBarUpgradeSound = playEvolutionBarUpgradeSound;

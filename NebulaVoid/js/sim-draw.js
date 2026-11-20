@@ -611,6 +611,7 @@
             ctx.fillStyle = player.glow;
             ctx.shadowColor = player.glow;
             ctx.shadowBlur = 6;
+            const auraDamp = Math.pow(0.95, dt * 60);
             for (let i = 0; i < poolAuraParticles.length; i++) {
                 const ap = poolAuraParticles[i];
                 if (!ap.active) continue;
@@ -621,8 +622,8 @@
                 }
                 ap.x += ap.vx * dt;
                 ap.y += ap.vy * dt;
-                ap.vx *= 0.95;
-                ap.vy *= 0.95;
+                ap.vx *= auraDamp;
+                ap.vy *= auraDamp;
                 const tLife = ap.life / ap.maxLife;
                 ctx.globalAlpha = 0.32 * tLife;
                 ctx.beginPath();
