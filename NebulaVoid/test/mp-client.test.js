@@ -412,6 +412,46 @@ describe("mp-session state send + remote apply", () => {
         sandbox.tickRemoteDisplayInterpolation(0.1);
         assert.ok(Math.abs(rp.displayX - 14) < 0.05, `capped displayX ${rp.displayX}`);
     });
+
+    it("keeps a late burst on the sampled path", () => {
+        const { sandbox, remotes } = sessionEnv();
+        for (let i = 0; i < 8; i++) {
+            sandbox._now = 10000 + i * 16;
+            sandbox.handleMpRelayMessage({
+                type: "state",
+                fromPeerId: "pOther",
+                t: 10000 + i * 16,
+                x: i * 4,
+                y: 10,
+                vx: 250,
+                vy: 0,
+                radius: 20,
+            });
+        }
+        sandbox._now = 10112;
+        for (let i = 0; i < 4; i++) sandbox.tickRemoteDisplayInterpolation(0.032);
+        const rp = remotes.get("pOther");
+        assert.ok(Math.abs(rp.displayX - 20) < 0.05, `settled displayX ${rp.displayX}`);
+
+        sandbox._now = 10182;
+        const burst = [10128, 10144, 10160];
+        for (let i = 0; i < burst.length; i++) {
+            const t = burst[i];
+            sandbox.handleMpRelayMessage({
+                type: "state",
+                fromPeerId: "pOther",
+                t: t,
+                x: ((t - 10000) / 16) * 4,
+                y: 10,
+                vx: 250,
+                vy: 0,
+                radius: 20,
+            });
+        }
+        sandbox.tickRemoteDisplayInterpolation(0.016);
+        assert.ok(Math.abs(rp.displayX - 24) < 0.15, `burst displayX ${rp.displayX}`);
+        assert.ok(Math.abs(rp.displayY - 10) < 0.05);
+    });
 });
 
 describe("mirror-match eat relay", () => {

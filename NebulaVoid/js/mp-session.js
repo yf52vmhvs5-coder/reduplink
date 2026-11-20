@@ -19,12 +19,15 @@
     const STATE_SEND_OPTS = { dropIfBuffered: true };
     /** Draw this far behind the newest sample once the buffer can cover it. */
     const INTERP_DELAY_MIN_MS = 32;
-    const INTERP_DELAY_MAX_MS = 80;
+    const INTERP_DELAY_MAX_MS = 120;
     /** A long frame may advance the remote pose by at most this much. */
     const INTERP_STEP_CAP_MS = 32;
+    /** Per-packet cap on how far a late arrival may nudge the clock baseline. */
     const CLOCK_SLEW_MS = 40;
-    const CLOCK_BLEND = 0.15;
-    const POSE_BUFFER_MAX = 4;
+    const CLOCK_CREEP = 0.02;
+    const JITTER_RISE = 0.35;
+    const JITTER_DECAY = 0.08;
+    const POSE_BUFFER_MAX = 8;
 
     /** @type {Record<string, { samples: { t: number, x: number, y: number, vx: number, vy: number, r: number }[], offset: number | null, jitter: number, renderT: number | null }>} */
     const poseByPeerId = Object.create(null);
@@ -143,23 +146,18 @@
         st.renderT = null;
     }
 
-    function notePoseClock(st, now, senderT, prevSenderT) {
+    function notePoseClock(st, now, senderT) {
         const raw = now - senderT;
-        if (st.offset == null) st.offset = raw;
-        else {
-            let delta = raw - st.offset;
-            if (delta > CLOCK_SLEW_MS) delta = CLOCK_SLEW_MS;
-            else if (delta < -CLOCK_SLEW_MS) delta = -CLOCK_SLEW_MS;
-            st.offset += delta * CLOCK_BLEND;
+        if (st.offset == null) {
+            st.offset = raw;
+            return;
         }
-        if (prevSenderT != null && senderT > prevSenderT) {
-            const gap = senderT - prevSenderT;
-            if (gap > 0 && gap < 350) {
-                const excess = Math.abs(gap - stateSendIntervalMs);
-                st.jitter += (excess - st.jitter) * 0.25;
-                if (st.jitter > INTERP_DELAY_MAX_MS) st.jitter = INTERP_DELAY_MAX_MS;
-            }
-        }
+        const late = Math.max(0, raw - st.offset);
+        const sample = Math.min(late, INTERP_DELAY_MAX_MS);
+        const alpha = sample > st.jitter ? JITTER_RISE : JITTER_DECAY;
+        st.jitter += (sample - st.jitter) * alpha;
+        if (raw < st.offset) st.offset = raw;
+        else if (late > 0) st.offset += Math.min(late, CLOCK_SLEW_MS) * CLOCK_CREEP;
     }
 
     function pushPoseSample(st, sample) {
@@ -180,7 +178,9 @@
             INTERP_DELAY_MAX_MS,
             Math.max(INTERP_DELAY_MIN_MS, stateSendIntervalMs + st.jitter * 2)
         );
-        const delay = span > 0 ? Math.min(target, span) : 0;
+        let room = span;
+        if (span > stateSendIntervalMs) room = span - stateSendIntervalMs;
+        const delay = room > 0 ? Math.min(target, room) : 0;
         let renderT = senderNow - delay;
         if (renderT < oldest.t) renderT = oldest.t;
         return renderT;
@@ -403,7 +403,7 @@
         if (st && senderT != null) {
             if (freshClock || jumped) resetPose(st);
             const recvNow = performance.now();
-            notePoseClock(st, recvNow, senderT, freshClock || jumped ? null : prevSenderT);
+            notePoseClock(st, recvNow, senderT);
             pushPoseSample(st, {
                 t: senderT,
                 x: rp.x,
