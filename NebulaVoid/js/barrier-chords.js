@@ -35,6 +35,36 @@
     let spawnIn = FIRST_DELAY;
     let arenaSize = 0;
     let nextToneId = 1;
+    let mirrorOn = false;
+    let mirrorSeed = 0;
+    let mirrorEpoch = 0;
+    let mirrorCursor = FIRST_DELAY;
+    let mirrorSerial = 0;
+
+    const MIRROR_TONE_KEYS = [
+        "TITAN",
+        "GLITCH",
+        "PULSAR",
+        "NECROMANCER",
+        "GRAVITY_WELL",
+        "ARCHITECT",
+        "WORMHOLE",
+        "CHRONOS",
+        "NEBULA",
+        "MIMIC",
+    ];
+    const MIRROR_TONE_FALLBACK = [
+        "#F5F5F5",
+        "#00FF7F",
+        "#FFFF00",
+        "#32CD32",
+        "#8A2BE2",
+        "#FFD700",
+        "#FF4500",
+        "#00BFFF",
+        "#4B0082",
+        "#A9A9A9",
+    ];
 
     function isSolo() {
         const mode = global.NebulaGameMode;
@@ -245,7 +275,154 @@
         }
     }
 
+    function mix01(seed, id, salt) {
+        let h = (seed >>> 0) ^ Math.imul(id >>> 0, 0x9e3779b1) ^ Math.imul(salt >>> 0, 0x85ebca6b);
+        h = Math.imul(h ^ (h >>> 16), 0x7feb352d);
+        h = Math.imul(h ^ (h >>> 15), 0x846ca68b);
+        return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+    }
+
+    function mirrorPalette() {
+        const boot = global.__GAME_BOOT;
+        const types = boot && boot.entityTypes;
+        const out = [];
+        for (let i = 0; i < MIRROR_TONE_KEYS.length; i++) {
+            const row = types && types[MIRROR_TONE_KEYS[i]];
+            if (row && typeof row.color === "string" && row.color) out.push(row.color);
+            else out.push(MIRROR_TONE_FALLBACK[i]);
+        }
+        return out;
+    }
+
+    function mirrorMatchSec() {
+        return Math.max(0, (performance.now() - mirrorEpoch) / 1000);
+    }
+
+    function makeSeededChord(serial, world, start, life) {
+        let chord = null;
+        for (let attempt = 0; attempt < 6 && !chord; attempt++) {
+            const x = 1 + mix01(mirrorSeed, serial, 1 + attempt) * (world - 2);
+            const y = 1 + mix01(mirrorSeed, serial, 20 + attempt) * (world - 2);
+            const ang = mix01(mirrorSeed, serial, 40 + attempt) * Math.PI;
+            const dx = Math.cos(ang);
+            const dy = Math.sin(ang);
+            const a = rayToBorder(x, y, dx, dy, world);
+            const b = rayToBorder(x, y, -dx, -dy, world);
+            if (Math.hypot(b.x - a.x, b.y - a.y) < MIN_CHORD) continue;
+            const dxL = b.x - a.x;
+            const dyL = b.y - a.y;
+            const len = Math.hypot(dxL, dyL) || 1;
+            const palette = mirrorPalette();
+            const color = palette[(mix01(mirrorSeed, serial, 7) * palette.length) | 0];
+            chord = {
+                x1: a.x,
+                y1: a.y,
+                x2: b.x,
+                y2: b.y,
+                dx: dxL,
+                dy: dyL,
+                invLenSq: 1 / (len * len),
+                ux: dxL / len,
+                uy: dyL / len,
+                color: color,
+                life: life,
+                end: start + life,
+                toneId: serial + 1,
+                hit: new Set(),
+            };
+        }
+        return chord;
+    }
+
+    function catchMirrorChords(now, world) {
+        let guard = 0;
+        while (mirrorCursor <= now && guard < 4000) {
+            guard++;
+            const life = LIFE_MIN + mix01(mirrorSeed, mirrorSerial, 5) * LIFE_SPAN;
+            const start = mirrorCursor;
+            const gap = GAP_MIN + mix01(mirrorSeed, mirrorSerial, 6) * GAP_SPAN;
+            if (start + life > now && chords.length < MAX_CHORDS) {
+                const chord = makeSeededChord(mirrorSerial, world, start, life);
+                if (chord) chords.push(chord);
+            }
+            mirrorSerial++;
+            mirrorCursor = start + gap;
+        }
+        for (let i = 0; i < chords.length; i++) {
+            chords[i].life = chords[i].end - now;
+        }
+    }
+
+    function mirrorRemotes() {
+        const api = global.NebulaMpRemotes;
+        if (!api || typeof api.getRemotePlayers !== "function") return [];
+        const list = api.getRemotePlayers();
+        return list || [];
+    }
+
+    function cutLocalPlayer(chord, player) {
+        if (chord.hit.has(PLAYER_HIT)) return false;
+        const hit = touch(player.x, player.y, chord);
+        if (hit.dist > player.radius) return false;
+        chord.hit.add(PLAYER_HIT);
+        burst(hit.cx, hit.cy, hit.nx, hit.ny, chord.ux, chord.uy, player.glow || "#ffffff", player.radius);
+        player.radius -= RADIUS_LOSS;
+        if (typeof global.pulseChordCutShake === "function") global.pulseChordCutShake();
+        if (typeof global.playChordCutSound === "function") global.playChordCutSound();
+        if (player.radius < 5) {
+            dropChords();
+            if (typeof global.playerDeath === "function") global.playerDeath();
+            return true;
+        }
+        return false;
+    }
+
+    function sparkRemote(chord, rp) {
+        const id = rp && typeof rp.peerId === "string" ? rp.peerId : "";
+        if (!id || chord.hit.has(id) || rp.arenaOut || rp.active === false) return;
+        const x = typeof rp.displayX === "number" && Number.isFinite(rp.displayX) ? rp.displayX : rp.x;
+        const y = typeof rp.displayY === "number" && Number.isFinite(rp.displayY) ? rp.displayY : rp.y;
+        const r = typeof rp.displayRadius === "number" && rp.displayRadius > 0 ? rp.displayRadius : rp.radius;
+        if (!(r > 0) || typeof x !== "number" || typeof y !== "number") return;
+        const hit = touch(x, y, chord);
+        if (hit.dist > r) return;
+        chord.hit.add(id);
+        burst(hit.cx, hit.cy, hit.nx, hit.ny, chord.ux, chord.uy, rp.glow || chord.color, r);
+    }
+
+    function tickMirrorChords(dt, player, worldSize, view) {
+        if (!player || !(worldSize > 0) || !(dt > 0)) return false;
+        arenaSize = worldSize;
+        stepSparks(dt);
+        const now = mirrorMatchSec();
+        catchMirrorChords(now, worldSize);
+        for (let i = chords.length - 1; i >= 0; i--) {
+            const chord = chords[i];
+            if (cutLocalPlayer(chord, player)) return true;
+            const remotes = mirrorRemotes();
+            for (let r = 0; r < remotes.length; r++) sparkRemote(chord, remotes[r]);
+        }
+        for (let i = chords.length - 1; i >= 0; i--) {
+            if (chords[i].life <= 0) chords.splice(i, 1);
+        }
+        publishChordTones(view);
+        return false;
+    }
+
+    function beginMirrorChords(seed) {
+        mirrorOn = true;
+        mirrorSeed = seed >>> 0;
+        mirrorEpoch = performance.now();
+        mirrorCursor = FIRST_DELAY;
+        mirrorSerial = 0;
+        chords.length = 0;
+        spawnIn = FIRST_DELAY;
+        for (let i = 0; i < sparks.length; i++) sparks[i].active = false;
+        publishChordTones(null);
+    }
+
     function clearBarrierChords() {
+        mirrorOn = false;
         dropChords();
         spawnIn = FIRST_DELAY;
         for (let i = 0; i < sparks.length; i++) sparks[i].active = false;
@@ -255,6 +432,7 @@
      * @returns {boolean} true când jucătorul moare și cadrul trebuie oprit
      */
     function tickBarrierChords(dt, player, poolBots, poolNutrients, worldSize, view) {
+        if (mirrorOn) return tickMirrorChords(dt, player, worldSize, view);
         if (!isSolo()) {
             clearBarrierChords();
             return false;
@@ -314,7 +492,7 @@
     }
 
     function drawBarrierChords(ctx, timeNow, dt, integrateSparks) {
-        if (!isSolo()) return false;
+        if (!mirrorOn && !isSolo()) return false;
         if (integrateSparks && dt > 0) stepSparks(dt);
 
         const pulse = 15 + Math.sin(timeNow * 0.005) * 10;
@@ -365,6 +543,7 @@
         return drew;
     }
 
+    global.beginMirrorChords = beginMirrorChords;
     global.clearBarrierChords = clearBarrierChords;
     global.tickBarrierChords = tickBarrierChords;
     global.drawBarrierChords = drawBarrierChords;

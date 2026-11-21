@@ -583,6 +583,7 @@
         mirrorInArena = false;
         if (typeof global.NebulaDust !== "undefined" && global.NebulaDust.end) global.NebulaDust.end();
         if (typeof global.NebulaGlass !== "undefined" && global.NebulaGlass.end) global.NebulaGlass.end();
+        if (typeof global.clearBarrierChords === "function") global.clearBarrierChords();
         if (typeof global.stopMpNetworkTick === "function") global.stopMpNetworkTick();
         deps.setGameActive(false);
         deps.setIsDying(false);
@@ -1157,6 +1158,7 @@
         if (typeof global.NebulaGlass !== "undefined" && global.NebulaGlass.begin) {
             global.NebulaGlass.begin(dustSeed);
         }
+        if (typeof global.beginMirrorChords === "function") global.beginMirrorChords(dustSeed);
         resetMirrorCombatNet();
         if (typeof global.resetMirrorAbilities === "function") global.resetMirrorAbilities();
         if (typeof global.resetMpTaunts === "function") global.resetMpTaunts();
